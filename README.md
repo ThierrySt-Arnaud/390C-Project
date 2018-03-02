@@ -5,5 +5,4 @@ This project involves two parts. One is an Android Studio project to create a so
 
 Thierry St-Arnaud
 
-
-
+Bryan Tallec
