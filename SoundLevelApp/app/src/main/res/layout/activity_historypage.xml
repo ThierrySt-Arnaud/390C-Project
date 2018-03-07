@@ -19,8 +19,7 @@
             android:layout_marginStart="33dp"
             android:layout_marginTop="15dp"
             android:text="Select Meter"
-            android:textColor="@color/colorRed"
-            android:textSize="30sp"/>
+            />
 
         <ListView
             android:id="@+id/listview"

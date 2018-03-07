@@ -18,8 +18,6 @@
             android:layout_alignParentTop="true"
             android:layout_marginTop="11dp"
             android:text="Last Connection of Meters"
-            android:textColor="@color/colorRed"
-            android:textSize="30sp"
             tools:layout_editor_absoluteX="106dp"
             tools:layout_editor_absoluteY="40dp" />
 

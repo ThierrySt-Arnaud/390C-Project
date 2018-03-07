@@ -20,9 +20,7 @@
             android:background="@android:drawable/alert_dark_frame"
             android:text="Configure"
             tools:layout_editor_absoluteX="39dp"
-            tools:layout_editor_absoluteY="112dp"
-            android:textColor="@color/colorRed"
-            />
+            tools:layout_editor_absoluteY="112dp" />
 
         <TextView
             android:id="@+id/textView5"
@@ -32,11 +30,9 @@
             android:layout_alignParentTop="true"
             android:layout_marginTop="45dp"
             android:text="Meter A"
+            android:textAppearance="@style/TextAppearance.AppCompat.Display1"
             tools:layout_editor_absoluteX="52dp"
-            tools:layout_editor_absoluteY="16dp"
-            android:textColor="@color/colorRed"
-            android:textSize="30sp"
-            />
+            tools:layout_editor_absoluteY="16dp" />
 
         <Button
             android:id="@+id/button2"
@@ -48,8 +44,7 @@
             android:background="@android:drawable/alert_dark_frame"
             android:text="dB Level"
             tools:layout_editor_absoluteX="16dp"
-            tools:layout_editor_absoluteY="147dp"
-            android:textColor="@color/colorRed"/>
+            tools:layout_editor_absoluteY="147dp" />
     </RelativeLayout>
 
 </android.support.constraint.ConstraintLayout>
