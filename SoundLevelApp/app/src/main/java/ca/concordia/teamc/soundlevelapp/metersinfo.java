@@ -11,17 +11,16 @@ import android.widget.ListView;
 import java.util.ArrayList;
 import java.util.List;
 
-public class connectpage extends AppCompatActivity {
+public class metersinfo extends AppCompatActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_connectpage);
+        setContentView(R.layout.activity_metersinfo);
         List<String> Mylist = new ArrayList<>();
-        Mylist.add("Meter A: 05/18/18");
-        Mylist.add("Meter B: 05/25/18");
-        Mylist.add("Meter C: 05/26/18");
-
+        Mylist.add("Meter A");
+        Mylist.add("Meter B");
+        Mylist.add("Meter C");
         ListView listView = (ListView) findViewById(R.id.listview);
         ArrayAdapter<String> adapter = new ArrayAdapter<String>(this,android.R.layout.simple_list_item_1,Mylist);
         listView.setAdapter(adapter);
@@ -32,7 +31,7 @@ public class connectpage extends AppCompatActivity {
 
                 if(position == 0)
                 {
-                    Intent myIntent = new Intent(connectpage.this, MainActivity.class);
+                    Intent myIntent = new Intent(metersinfo.this, metersinfopts.class);
                     startActivityForResult(myIntent, 0);
                 }
 

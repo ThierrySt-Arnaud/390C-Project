@@ -34,10 +34,10 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             Intent intent = new Intent(this, rangepage.class);
             startActivity(intent);
         } else if (v.getId() == R.id.buthistory) {
-            Intent intent = new Intent(this, historypage.class);
+            Intent intent = new Intent(this, metersinfo.class);
             startActivity(intent);
         } else if (v.getId() == R.id.butlastconnect) {
-            Intent intent = new Intent(this, connectpage.class);
+            Intent intent = new Intent(this, myDataSets.class);
             startActivity(intent);
         }
     }

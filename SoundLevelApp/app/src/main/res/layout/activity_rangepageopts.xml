@@ -4,7 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context="ca.concordia.teamc.soundlevelapp.connectmeteropts">
+    tools:context="ca.concordia.teamc.soundlevelapp.rangepageopts">
 
     <RelativeLayout
         android:layout_width="match_parent"
@@ -40,7 +40,7 @@
             android:layout_height="wrap_content"
             android:layout_above="@+id/button"
             android:layout_alignParentStart="true"
-            android:layout_marginBottom="76dp"
+            android:layout_marginBottom="71dp"
             android:background="@android:drawable/alert_dark_frame"
             android:text="dB Level"
             tools:layout_editor_absoluteX="16dp"

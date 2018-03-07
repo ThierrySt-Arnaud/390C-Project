@@ -16,15 +16,36 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name=".connectpage"
+        <activity android:name=".myDataSets"
             android:parentActivityName=".MainActivity">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
-                android:value=".MainActivity"/>
+                android:value=".MainActivity" />
         </activity>
-        <activity android:name=".rangepage" />
-        <activity android:name=".historypage" />
-        <activity android:name=".connectmeteropts"></activity>
+        <activity android:name=".rangepage"
+            android:parentActivityName=".MainActivity">
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value=".MainActivity" />
+        </activity>
+        <activity android:name=".metersinfo"
+            android:parentActivityName=".MainActivity">
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value=".MainActivity" />
+        </activity>
+        <activity android:name=".rangepageopts"
+            android:parentActivityName=".rangepage">
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value=".rangepage" />
+        </activity>
+        <activity android:name=".metersinfopts"
+            android:parentActivityName=".metersinfo">
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value=".metersinfo" />
+        </activity>
     </application>
 
 </manifest>

@@ -6,54 +6,56 @@
     android:layout_height="match_parent"
     tools:context="ca.concordia.teamc.soundlevelapp.MainActivity">
 
-    <RelativeLayout
+    <TextView
+        android:id="@+id/textView"
         android:layout_width="match_parent"
-        android:layout_height="match_parent">
+        android:layout_height="100dp"
+        android:layout_alignParentStart="true"
+        android:layout_alignParentTop="true"
+        android:layout_marginTop="8dp"
+        android:text="Welcome to NoiseTracker"
+        android:textAppearance="@style/TextAppearance.AppCompat.Display1"
+        app:layout_constraintTop_toTopOf="parent" />
 
-        <TextView
-            android:id="@+id/textView"
-            android:layout_width="match_parent"
-            android:layout_height="100dp"
-            android:layout_alignParentStart="true"
-            android:layout_alignParentTop="true"
-            android:layout_marginTop="37dp"
-            android:text="Welcome to NoiseTracker"
-            android:textColor="@color/colorRed"
-            android:textSize="32sp"
-            android:textStyle="bold|italic" />
-        <!--Color,size,bold,itatlic is defined in XML-->
-        <Button
-            android:id="@+id/buthistory"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_alignParentStart="true"
-            android:layout_below="@+id/butrange"
-            android:layout_marginTop="74dp"
-            android:background="@android:drawable/alert_dark_frame"
-            android:text="Check History"
-            android:textColor="@color/colorRed" />
+    <Button
+        android:id="@+id/buthistory"
+        android:layout_width="match_parent"
+        android:layout_height="88dp"
+        android:layout_alignParentStart="true"
+        android:layout_below="@+id/butrange"
+        android:layout_marginStart="8dp"
+        android:layout_marginTop="24dp"
+        android:background="@android:drawable/alert_dark_frame"
+        android:text="METERS INFO"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/butrange" />
 
-        <Button
-            android:id="@+id/butlastconnect"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_alignParentStart="true"
-            android:layout_below="@+id/buthistory"
-            android:layout_marginTop="51dp"
-            android:background="@android:drawable/alert_dark_frame"
-            android:text="Last Connection of Meters"
-            android:textColor="@color/colorRed" />
+    <Button
+        android:id="@+id/butlastconnect"
+        style="@style/Widget.AppCompat.Button"
+        android:layout_width="match_parent"
+        android:layout_height="88dp"
+        android:layout_alignParentStart="true"
+        android:layout_below="@+id/buthistory"
+        android:layout_marginStart="8dp"
+        android:layout_marginTop="24dp"
+        android:background="@android:drawable/alert_dark_frame"
+        android:text="Datasets"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/buthistory" />
 
-        <Button
-            android:id="@+id/butrange"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_alignParentStart="true"
-            android:layout_below="@+id/textView"
-            android:layout_marginTop="43dp"
-            android:background="@android:drawable/alert_dark_frame"
-            android:text="Meters in Range"
-            android:textColor="@color/colorRed" />
+    <Button
+        android:id="@+id/butrange"
+        style="@style/Widget.AppCompat.Button.Small"
+        android:layout_width="match_parent"
+        android:layout_height="88dp"
+        android:layout_alignParentStart="true"
+        android:layout_below="@+id/textView"
+        android:layout_marginStart="8dp"
+        android:layout_marginTop="24dp"
+        android:background="@android:drawable/alert_dark_frame"
+        android:text="Meters in Range"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/textView" />
 
-    </RelativeLayout>
 </android.support.constraint.ConstraintLayout>

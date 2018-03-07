@@ -8,18 +8,19 @@ import android.widget.ListView;
 import java.util.ArrayList;
 import java.util.List;
 
-public class historypage extends AppCompatActivity {
+public class myDataSets extends AppCompatActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_historypage);
+        setContentView(R.layout.activity_mydatasets);
         List<String> Mylist = new ArrayList<>();
-        Mylist.add("Meter A");
-        Mylist.add("Meter B");
-        Mylist.add("Meter C");
+        Mylist.add("For Sprint 2");
+
         ListView listView = (ListView) findViewById(R.id.listview);
         ArrayAdapter<String> adapter = new ArrayAdapter<String>(this,android.R.layout.simple_list_item_1,Mylist);
         listView.setAdapter(adapter);
+
+
     }
 }

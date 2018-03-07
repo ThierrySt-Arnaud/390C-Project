@@ -32,7 +32,7 @@ public class rangepage extends AppCompatActivity {
 
                 if(position == 0)
                 {
-                    Intent myIntent = new Intent(rangepage.this, connectmeteropts.class);
+                    Intent myIntent = new Intent(rangepage.this, rangepageopts.class);
                     startActivityForResult(myIntent, 0);
                 }
 
