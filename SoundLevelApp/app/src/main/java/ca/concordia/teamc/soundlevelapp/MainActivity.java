@@ -6,23 +6,43 @@ import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends AppCompatActivity implements View.OnClickListener {
 
     protected SharedPreferenceHelper sharedPreferenceHelper;
-    protected Button button = null;
-
+    protected Button goToRangePage = null;
+    protected Button goToHistoryPage = null;
+    protected Button goToConnectPage = null;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-
         sharedPreferenceHelper = new SharedPreferenceHelper(MainActivity.this);
-        button = (Button) findViewById(R.id.button2);
-        button.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {startActivity(new Intent(MainActivity.this, MeterConfigScreen.class));
-            }
-        });
+
+        setupUI();
+    }
+
+    protected void setupUI(){
+        goToRangePage = (Button) findViewById(R.id.butrange);
+        goToHistoryPage = (Button) findViewById(R.id.buthistory);
+        goToConnectPage = (Button) findViewById(R.id.butlastconnect);
+        goToRangePage.setOnClickListener(this);
+        goToHistoryPage.setOnClickListener(this);
+        goToConnectPage.setOnClickListener(this);
+    }
+
+    public void onClick(View v) {
+
+        if (v.getId() == R.id.butrange) {
+            Intent intent = new Intent(this, ListDevicesActivity.class);
+            startActivity(intent);
+        } else if (v.getId() == R.id.buthistory) {
+            Intent intent = new Intent(this, metersinfo.class);
+            startActivity(intent);
+        } else if (v.getId() == R.id.butlastconnect) {
+            Intent intent = new Intent(this, myDataSets.class);
+            startActivity(intent);
+        }
     }
 }
