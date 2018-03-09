@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="utf-8"?>
+<android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context="ca.concordia.teamc.soundlevelapp.ListDevicesActivity">
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        tools:layout_editor_absoluteX="0dp"
+        tools:layout_editor_absoluteY="0dp">
+
+        <Button
+            android:id="@+id/searchBluetoothButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentTop="true"
+            android:layout_alignStart="@+id/listView"
+            android:layout_marginStart="31dp"
+            android:text="List Paired" />
+
+        <ListView
+            android:id="@+id/listView"
+            android:layout_width="369dp"
+            android:layout_height="453dp"
+            android:layout_below="@+id/searchBluetoothButton"
+            android:layout_centerHorizontal="true"
+            tools:layout_editor_absoluteX="8dp"
+            tools:layout_editor_absoluteY="55dp" />
+
+        <Button
+            android:id="@+id/SearchNewDeviceButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignEnd="@+id/listView"
+            android:layout_alignParentTop="true"
+            android:layout_marginEnd="55dp"
+            android:text="Search New Device" />
+
+    </RelativeLayout>
+
+</android.support.constraint.ConstraintLayout>
