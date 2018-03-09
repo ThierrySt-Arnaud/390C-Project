@@ -54,32 +54,38 @@ void app_main() {
   if (err != ESP_OK)
     ESP_LOGE(SPP_TAG,"%s while saving dummy data to NVS\n", esp_err_to_name(err));
 
+  ESP_ERROR_CHECK(print_dummy_data());
+
   if (!initialize_bluetooth()){
     ESP_LOGI(SPP_TAG,"Restarting...");
     esp_restart();
   }
 }
 
-void send_dummy_data(void* handle){
+void send_dummy_data(void* params){
   ESP_LOGI(SPP_TAG, "send_dummy_data task created");
-  uint32_t* bt_handle = (uint32_t*) handle;
+  send_parameters* parameters = (send_parameters)
+  uint32_t bt_handle = parameters->bt_handle;
+  TaskHandle_t self_handle = parameters->task_handle;
   TickType_t xLastWakeTime;
   const TickType_t xPeriod = pdMS_TO_TICKS(125);
   uint8_t i = 0;
   size_t dummyValues = 0;
   uint8_t* dummyData = NULL;
   esp_err_t err = ESP_OK;
+  ESP_LOGI(SPP_TAG, "Values initialized");
 
-  get_dummy_data(dummyData, &dummyValues);
+  err = get_dummy_data(dummyData, &dummyValues);
+  if(err == ESP_OK) ESP_LOGI(SPP_TAG, "Dummy data retrieved");
 
   while(err == ESP_OK){
-    err = esp_spp_write(*bt_handle, sizeof(dummyData[i]), &dummyData[i++]);
+    err = esp_spp_write(bt_handle, sizeof(dummyData[i]), &dummyData[i++]);
     i %= dummyValues;
     vTaskDelayUntil(&xLastWakeTime, xPeriod);
   }
 
   free(dummyData);
-  return;
+  vTaskDelete(NULL);
 }
 
 esp_err_t get_dummy_data(uint8_t* dummyData, size_t* dummyValues){
