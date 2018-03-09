@@ -16,6 +16,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
         setupUI();
     }
 
@@ -31,7 +32,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     public void onClick(View v) {
 
         if (v.getId() == R.id.butrange) {
-            Intent intent = new Intent(this, rangepage.class);
+            Intent intent = new Intent(this, ListDevicesActivity.class);
             startActivity(intent);
         } else if (v.getId() == R.id.buthistory) {
             Intent intent = new Intent(this, metersinfo.class);
@@ -41,5 +42,4 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             startActivity(intent);
         }
     }
-
 }
