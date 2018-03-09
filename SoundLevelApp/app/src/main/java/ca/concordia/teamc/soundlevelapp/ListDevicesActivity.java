@@ -29,56 +29,60 @@ public class ListDevicesActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_list_devices);
 
-        searchBluetooth = (Button) findViewById(R.id.searchBluetoothButton);
-
+        // initiate bluetooth adapter object
         bluetooth = BluetoothAdapter.getDefaultAdapter();
 
+        //if the bluetooth is off turn it on
         if (!bluetooth.isEnabled()) {
             Intent turnOn = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
             startActivityForResult(turnOn, 0);
             Toast.makeText(getApplicationContext(), "Turned on", Toast.LENGTH_LONG).show();
-
         }
 
+        // get list view for devices
         bluetoothDevicesList = (ListView) findViewById(R.id.listView);
+        // initiate array adapter
+        BTArrayAdapter = new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1);
+        //set adapter for list view
+        bluetoothDevicesList.setAdapter(BTArrayAdapter);
 
     }
 
-    public void list(View V) {
+    public void listPairedDevices(View V) {
+        // clear list
+        BTArrayAdapter.clear();
+        //get paired devices
         pairedDevices = bluetooth.getBondedDevices();
 
-        ArrayList list = new ArrayList();
-
-        for (BluetoothDevice bt : pairedDevices) list.add(bt.getName());
+        for (BluetoothDevice device : pairedDevices){
+            // show name & address
+            BTArrayAdapter.add(device.getName() + "\n" + device.getAddress() );
+        }
         Toast.makeText(getApplicationContext(), "Showing Paired Devices", Toast.LENGTH_SHORT).show();
-
-        final ArrayAdapter adapter = new ArrayAdapter(this, android.R.layout.simple_list_item_1, list);
-
-        bluetoothDevicesList.setAdapter(adapter);
     }
 
-    final BroadcastReceiver bReceiver = new BroadcastReceiver() {
+    public void listNewDevices(View view) {
+        //clear list
+        BTArrayAdapter.clear();
+        // start searching for all devices in range
+        bluetooth.startDiscovery();
+        //call receiver
+        registerReceiver(btReceiver, new IntentFilter(BluetoothDevice.ACTION_FOUND));
+        Toast.makeText(getApplicationContext(), "Showing All Devices", Toast.LENGTH_SHORT).show();
+    }
+
+    final BroadcastReceiver btReceiver = new BroadcastReceiver() {
         public void onReceive(Context context, Intent intent) {
             String action = intent.getAction();
-            // When discovery finds a device
+            // new device found
             if (BluetoothDevice.ACTION_FOUND.equals(action)) {
-                // Get the BluetoothDevice object from the Intent
+                // Get the BluetoothDevice
                 BluetoothDevice device = intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE);
-                // add the name and the MAC address of the object to the arrayAdapter
+                // show name & address
                 BTArrayAdapter.add(device.getName() + "\n" + device.getAddress());
+                //update array adapter with new data
                 BTArrayAdapter.notifyDataSetChanged();
             }
         }
     };
-
-    public void find(View view) {
-            BTArrayAdapter.clear();
-            bluetooth.startDiscovery();
-
-            registerReceiver(bReceiver, new IntentFilter(BluetoothDevice.ACTION_FOUND));
-
-    }
 }
-
-
-
