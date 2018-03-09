@@ -24,16 +24,18 @@
         <activity
             android:name="ca.concordia.teamc.soundlevelapp.MeterConfigScreen"
             android:label="Meter Configuration"
-            android:parentActivityName=".MainActivity" >
+            android:parentActivityName=".ListDevicesActivity" >
         <!-- Parent activity meta-data to support 4.0 and lower -->
         <meta-data
             android:name="android.support.PARENT_ACTIVITY"
-            android:value=".MainActivity" />
+            android:value=".ListDevicesActivity" />
+        </activity>
         <activity android:name=".ListDevicesActivity"
             android:parentActivityName=".MainActivity">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
-                android:value=".MainActivity" ></activity>
+                android:value=".MainActivity" />
+        </activity>
         <activity android:name=".myDataSets"
             android:parentActivityName=".MainActivity">
             <meta-data

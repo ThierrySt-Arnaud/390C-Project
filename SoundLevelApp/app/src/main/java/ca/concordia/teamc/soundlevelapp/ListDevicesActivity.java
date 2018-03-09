@@ -8,11 +8,11 @@ import android.content.IntentFilter;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.View;
+import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.ListView;
 import android.widget.Toast;
-import java.util.ArrayList;
 import java.util.Set;
 
 public class ListDevicesActivity extends AppCompatActivity {
@@ -46,7 +46,17 @@ public class ListDevicesActivity extends AppCompatActivity {
         //set adapter for list view
         bluetoothDevicesList.setAdapter(BTArrayAdapter);
 
+
+        bluetoothDevicesList.setOnItemClickListener(BTDeviceClickListener);
+
     }
+
+    private AdapterView.OnItemClickListener BTDeviceClickListener = new AdapterView.OnItemClickListener() {
+        public void onItemClick(AdapterView parent, View v, int position, long id) {
+            Intent intent = new Intent(ListDevicesActivity.this, MeterConfigScreen.class);
+            startActivity(intent);
+        }
+    };
 
     public void listPairedDevices(View V) {
         // clear list
