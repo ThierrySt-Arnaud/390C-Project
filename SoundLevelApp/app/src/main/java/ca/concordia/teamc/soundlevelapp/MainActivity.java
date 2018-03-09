@@ -8,6 +8,7 @@ import android.widget.Button;
 
 public class MainActivity extends AppCompatActivity implements View.OnClickListener {
 
+    protected SharedPreferenceHelper sharedPreferenceHelper;
     protected Button goToRangePage = null;
     protected Button goToHistoryPage = null;
     protected Button goToConnectPage = null;
@@ -16,6 +17,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        sharedPreferenceHelper = new SharedPreferenceHelper(MainActivity.this);
 
         setupUI();
     }
