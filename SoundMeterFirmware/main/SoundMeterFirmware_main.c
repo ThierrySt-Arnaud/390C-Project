@@ -3,6 +3,7 @@
 #include <string.h>
 #include <stdbool.h>
 #include <stdio.h>
+#include <stdatomic.h>
 #include "nvs.h"
 #include "nvs_flash.h"
 #include "freertos/FreeRTOS.h"
@@ -24,35 +25,39 @@
 #define DUMMY_DATA 48, 49, 50, 51, 52, 53, 54, 55, 56, 57
 #define STORAGE_NAMESPACE "dummy"
 #define DUMMY_KEY "dummy_data"
-#define DUMMY_SENDER_SIZE 1024
+#define DUMMY_SENDER_SIZE 2048
 
 static const esp_spp_sec_t sec_mask = ESP_SPP_SEC_NONE;
 static const esp_spp_role_t role_slave = ESP_SPP_ROLE_SLAVE;
 static const esp_spp_mode_t esp_spp_mode = ESP_SPP_MODE_CB;
+static atomic_bool connection_ready = ATOMIC_VAR_INIT(false);
+static atomic_bool connection_open = ATOMIC_VAR_INIT(false);
 
-static BaseType_t send_dummy_data_type;
-static TaskHandle_t send_dummy_data_handle = NULL;
-
-esp_err_t get_dummy_data(uint8_t*, size_t*);
+esp_err_t get_dummy_data(uint8_t**, size_t*);
 void send_dummy_data(void*);
 esp_err_t print_dummy_data(void);
 static void esp_spp_cb(esp_spp_cb_event_t, esp_spp_cb_param_t*);
 bool initialize_bluetooth(void);
-esp_err_t save_dummy_data(int8_t[]);
+esp_err_t save_dummy_data(uint8_t[]);
 
 void app_main() {
-  ESP_ERROR_CHECK(nvs_flash_erase());
   esp_err_t err = nvs_flash_init();
+  if (err == ESP_ERR_NVS_NO_FREE_PAGES) {
+      ESP_ERROR_CHECK(nvs_flash_erase());
+      err = nvs_flash_init();
+  }
   ESP_ERROR_CHECK( err );
 
   gpio_set_direction(GPIO_NUM_5, GPIO_MODE_DEF_OUTPUT);
   gpio_set_level(GPIO_NUM_5, 0);
 
-  int8_t dummyData[] = {DUMMY_DATA};
+  uint8_t dummyData[] = {DUMMY_DATA};
 
   err = save_dummy_data(dummyData);
   if (err != ESP_OK)
     ESP_LOGE(SPP_TAG,"%s while saving dummy data to NVS\n", esp_err_to_name(err));
+
+  ESP_ERROR_CHECK(print_dummy_data());
 
   if (!initialize_bluetooth()){
     ESP_LOGI(SPP_TAG,"Restarting...");
@@ -60,71 +65,10 @@ void app_main() {
   }
 }
 
-void send_dummy_data(void* handle){
-  ESP_LOGI(SPP_TAG, "send_dummy_data task created");
-  uint32_t* bt_handle = (uint32_t*) handle;
-  TickType_t xLastWakeTime;
-  const TickType_t xPeriod = pdMS_TO_TICKS(125);
-  uint8_t i = 0;
-  size_t dummyValues = 0;
-  uint8_t* dummyData = NULL;
-  esp_err_t err = ESP_OK;
-
-  get_dummy_data(dummyData, &dummyValues);
-
-  while(err == ESP_OK){
-    err = esp_spp_write(*bt_handle, sizeof(dummyData[i]), &dummyData[i++]);
-    i %= dummyValues;
-    vTaskDelayUntil(&xLastWakeTime, xPeriod);
-  }
-
-  free(dummyData);
-  return;
-}
-
-esp_err_t get_dummy_data(uint8_t* dummyData, size_t* dummyValues){
-  nvs_handle my_handle;
-  esp_err_t err;
-
-  free(dummyData);
-  dummyData = NULL;
-
-  // Open
-  err = nvs_open(STORAGE_NAMESPACE, NVS_READONLY, &my_handle);
-  if (err != ESP_OK) return err;
-
-  err = nvs_get_blob(my_handle, DUMMY_KEY, dummyData, dummyValues);
-  if (err != ESP_OK) return err;
-
-  dummyData = malloc(*dummyValues);
-
-  err = nvs_get_blob(my_handle, DUMMY_KEY, dummyData, dummyValues);
-  if (err != ESP_OK) return err;
-
-  // Close
-  nvs_close(my_handle);
-  return ESP_OK;
-}
-
-esp_err_t print_dummy_data(void){
-  esp_err_t err;
-  size_t dummyValues = 0;
-  uint8_t* dummyData = NULL;
-
-  err = get_dummy_data(dummyData, &dummyValues);
-  if (err != ESP_OK) return err;
-
-  printf("There are %i values. They are:\n", dummyValues);
-
-  for (size_t i = 0; i < dummyValues; i++) {
-    printf("%i\n", dummyData[i]);
-  }
-
-  free(dummyData);
-  return ESP_OK;
-}
-
 static void esp_spp_cb(esp_spp_cb_event_t event, esp_spp_cb_param_t *param){
+  BaseType_t send_dummy_data_type;
+  TaskHandle_t send_dummy_data_handle = NULL;
+
   switch (event) {
     // SPP Profile initialization event
     case ESP_SPP_INIT_EVT:
@@ -147,7 +91,7 @@ static void esp_spp_cb(esp_spp_cb_event_t event, esp_spp_cb_param_t *param){
     // Connection closure event
     case ESP_SPP_CLOSE_EVT:
       ESP_LOGI(SPP_TAG, "ESP_SPP_CLOSE_EVT");
-      vTaskDelete(send_dummy_data_handle);
+      atomic_store(&connection_open, false);
       break;
 
     // SPP profile start event
@@ -169,35 +113,27 @@ static void esp_spp_cb(esp_spp_cb_event_t event, esp_spp_cb_param_t *param){
 
     // SPP congestion status change event
     case ESP_SPP_CONG_EVT:
-      ESP_LOGI(SPP_TAG, "ESP_SPP_CONG_EVT cong=%d", param->cong.cong);
-      if (param->cong.cong == 0) {
-        uint32_t* handle = &param->cong.handle;
-        send_dummy_data_type = xTaskCreate(send_dummy_data,
-                                           "DataSender",
-                                           DUMMY_SENDER_SIZE,
-                                           handle,
-                                           tskIDLE_PRIORITY,
-                                           send_dummy_data_handle);
-      } else{
-        vTaskDelete(send_dummy_data_handle);
-      }
+      ESP_LOGI(SPP_TAG, "ESP_SPP_CONG_EVT cong=%d handle=%d", param->cong.cong,param->cong.handle);
+      atomic_store(&connection_ready, !param->cong.cong);
       break;
 
     // SPP Write event
     case ESP_SPP_WRITE_EVT:
       ESP_LOGI(SPP_TAG, "ESP_SPP_WRITE_EVT len=%d cong=%d", param->write.len , param->write.cong);
+      atomic_store(&connection_ready, !param->write.cong);
       break;
 
     // SPP server connection opening event
     case ESP_SPP_SRV_OPEN_EVT:
-      ESP_LOGI(SPP_TAG, "ESP_SPP_SRV_OPEN_EVT");
-      uint32_t* handle = &param->srv_open.handle;
-      send_dummy_data_type = xTaskCreate(send_dummy_data,
-                                         "DataSender",
-                                         DUMMY_SENDER_SIZE,
-                                         handle,
+      ESP_LOGI(SPP_TAG, "ESP_SPP_SRV_OPEN_EVT handle=%d",param->srv_open.handle);
+      atomic_store(&connection_ready, true);
+      atomic_store(&connection_open, true);
+      uint32_t * bt_handle = malloc(sizeof(uint32_t));
+      *bt_handle = param->srv_open.handle;
+      send_dummy_data_type = xTaskCreate(send_dummy_data, "DataSender",
+                                         DUMMY_SENDER_SIZE, bt_handle,
                                          tskIDLE_PRIORITY,
-                                         send_dummy_data_handle);
+                                         &send_dummy_data_handle);
       break;
 
     default:
@@ -239,20 +175,97 @@ bool initialize_bluetooth(){
     return true;
 }
 
-esp_err_t save_dummy_data(int8_t dummyData[]){
+void send_dummy_data(void* params){
+  ESP_LOGI(SPP_TAG, "Entering send_dummy_data");
+  uint32_t bt_handle = *((uint32_t*) params);
+  free(params);
+  TickType_t xLastWakeTime;
+  const TickType_t NormalPeriod = pdMS_TO_TICKS(125);
+  const TickType_t WaitPeriod = pdMS_TO_TICKS(10);
+  uint8_t i = 0;
+  size_t dummyValues = 0;
+  uint8_t* dummyData = NULL;
+  esp_err_t err = ESP_OK;
+  err = get_dummy_data(&dummyData, &dummyValues);
+
+  while(err == ESP_OK && atomic_load(&connection_open)){
+    if (atomic_load(&connection_ready)){
+      err = esp_spp_write(bt_handle, sizeof(dummyData[i]), &dummyData[i++]);
+      i %= dummyValues;
+      vTaskDelayUntil(&xLastWakeTime, NormalPeriod);
+    } else{
+      ESP_LOGE(SPP_TAG, "Congestion on handle=%d, waiting.",bt_handle);
+      vTaskDelayUntil(&xLastWakeTime, WaitPeriod);
+    }
+  }
+  if (err != ESP_OK)
+    ESP_LOGE(SPP_TAG, "%s send failed, err=%s", __func__, esp_err_to_name(err));
+  ESP_LOGI(SPP_TAG, "Exiting send_dummy_data");
+  free(dummyData);
+  vTaskDelete(NULL);
+}
+
+esp_err_t print_dummy_data(void){
+  esp_err_t err;
+  size_t dummyValues = 0;
+  uint8_t* dummyData = NULL;
+
+  err = get_dummy_data(&dummyData, &dummyValues);
+  if (err != ESP_OK) return err;
+
+  printf("There are %i values. They are:\n", dummyValues);
+
+  for (size_t i = 0; i < dummyValues; i++) {
+    printf("%i\n", dummyData[i]);
+  }
+
+  free(dummyData);
+  return ESP_OK;
+}
+
+esp_err_t save_dummy_data(uint8_t dummyData[]){
   nvs_handle my_handle;
   esp_err_t err;
-
+  size_t required_size = 0;
   // Open
   err = nvs_open(STORAGE_NAMESPACE, NVS_READWRITE, &my_handle);
   if (err != ESP_OK) return err;
 
-  err = nvs_set_blob(my_handle, "dummy_data", dummyData, (DUMMY_VALUES*sizeof(int8_t)));
+  err = nvs_get_blob(my_handle, DUMMY_KEY, NULL, &required_size);
+  if (err == ESP_ERR_NVS_NOT_FOUND){
+    ESP_LOGI(SPP_TAG, "Previous data not found. Writing new data.");
+    err = nvs_set_blob(my_handle, DUMMY_KEY, dummyData, (DUMMY_VALUES*sizeof(uint8_t)));
+    if (err != ESP_OK) return err;
+
+    err = nvs_commit(my_handle);
+    if (err != ESP_OK) return err;
+  } else
+    ESP_LOGI(SPP_TAG, "Previous dummy data found.");
+
+  nvs_close(my_handle);
+  return ESP_OK;
+}
+
+esp_err_t get_dummy_data(uint8_t** dummyData, size_t* dummyValues){
+  nvs_handle my_handle;
+  esp_err_t err;
+
+  free(*dummyData);
+  *dummyData = NULL;
+
+  // Open
+  err = nvs_open(STORAGE_NAMESPACE, NVS_READONLY, &my_handle);
   if (err != ESP_OK) return err;
 
-  err = nvs_commit(my_handle);
+  err = nvs_get_blob(my_handle, DUMMY_KEY, *dummyData, dummyValues);
   if (err != ESP_OK) return err;
 
+  *dummyData = malloc(*dummyValues);
+
+  err = nvs_get_blob(my_handle, DUMMY_KEY, *dummyData, dummyValues);
+  if (err != ESP_OK) return err;
+
+  // Close
   nvs_close(my_handle);
   return ESP_OK;
 }
