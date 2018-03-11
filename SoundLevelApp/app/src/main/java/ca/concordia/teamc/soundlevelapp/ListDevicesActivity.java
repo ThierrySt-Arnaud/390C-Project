@@ -142,7 +142,6 @@ public class ListDevicesActivity extends AppCompatActivity {
                         try {
                             fail = true;
                             BTSocket.close();
-                            //handler.obtainMessage(3, -1, -1).sendToTarget();
                         } catch (IOException e2) {
                             //insert code to deal with this
                             Toast.makeText(getBaseContext(), "Socket creation failed", Toast.LENGTH_SHORT).show();
@@ -152,7 +151,8 @@ public class ListDevicesActivity extends AppCompatActivity {
                         connectedThread = new ConnectedThread(BTSocket);
                         connectedThread.start();
 
-                        //handler.obtainMessage(3, 1, -1, name).sendToTarget();
+                        Intent intent = new Intent(ListDevicesActivity.this, MeterConfigScreen.class);
+                        startActivity(intent);
                     }
                 }
             }.start();
@@ -226,6 +226,10 @@ public class ListDevicesActivity extends AppCompatActivity {
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        unregisterReceiver(btReceiver);
+        try{
+            unregisterReceiver(btReceiver);
+        }catch (IllegalArgumentException e){
+            // no receiver registred
+        }
     }
 }
