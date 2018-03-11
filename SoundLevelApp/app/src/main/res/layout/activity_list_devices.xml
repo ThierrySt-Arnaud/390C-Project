@@ -5,8 +5,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context="ca.concordia.teamc.soundlevelapp.ListDevicesActivity"
-    android:screenOrientation="portrait">
+    tools:context="ca.concordia.teamc.soundlevelapp.ListDevicesActivity">
 
     <Button
         android:id="@+id/searchNewDeviceButton"
@@ -23,11 +22,12 @@
 
     <ListView
         android:id="@+id/listView"
-        android:layout_width="369dp"
-        android:layout_height="453dp"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
         android:layout_below="@+id/searchBluetoothButton"
         android:layout_centerHorizontal="true"
         android:layout_marginTop="8dp"
+        app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.533"
         app:layout_constraintStart_toStartOf="parent"
