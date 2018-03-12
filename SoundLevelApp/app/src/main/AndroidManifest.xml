@@ -42,23 +42,11 @@
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value=".MainActivity" />
         </activity>
-        <activity android:name=".rangepage"
-            android:parentActivityName=".MainActivity">
-            <meta-data
-                android:name="android.support.PARENT_ACTIVITY"
-                android:value=".MainActivity" />
-        </activity>
         <activity android:name=".metersinfo"
             android:parentActivityName=".MainActivity">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value=".MainActivity" />
-        </activity>
-        <activity android:name=".rangepageopts"
-            android:parentActivityName=".rangepage">
-            <meta-data
-                android:name="android.support.PARENT_ACTIVITY"
-                android:value=".rangepage" />
         </activity>
         <activity android:name=".metersinfopts"
             android:parentActivityName=".metersinfo">
