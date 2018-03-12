@@ -5,15 +5,22 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.os.Handler;
+import android.os.SystemClock;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
-import android.widget.Button;
 import android.widget.ListView;
+import android.widget.TextView;
 import android.widget.Toast;
+
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.util.Set;
+import java.util.UUID;
 
 public class ListDevicesActivity extends AppCompatActivity {
 
@@ -21,7 +28,12 @@ public class ListDevicesActivity extends AppCompatActivity {
     private Set<BluetoothDevice> pairedDevices;
     private ArrayAdapter<String> BTArrayAdapter;
 
-    Button searchBluetooth;
+    private Handler handler; // Our main handler that will receive callback notifications
+    private ConnectedThread connectedThread; // bluetooth background worker thread to send and receive data
+    private BluetoothSocket BTSocket = null; // bi-directional client-to-client data path
+
+    private static final UUID BTMODULEUUID = UUID.fromString("00001101-0000-1000-8000-00805F9B34FB"); // "random" unique identifier
+
     ListView bluetoothDevicesList;
 
     @Override
@@ -46,17 +58,9 @@ public class ListDevicesActivity extends AppCompatActivity {
         //set adapter for list view
         bluetoothDevicesList.setAdapter(BTArrayAdapter);
 
-
-        bluetoothDevicesList.setOnItemClickListener(BTDeviceClickListener);
+        bluetoothDevicesList.setOnItemClickListener(devicesClickListener);
 
     }
-
-    private AdapterView.OnItemClickListener BTDeviceClickListener = new AdapterView.OnItemClickListener() {
-        public void onItemClick(AdapterView parent, View v, int position, long id) {
-            Intent intent = new Intent(ListDevicesActivity.this, MeterConfigScreen.class);
-            startActivity(intent);
-        }
-    };
 
     public void listPairedDevices(View V) {
         // clear list
@@ -95,4 +99,70 @@ public class ListDevicesActivity extends AppCompatActivity {
             }
         }
     };
+
+    private AdapterView.OnItemClickListener devicesClickListener = new AdapterView.OnItemClickListener() {
+        public void onItemClick(AdapterView<?> av, View v, int arg2, long arg3) {
+
+            if(!bluetooth.isEnabled()) {
+                Toast.makeText(getBaseContext(), "Bluetooth not on", Toast.LENGTH_SHORT).show();
+                return;
+            }
+
+            // Get the device MAC address, which is the last 17 chars in the View
+            String info = ((TextView) v).getText().toString();
+            final String address = info.substring(info.length() - 17);
+            final String name = info.substring(0,info.length() - 17);
+
+            // Spawn a new thread to avoid blocking the GUI one
+            new Thread()
+            {
+                public void run() {
+                    boolean fail = false;
+
+                    BluetoothDevice device = bluetooth.getRemoteDevice(address);
+
+                    try {
+                        BTSocket = createBluetoothSocket(device);
+                    } catch (IOException e) {
+                        fail = true;
+                        Toast.makeText(getBaseContext(), "Socket creation failed", Toast.LENGTH_SHORT).show();
+                    }
+                    // Establish the Bluetooth socket connection.
+                    try {
+                        BTSocket.connect();
+                    } catch (IOException e) {
+                        try {
+                            fail = true;
+                            BTSocket.close();
+                        } catch (IOException e2) {
+                            //insert code to deal with this
+                            Toast.makeText(getBaseContext(), "Socket creation failed", Toast.LENGTH_SHORT).show();
+                        }
+                    }
+                    if(fail == false) {
+                        connectedThread = new ConnectedThread(BTSocket);
+                        connectedThread.start();
+
+                        Intent intent = new Intent(ListDevicesActivity.this, MeterConfigScreen.class);
+                        startActivity(intent);
+                    }
+                }
+            }.start();
+        }
+    };
+
+    private BluetoothSocket createBluetoothSocket(BluetoothDevice device) throws IOException {
+        return  device.createRfcommSocketToServiceRecord(BTMODULEUUID);
+        //creates secure outgoing connection with BT device using UUID
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        try{
+            unregisterReceiver(btReceiver);
+        }catch (IllegalArgumentException e){
+            // no receiver registred
+        }
+    }
 }
