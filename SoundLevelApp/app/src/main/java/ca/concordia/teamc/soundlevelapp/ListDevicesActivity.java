@@ -5,10 +5,9 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.os.Handler;
-import android.os.SystemClock;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
@@ -18,23 +17,28 @@ import android.widget.Toast;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.OutputStream;
 import java.util.Set;
 import java.util.UUID;
 
 public class ListDevicesActivity extends AppCompatActivity {
-
+    private static final String TAG = "ListDevices activity";
     private BluetoothAdapter bluetooth;
     private Set<BluetoothDevice> pairedDevices;
     private ArrayAdapter<String> BTArrayAdapter;
+    Thread listen;
 
-    private Handler handler; // Our main handler that will receive callback notifications
-    private ConnectedThread connectedThread; // bluetooth background worker thread to send and receive data
     private BluetoothSocket BTSocket = null; // bi-directional client-to-client data path
 
     private static final UUID BTMODULEUUID = UUID.fromString("00001101-0000-1000-8000-00805F9B34FB"); // "random" unique identifier
 
     ListView bluetoothDevicesList;
+
+    //Demo test views
+    TextView deviceName;
+    TextView deviceAddress;
+    TextView receivedChars;
+    TextView receivedLegend;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -60,6 +64,23 @@ public class ListDevicesActivity extends AppCompatActivity {
 
         bluetoothDevicesList.setOnItemClickListener(devicesClickListener);
 
+        deviceAddress = findViewById(R.id.device_address);
+        deviceName = findViewById(R.id.device_name);
+        receivedLegend = findViewById(R.id.device_legend);
+        receivedChars = findViewById(R.id.received_chars);
+
+    }
+
+    @Override
+    protected void onStart(){
+        super.onStart();
+
+        bluetoothDevicesList.setVisibility(View.VISIBLE);
+        deviceName.setVisibility(View.GONE);
+        deviceAddress.setVisibility(View.GONE);
+        receivedLegend.setVisibility(View.GONE);
+        receivedChars.setVisibility(View.GONE);
+
     }
 
     public void listPairedDevices(View V) {
@@ -67,7 +88,7 @@ public class ListDevicesActivity extends AppCompatActivity {
         BTArrayAdapter.clear();
         //get paired devices
         pairedDevices = bluetooth.getBondedDevices();
-
+        BTArrayAdapter.add("ExampleDevice\n00:00:00:00:00:00");
         for (BluetoothDevice device : pairedDevices){
             // show name & address
             BTArrayAdapter.add(device.getName() + "\n" + device.getAddress() );
@@ -82,7 +103,11 @@ public class ListDevicesActivity extends AppCompatActivity {
         bluetooth.startDiscovery();
         //call receiver
         registerReceiver(btReceiver, new IntentFilter(BluetoothDevice.ACTION_FOUND));
-        Toast.makeText(getApplicationContext(), "Showing All Devices", Toast.LENGTH_SHORT).show();
+        Toast.makeText(getApplicationContext(), "Searching for Devices", Toast.LENGTH_SHORT).show();
+    }
+
+    private void updateReceivedChars(String received){
+        receivedChars.setText(received);
     }
 
     final BroadcastReceiver btReceiver = new BroadcastReceiver() {
@@ -111,53 +136,132 @@ public class ListDevicesActivity extends AppCompatActivity {
             // Get the device MAC address, which is the last 17 chars in the View
             String info = ((TextView) v).getText().toString();
             final String address = info.substring(info.length() - 17);
-            final String name = info.substring(0,info.length() - 17);
 
-            // Spawn a new thread to avoid blocking the GUI one
-            new Thread()
-            {
-                public void run() {
-                    boolean fail = false;
+            boolean fail = false;
+            try {
+                Log.d(TAG,"Cancelling discovery if open");
+                bluetooth.cancelDiscovery();
+            } catch(Exception e){
+                Log.e(TAG,"Couldn't cancel discovery",e);
+            }
 
-                    BluetoothDevice device = bluetooth.getRemoteDevice(address);
+            if (address.equals("00:00:00:00:00:00")){
 
+                Intent intent = new Intent(v.getContext(), MeterConfigScreen.class);
+                startActivity(intent);
+
+            } else {
+                BluetoothDevice device = bluetooth.getRemoteDevice(address);
+
+                try {
+                    Log.d(TAG, "Creating socket");
+                    BTSocket = createBluetoothSocket(device);
+                } catch (IOException e) {
+                    fail = true;
+                    Toast.makeText(getBaseContext(),
+                            "Socket creation failed", Toast.LENGTH_SHORT).show();
+                }
+                // Establish the Bluetooth socket connection.
+                try {
+                    Log.d(TAG, "Connecting");
+                    BTSocket.connect();
+                } catch (IOException e) {
                     try {
-                        BTSocket = createBluetoothSocket(device);
-                    } catch (IOException e) {
                         fail = true;
-                        Toast.makeText(getBaseContext(), "Socket creation failed", Toast.LENGTH_SHORT).show();
-                    }
-                    // Establish the Bluetooth socket connection.
-                    try {
-                        BTSocket.connect();
-                    } catch (IOException e) {
-                        try {
-                            fail = true;
-                            BTSocket.close();
-                        } catch (IOException e2) {
-                            //insert code to deal with this
-                            Toast.makeText(getBaseContext(), "Socket creation failed", Toast.LENGTH_SHORT).show();
-                        }
-                    }
-                    if(fail == false) {
-                        connectedThread = new ConnectedThread(BTSocket);
-                        connectedThread.start();
-
-                        Intent intent = new Intent(ListDevicesActivity.this, MeterConfigScreen.class);
-                        startActivity(intent);
+                        BTSocket.close();
+                        return;
+                    } catch (IOException e2) {
+                        //insert code to deal with this
+                        Toast.makeText(getBaseContext(),
+                                "Socket creation failed", Toast.LENGTH_SHORT).show();
                     }
                 }
-            }.start();
+                if (!fail) {
+                    Log.d(TAG, "Starting listen mode");
+                    deviceName.setText(device.getName());
+                    deviceAddress.setText(device.getAddress());
+                    receivedChars.setText("");
+                    bluetoothDevicesList.setVisibility(View.GONE);
+                    deviceName.setVisibility(View.VISIBLE);
+                    deviceAddress.setVisibility(View.VISIBLE);
+                    receivedLegend.setVisibility(View.VISIBLE);
+                    receivedChars.setVisibility(View.VISIBLE);
+
+                    listen = new Thread(new Runnable() {
+                        @Override
+                        public void run() {
+                            Log.d(TAG, "Started listen thread");
+
+                            final InputStream mmInStream;
+                            InputStream tmpIn = null;
+
+                            // Get the input and output streams, using temp objects because
+                            // member streams are final
+                            try
+
+                            {
+                                tmpIn = BTSocket.getInputStream();
+                            } catch (
+                                    IOException e)
+
+                            {
+                                Log.e(TAG, "Couldn't get input stream", e);
+                            }
+
+                            mmInStream = tmpIn;
+                            byte[] buffer = new byte[1024];  // buffer store for the stream
+                            int bytes; // bytes returned from read()
+                            // Keep listening to the InputStream until an exception occurs
+                            while (true) {
+                                Log.d(TAG, "Starting listen loop");
+                                try {
+                                    // Read from the InputStream
+                                    assert mmInStream != null;
+                                    bytes = mmInStream.read(buffer);
+                                    if (bytes > 0) {
+                                        Log.d(TAG, "Received data:");
+                                        char[] string = new char[bytes];
+                                        for (int i = 0; i < bytes; i++) {
+                                            string[i] = (char) buffer[i];
+                                        }
+                                        final String received = String.valueOf(string);
+                                        Log.d(TAG, received);
+                                        runOnUiThread(new Runnable() {
+                                            @Override
+                                            public void run() {
+                                                updateReceivedChars(received);
+                                            }
+                                        });
+                                    }
+                                } catch (IOException e) {
+                                    Log.d(TAG, "Input stream disconnected.", e);
+                                    break;
+                                }
+                            }
+                        }
+                    });
+                    listen.start();
+                }
+            }
         }
     };
 
     private BluetoothSocket createBluetoothSocket(BluetoothDevice device) throws IOException {
-        return  device.createRfcommSocketToServiceRecord(BTMODULEUUID);
-        //creates secure outgoing connection with BT device using UUID
+        return  device.createInsecureRfcommSocketToServiceRecord(BTMODULEUUID);
+        //creates insecure outgoing connection with BT device using UUID
+    }
+    @Override
+    protected void onPause() {
+        super.onPause();
+        try{
+            BTSocket.close();
+        } catch (Exception e){
+            Log.e(TAG,"Couldn't close socket.", e);
+        }
     }
 
     @Override
-    protected void onDestroy() {
+    protected void onDestroy(){
         super.onDestroy();
         try{
             unregisterReceiver(btReceiver);

@@ -113,7 +113,7 @@ static void esp_spp_cb(esp_spp_cb_event_t event, esp_spp_cb_param_t *param){
 
     // SPP congestion status change event
     case ESP_SPP_CONG_EVT:
-      ESP_LOGI(SPP_TAG, "ESP_SPP_CONG_EVT cong=%d handle=%d", param->cong.cong,param->cong.handle);
+      ESP_LOGI(SPP_TAG, "ESP_SPP_CONG_EVT cong=%d handle=%d", param->cong.cong, param->cong.handle);
       atomic_store(&connection_ready, !param->cong.cong);
       break;
 
@@ -179,7 +179,6 @@ void send_dummy_data(void* params){
   ESP_LOGI(SPP_TAG, "Entering send_dummy_data");
   uint32_t bt_handle = *((uint32_t*) params);
   free(params);
-  TickType_t xLastWakeTime;
   const TickType_t NormalPeriod = pdMS_TO_TICKS(125);
   const TickType_t WaitPeriod = pdMS_TO_TICKS(10);
   uint8_t i = 0;
@@ -192,10 +191,10 @@ void send_dummy_data(void* params){
     if (atomic_load(&connection_ready)){
       err = esp_spp_write(bt_handle, sizeof(dummyData[i]), &dummyData[i++]);
       i %= dummyValues;
-      vTaskDelayUntil(&xLastWakeTime, NormalPeriod);
+      vTaskDelay(NormalPeriod);
     } else{
       ESP_LOGE(SPP_TAG, "Congestion on handle=%d, waiting.",bt_handle);
-      vTaskDelayUntil(&xLastWakeTime, WaitPeriod);
+      vTaskDelay(WaitPeriod);
     }
   }
   if (err != ESP_OK)
