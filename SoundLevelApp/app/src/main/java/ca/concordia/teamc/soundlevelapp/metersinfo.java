@@ -7,6 +7,10 @@ import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
+
 
 import java.util.ArrayList;
 import java.util.List;
@@ -43,5 +47,36 @@ public class metersinfo extends AppCompatActivity {
             }*/
             }
         });
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        MenuInflater inflater = getMenuInflater();
+        inflater.inflate(R.menu.actionbutton_metersinfo, menu);
+        return super.onCreateOptionsMenu(menu);
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+
+
+        if (item.getItemId() == R.id.action_metersinrange) {
+
+
+            Intent intent= new Intent(this, ListDevicesActivity.class);
+            startActivity(intent);
+            return true;
+
+        }
+
+        if (item.getItemId() == R.id.action_datasets) {
+
+
+            Intent intent= new Intent(this, myDataSets.class);
+            startActivity(intent);
+            return true;
+
+        }
+        return super.onOptionsItemSelected(item);
     }
 }
