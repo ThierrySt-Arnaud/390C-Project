@@ -1,9 +1,8 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
-    <item android:id="@+id/Edit"
-        android:title="Edit"/>
-    <item android:id="@+id/action_datasets"
-        android:title="Datasets"
+
+    <item android:id="@+id/action_metersinrange"
+        android:title="Meters In Range"
         android:orderInCategory="100"
         />
     <item android:id="@+id/action_knownmeters"

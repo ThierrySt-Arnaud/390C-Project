@@ -14,6 +14,10 @@ import android.widget.ArrayAdapter;
 import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
+
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -269,4 +273,36 @@ public class ListDevicesActivity extends AppCompatActivity {
             // no receiver registred
         }
     }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        MenuInflater inflater = getMenuInflater();
+        inflater.inflate(R.menu.action_button, menu);
+        return super.onCreateOptionsMenu(menu);
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+
+
+        if (item.getItemId() == R.id.action_datasets) {
+
+
+            Intent intent= new Intent(this, myDataSets.class);
+            startActivity(intent);
+            return true;
+
+        }
+
+        if (item.getItemId() == R.id.action_knownmeters) {
+
+
+            Intent intent= new Intent(this, metersinfo.class);
+            startActivity(intent);
+            return true;
+
+        }
+        return super.onOptionsItemSelected(item);
+    }
+
 }

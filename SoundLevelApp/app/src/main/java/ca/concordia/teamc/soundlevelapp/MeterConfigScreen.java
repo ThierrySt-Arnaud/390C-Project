@@ -9,9 +9,9 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
+import android.content.Intent;
 
 public class MeterConfigScreen extends AppCompatActivity{
-    protected EditText nameText = null;
     protected EditText ProjectText =null;
     protected EditText LocationText =null;
     protected Button saveButton = null;
@@ -22,7 +22,6 @@ public class MeterConfigScreen extends AppCompatActivity{
         super.onCreate(savedInstanceState);
         setContentView(R.layout.meter_config_screen);
 
-        nameText = (EditText) findViewById(R.id.nameEditText); //connecting edittext for each
         ProjectText = (EditText) findViewById(R.id.ProjectEditText);
         LocationText = (EditText) findViewById(R.id.LocationEditText);
 
@@ -31,11 +30,9 @@ public class MeterConfigScreen extends AppCompatActivity{
         editText(false);
 
 
-        final SharedPreferenceHelper sharedPreferenceHelper = new SharedPreferenceHelper(MeterConfigScreen.this);
+       final SharedPreferenceHelper sharedPreferenceHelper = new SharedPreferenceHelper(MeterConfigScreen.this);
 
-        if (sharedPreferenceHelper.getProfileName() != null) {
-            nameText.setText(sharedPreferenceHelper.getProfileName());
-            ProjectText.setText(sharedPreferenceHelper.getProfileProject());
+        if (sharedPreferenceHelper.getProfileProject() != null) {
             LocationText.setText(sharedPreferenceHelper.getProfileLocation());
         }
 
@@ -43,12 +40,10 @@ public class MeterConfigScreen extends AppCompatActivity{
             public void onClick(View v) {
 
                 if ((LocationText.getText().toString().matches(""))
-                        || (nameText.getText().toString().matches(""))
                         || (ProjectText.getText().toString().matches(""))) {
                     Toast msg = Toast.makeText(getApplicationContext(), "Invalid Input!", Toast.LENGTH_LONG);
                     msg.show();
                 } else {
-                    profile.setName(nameText.getText().toString());
                     profile.setProject(ProjectText.getText().toString());
                     profile.setLocation(LocationText.getText().toString());
 
@@ -73,19 +68,37 @@ public class MeterConfigScreen extends AppCompatActivity{
         if (item.getItemId() == R.id.Edit) {
             editText(true);
         }
+
+        if (item.getItemId() == R.id.action_datasets) {
+
+
+            Intent intent= new Intent(this, myDataSets.class);
+            startActivity(intent);
+            return true;
+
+        }
+
+        if (item.getItemId() == R.id.action_knownmeters) {
+
+
+            Intent intent= new Intent(this, metersinfo.class);
+            startActivity(intent);
+            return true;
+
+        }
         return super.onOptionsItemSelected(item);
     }
 
 
     protected void editText(boolean bool){
-        nameText.setFocusableInTouchMode(bool);
-        nameText.setFocusable(bool);
 
         ProjectText.setFocusableInTouchMode(bool);
         ProjectText.setFocusable(bool);
+        //editText(bool: true);
 
         LocationText.setFocusableInTouchMode(bool);
         LocationText.setFocusable(bool);
+        //editText(bool: true);
     }
 }
 
