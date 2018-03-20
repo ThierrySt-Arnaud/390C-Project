@@ -6,6 +6,8 @@ import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.content.Intent;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 
 public class metersinfopts extends AppCompatActivity {
 
@@ -16,33 +18,34 @@ public class metersinfopts extends AppCompatActivity {
     }
 
     @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
+    public boolean onCreateOptionsMenu (Menu menu){
         MenuInflater inflater = getMenuInflater();
         inflater.inflate(R.menu.actionbutton_metersinfo, menu);
         return super.onCreateOptionsMenu(menu);
     }
 
     @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
+    public boolean onOptionsItemSelected (MenuItem item) {
 
 
         if (item.getItemId() == R.id.action_metersinrange) {
 
 
-            Intent intent= new Intent(this, myDataSets.class);
+            Intent intent = new Intent(this, ListDevicesActivity.class);
             startActivity(intent);
             return true;
 
         }
 
-        if (item.getItemId() == R.id.action_knownmeters) {
+        if (item.getItemId() == R.id.action_datasets) {
 
 
-            Intent intent= new Intent(this, metersinfo.class);
+            Intent intent = new Intent(this, myDataSets.class);
             startActivity(intent);
             return true;
 
         }
         return super.onOptionsItemSelected(item);
-    }
-}
+
+
+    }}
