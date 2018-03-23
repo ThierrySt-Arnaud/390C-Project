@@ -9,7 +9,7 @@
     <TextView
         android:id="@+id/project_name"
         android:layout_width="370dp"
-        android:layout_height="wrap_content"
+        android:layout_height="56dp"
         android:layout_marginStart="8dp"
         android:layout_marginTop="8dp"
         android:text="Project Name"
@@ -19,8 +19,8 @@
 
     <TextView
         android:id="@+id/location"
-        android:layout_width="374dp"
-        android:layout_height="32dp"
+        android:layout_width="370dp"
+        android:layout_height="56dp"
         android:layout_marginStart="8dp"
         android:layout_marginTop="8dp"
         android:text="Location"
@@ -30,9 +30,9 @@
 
     <TextView
         android:id="@+id/sensor_macaddress"
-        android:layout_width="372dp"
-        android:layout_height="28dp"
-        android:layout_marginStart="8dp"
+        android:layout_width="370dp"
+        android:layout_height="56dp"
+        android:layout_marginStart="4dp"
         android:layout_marginTop="8dp"
         android:text="Sensor MAC Address"
         android:textAppearance="@style/TextAppearance.AppCompat.Large"
@@ -41,8 +41,8 @@
 
     <TextView
         android:id="@+id/last_connected"
-        android:layout_width="366dp"
-        android:layout_height="27dp"
+        android:layout_width="370dp"
+        android:layout_height="56dp"
         android:layout_marginStart="8dp"
         android:layout_marginTop="8dp"
         android:text="Last Connected"
@@ -52,8 +52,8 @@
 
     <TextView
         android:id="@+id/textView8"
-        android:layout_width="364dp"
-        android:layout_height="wrap_content"
+        android:layout_width="370dp"
+        android:layout_height="56dp"
         android:layout_marginStart="8dp"
         android:layout_marginTop="8dp"
         android:text="Date Last Recorded"
@@ -64,7 +64,7 @@
     <TextView
         android:id="@+id/recording_status"
         android:layout_width="370dp"
-        android:layout_height="35dp"
+        android:layout_height="56dp"
         android:layout_marginStart="8dp"
         android:layout_marginTop="8dp"
         android:text="Recording Status"
