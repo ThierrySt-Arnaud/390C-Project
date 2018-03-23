@@ -4,7 +4,7 @@ package ca.concordia.teamc.soundlevelapp;
  * Created by Thilak on 2018-03-22.
  */
 
-public class Metergetset {
+public class Meter {
 
     String sensorName;
     String macAddress;
