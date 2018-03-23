@@ -1,20 +1,19 @@
 package ca.concordia.teamc.soundlevelapp;
 
-import android.support.v7.app.AppCompatActivity;
+
+import android.content.Intent;
 import android.os.Bundle;
+import android.support.v7.app.AppCompatActivity;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
-import android.content.Intent;
-import android.view.MenuInflater;
-import android.view.MenuItem;
 
-public class metersinfopts extends AppCompatActivity {
+public class myDataSets_Detailed extends AppCompatActivity{
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_metersinfopts);
+        setContentView(R.layout.activity_mydatasets_detailed);
     }
 
     @Override
@@ -37,15 +36,17 @@ public class metersinfopts extends AppCompatActivity {
 
         }
 
-        if (item.getItemId() == R.id.action_datasets) {
+        if (item.getItemId() == R.id.action_knownmeters) {
 
 
-            Intent intent = new Intent(this, myDataSets.class);
+            Intent intent= new Intent(this, metersinfo.class);
             startActivity(intent);
             return true;
+
 
         }
         return super.onOptionsItemSelected(item);
 
 
     }}
+
