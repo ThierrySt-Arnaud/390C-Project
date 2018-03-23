@@ -22,10 +22,10 @@ public class DataListAdapter extends BaseAdapter
 
 {
     private Context context; //context
-    private List<Data> datasets; //data source of the list adapter
+    private List<DataSet> datasets; //data source of the list adapter
 
     //public constructor
-    public DataListAdapter(Context context, List<Data> datasets) {
+    public DataListAdapter(Context context, List<DataSet> datasets) {
         this.context = context;
         this.datasets = datasets;
     }
@@ -54,7 +54,7 @@ public class DataListAdapter extends BaseAdapter
         }
 
         // get current item to be displayed
-        Data currentItem = (Data) getItem(position);
+        DataSet currentItem = (DataSet) getItem(position);
 
         // get the TextView for item name and item description
         TextView textViewItemName = (TextView)
@@ -67,10 +67,10 @@ public class DataListAdapter extends BaseAdapter
                 convertView.findViewById(R.id.text_view_item_datedownloaded);
 
         //sets the text for item name and item description from the current item object
-        textViewItemName.setText(currentItem.getItemName());
-        textViewItemLocation.setText(currentItem.getItemLocation());
-        textViewItemDateStarted.setText(currentItem.getItemDateStarted());
-        textViewItemDateDownloaded.setText(currentItem.getItemDateDownloaded());
+        textViewItemName.setText(currentItem.getProjectName());
+        textViewItemLocation.setText(currentItem.getLocation());
+        textViewItemDateStarted.setText(currentItem.getDateStartRecord());
+        textViewItemDateDownloaded.setText(currentItem.getDateOfDownload());
 
         // returns the view for the current row
         return convertView;

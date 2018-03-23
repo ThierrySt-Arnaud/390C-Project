@@ -13,6 +13,16 @@ public class DataSet {
     String meterReferenceRecord;
     String datafile;
 
+    public DataSet(String projectName, String location, int dateOfDownload, int dateStartRecord, String meterReferenceRecord, String datafile) {
+        this.projectName = projectName;
+        this.location = location;
+        this.dateOfDownload = dateOfDownload;
+        this.dateStartRecord = dateStartRecord;
+        this.meterReferenceRecord = meterReferenceRecord;
+        this.datafile = datafile;
+
+    }
+
     public String getProjectName() {
         return projectName;
     }
