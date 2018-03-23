@@ -9,6 +9,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.BaseAdapter;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import java.util.ArrayList;
@@ -60,10 +61,24 @@ public class MeterListAdapter extends BaseAdapter
                 convertView.findViewById(R.id.text_view_item_name);
         TextView textViewItemDescription = (TextView)
                 convertView.findViewById(R.id.text_view_item_description);
+        TextView textViewItemMeterLocation = (TextView)
+                convertView.findViewById(R.id.text_view_item_meterlocation);
+        ImageView microphoneset = convertView.findViewById(R.id.microphone_On);
+        ImageView microphoneNot = convertView.findViewById(R.id.microphone_Off);
+
+        if (currentItem.getRecordingStatus()) {
+            microphoneset.setVisibility(View.VISIBLE);
+            microphoneNot.setVisibility(View.GONE);
+        } else {
+            microphoneset.setVisibility(View.GONE);
+            microphoneNot.setVisibility(View.VISIBLE);
+        }
 
         //sets the text for item name and item description from the current item object
-        textViewItemName.setText(currentItem.getItemName());
-        textViewItemDescription.setText(currentItem.getItemDescription());
+        textViewItemName.setText(currentItem.getSensorName());
+        textViewItemDescription.setText(currentItem.getLastKnownProject());
+        textViewItemMeterLocation.setText(currentItem.getLocation());
+
 
         // returns the view for the current row
         return convertView;
