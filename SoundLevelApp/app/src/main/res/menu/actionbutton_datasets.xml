@@ -5,11 +5,10 @@
     <item android:id="@+id/action_metersinrange"
         android:title="Meters In Range"
         android:orderInCategory="100"
-        app:showAsAction="ifRoom" />
+         />
     <item android:id="@+id/action_knownmeters"
         android:title="Known Meters"
         android:orderInCategory="100"
-        app:showAsAction="ifRoom"
         />
 
 </menu>

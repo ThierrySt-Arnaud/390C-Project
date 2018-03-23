@@ -60,6 +60,14 @@
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value=".metersinfo" />
         </activity>
+        <activity android:name=".myDataSets_Detailed"
+            android:parentActivityName=".myDataSets"
+            >
+
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value=".myDataSets" />
+        </activity>
     </application>
 
 </manifest>
