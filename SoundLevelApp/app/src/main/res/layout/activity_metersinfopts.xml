@@ -13,18 +13,18 @@
         android:layout_marginStart="8dp"
         android:layout_marginTop="8dp"
         android:text="Project Name"
-        android:textAppearance="@style/TextAppearance.AppCompat.Display1"
+        android:textAppearance="@style/TextAppearance.AppCompat.Large"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
     <TextView
         android:id="@+id/location"
         android:layout_width="374dp"
-        android:layout_height="56dp"
+        android:layout_height="32dp"
         android:layout_marginStart="8dp"
         android:layout_marginTop="8dp"
         android:text="Location"
-        android:textAppearance="@android:style/TextAppearance.Material.Display1"
+        android:textAppearance="@android:style/TextAppearance.Material.Large"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/project_name" />
 
