@@ -84,10 +84,10 @@ void app_main() {
 
     BaseType_t sample_audio_type;
 
-    /*sample_audio_type = xTaskCreate(sample_audio, "AudioSampler",
+    sample_audio_type = xTaskCreate(sample_audio, "AudioSampler",
                                      AUDIO_SAMPLE_MEM, (void*) 1,
                                      configMAX_PRIORITIES - 1,
-                                     &sample_audio_handle);*/
+                                     &sample_audio_handle);
 }
 
 static void esp_spp_cb(esp_spp_cb_event_t event, esp_spp_cb_param_t *param){
