@@ -14,6 +14,16 @@ public class Meter {
     Boolean recordingStatus;
     String startRecordingDate;
 
+    public Meter(String sensorName, String macAddress, String location, String lastKnownProject, String lastConnectionDate, Boolean recordingStatus, String startRecordingDate) {
+        this.sensorName = sensorName;
+        this.macAddress = macAddress;
+        this.location = location;
+        this.lastKnownProject = lastKnownProject;
+        this.lastConnectionDate = lastConnectionDate;
+        this.recordingStatus = recordingStatus;
+        this.startRecordingDate = startRecordingDate;
+    }
+
     public String getSensorName() {
         return sensorName;
     }
