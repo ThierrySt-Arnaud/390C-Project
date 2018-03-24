@@ -4,11 +4,10 @@
     <item android:id="@+id/action_datasets"
         android:title="Datasets"
         android:orderInCategory="100"
-        app:showAsAction="ifRoom" />
+         />
     <item android:id="@+id/action_knownmeters"
         android:title="Known Meters"
         android:orderInCategory="100"
-        app:showAsAction="ifRoom"
         />
 
 </menu>
