@@ -91,7 +91,7 @@ public class BluetoothService extends Service {
         MACAddress = intent.getStringExtra("address");
         checkBTState();
 
-         BTBroadcastReceiver = new BroadcastReceiver() {
+        BTBroadcastReceiver = new BroadcastReceiver() {
 
             @Override
             public void onReceive(Context context, Intent intent) {
