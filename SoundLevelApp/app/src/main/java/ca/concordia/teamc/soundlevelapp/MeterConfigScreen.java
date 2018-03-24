@@ -15,17 +15,23 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ProgressBar;
+import android.widget.TextView;
 import android.widget.Toast;
 import android.content.Intent;
 
 public class MeterConfigScreen extends AppCompatActivity{
     protected EditText ProjectText =null;
     protected EditText LocationText =null;
+    protected TextView DataText = null;
+    protected ProgressBar Storage = null;
     protected Button saveButton = null;
+    protected Button downloadButton = null;
     Profile profile = new Profile();
     BroadcastReceiver mReceiver;
     BluetoothService BTService;
     boolean bound=false;
+    boolean startData = false; // we got a message with config started
 
 
     @Override
@@ -35,13 +41,16 @@ public class MeterConfigScreen extends AppCompatActivity{
 
         ProjectText = (EditText) findViewById(R.id.ProjectEditText);
         LocationText = (EditText) findViewById(R.id.LocationEditText);
+        DataText = (TextView) findViewById(R.id.textView2);
+        Storage = (ProgressBar) findViewById(R.id.progressBar);
 
         saveButton = (Button) findViewById(R.id.saveButton);
+        downloadButton = (Button) findViewById(R.id.downloadButton);
 
         editText(false);
 
 
-       final SharedPreferenceHelper sharedPreferenceHelper = new SharedPreferenceHelper(MeterConfigScreen.this);
+        final SharedPreferenceHelper sharedPreferenceHelper = new SharedPreferenceHelper(MeterConfigScreen.this);
 
         if (sharedPreferenceHelper.getProfileProject() != null) {
             LocationText.setText(sharedPreferenceHelper.getProfileLocation());
@@ -60,13 +69,21 @@ public class MeterConfigScreen extends AppCompatActivity{
 
                     sharedPreferenceHelper.saveProfileName(profile);
 
-                    BTService.write("project: "+ ProjectText.getText().toString());
-                    BTService.write("location: "+ LocationText.getText().toString());
+                    Log.d("SEND", ProjectText.getText().toString() + "\n" + LocationText.getText().toString());
+                    BTService.write(ProjectText.getText().toString() + "\n" + LocationText.getText().toString());
+                    //BTService.write("location: "+ LocationText.getText().toString());
 
                     editText(false);
                     Toast toast = Toast.makeText(getApplicationContext(), "Saved!", Toast.LENGTH_LONG);
                     toast.show();
                 }
+            }
+        });
+
+        downloadButton.setOnClickListener(new View.OnClickListener() {
+            public void onClick(View v) {
+                Log.d("SEND", "download");
+                BTService.write("download");
             }
         });
 
@@ -81,25 +98,44 @@ public class MeterConfigScreen extends AppCompatActivity{
                 if (msg.lastIndexOf((char) 0x1A) != -1){
                     Log.d("DETECTED", "detected EOF");
                 }
+
                 if (msg.lastIndexOf((char) 0x0A) != -1 || msg.lastIndexOf((char) 0x0D) != -1){
                     Log.d("DETECTED", "detected NL");
+                    msg = msg.replace((char) 0x0A, '\n');
+                    msg = msg.replace((char) 0x0D, '\n');
                 }
 
-                String[] file = msg.split("<<<");
-                String[] config = file[0].split("\\r?\\n"); // doesn't work
-                String[] data = file[1].replace(">>>","").split("\\r?\\n"); // doesn't work
-
-                for(String str : config){
-                    Log.d("CONFIG", str);
+                if(msg.contains("<<<")){
+                    Log.d("DETECTED", "Start of Data");
+                    startData = true;
                 }
 
-                for(String str : data){
-                    Log.d("DATA", str);
+                if (msg.contains(">>>")){
+                    Log.d("DETECTED", "End of Data");
+                    startData = false;
                 }
 
-                ProjectText.setText(config[0]);
-                LocationText.setText(config[1]);
+                try{
+                    String[] file = msg.split("<<<");
+                    String[] config = file[0].split("\n");
+                    String data = file[1].replace(">>>","");
 
+                    for(String str : config){
+                        Log.d("CONFIG", str);
+                    }
+
+                    Log.d("DATA", data);
+
+                    ProjectText.setText(config[0]);
+                    LocationText.setText(config[1]);
+                    Storage.setProgress(Integer.parseInt(config[2]));
+                    DataText.setTextSize(20);
+                    DataText.setText(data);
+
+
+                }catch (ArrayIndexOutOfBoundsException exception){
+                    Log.d("DEBUG", "Ill formated message");
+                }
             }
         };
 
