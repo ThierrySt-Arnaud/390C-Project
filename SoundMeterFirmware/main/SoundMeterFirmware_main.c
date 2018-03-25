@@ -26,6 +26,7 @@
 #define DEVICE_NAME "SoundMeter"
 
 #define STORAGE_NAMESPACE "BLOB_SPACE"
+<<<<<<< HEAD
 #define CONFIG_NAMESPACE "config_space"
 #define BLOB_PREFIX "set-"
 #define NUMBER_OF_BLOBS "blob-tracker"
@@ -33,6 +34,11 @@
 #define PROJECT_NAME "project"
 #define LOCATION "location"
 
+=======
+#define BLOB_PREFIX "set-"
+#define NUMBER_OF_BLOBS "blob-tracker"
+#define BLOB_SIZE 1024
+>>>>>>> 5a0611e8583b1e446f199a7189f0ffe92ca35f9f
 #define AUDIO_SAMPLE_MEM 4096
 #define AUDIO_PROCESS_MEM 4096
 #define DATA_RECORDER_MEM 4096
