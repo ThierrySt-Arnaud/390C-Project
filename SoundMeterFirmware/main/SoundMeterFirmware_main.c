@@ -4,7 +4,7 @@
 #include <stdbool.h>
 #include <stdio.h>
 #include <stdatomic.h>
-//#include <math.h>
+#include <math.h>
 #include "nvs.h"
 #include "nvs_flash.h"
 #include "freertos/FreeRTOS.h"
@@ -18,25 +18,48 @@
 #include "time.h"
 #include "sys/time.h"
 #include "driver/adc.h"
+#include "driver/i2s.h"
 #include "esp_adc_cal.h"
 
 #define SPP_TAG "SoundMeterFirmware"
 #define SPP_SERVER_NAME "SMF_SPP_SERVER"
-#define EXAMPLE_DEVICE_NAME "SoundMeter"
+#define DEVICE_NAME "SoundMeter"
 
-#define DUMMY_VALUES 10
-#define DUMMY_DATA 48, 49, 50, 51, 52, 53, 54, 55, 56, 57
-#define STORAGE_NAMESPACE "dummy"
-#define DUMMY_KEY "dummy_data"
+#define STORAGE_NAMESPACE "BLOB_SPACE"
+#define CONFIG_NAMESPACE "config_space"
+#define BLOB_PREFIX "set-"
+#define NUMBER_OF_BLOBS "blob-tracker"
+#define BLOB_SIZE 1024
+#define PROJECT_NAME "project"
+#define LOCATION "location"
+
 #define AUDIO_SAMPLE_MEM 4096
-#define PROCESS_AUDIO_MEM 4096
+#define AUDIO_PROCESS_MEM 4096
+#define DATA_RECORDER_MEM 4096
 
-#define MULTISAMPLE_SIZE 32
-#define READING_BUFFER_SIZE 25
-#define SAMPLING_FREQ 48000
-#define SAMPLING_BUFFER_SIZE SAMPLING_FREQ/8
+//i2s number
+#define I2S_NUM             0
+//i2s sample rate
+#define I2S_SAMPLE_RATE     48000
+//i2s data bits
+#define I2S_SAMPLE_BITS     16
+//I2S read buffer length
+#define I2S_READ_LEN        I2S_SAMPLE_RATE/8
+//I2S data format
+#define I2S_FORMAT          I2S_CHANNEL_FMT_ONLY_LEFT
+//I2S channel number
+#define I2S_CHANNEL_NUM     1
+//I2S built-in ADC unit
+#define I2S_ADC_UNIT        ADC_UNIT_1
+//I2S built-in ADC channel
+#define I2S_ADC_CHANNEL     ADC1_CHANNEL_0
+//I2S built-in ADC attenuation
+#define I2S_ADC_ATTEN       ADC_ATTEN_DB_11
 
-#define DC_OFFSET 1628
+#define DEFAULT_VREF        1153 // Measured manually
+
+#define AMP_MIC_SENSIVITY   8
+#define MIC_VPA             0.005011872336273
 
 static const esp_spp_sec_t sec_mask = ESP_SPP_SEC_NONE;
 static const esp_spp_role_t role_slave = ESP_SPP_ROLE_SLAVE;
@@ -44,49 +67,52 @@ static const esp_spp_mode_t esp_spp_mode = ESP_SPP_MODE_CB;
 static atomic_bool connection_ready = ATOMIC_VAR_INIT(false);
 static atomic_bool connection_open = ATOMIC_VAR_INIT(false);
 static atomic_bool recording = ATOMIC_VAR_INIT(false);
+static atomic_uint data_to_write = ATOMIC_VAR_INIT(0);
 
 static TaskHandle_t sample_audio_handle = NULL;
 static TaskHandle_t process_audio_handle = NULL;
-static uint32_t bt_handle = 0;
+static TaskHandle_t record_data_handle = NULL;
 
-esp_err_t get_dummy_data(uint8_t**, size_t*);
+static uint32_t bt_handle = 0;
+static esp_adc_cal_characteristics_t *adc_chars;
+
 void sample_audio(void*);
 void process_audio(void*);
-esp_err_t print_dummy_data(void);
+void record_data(void*);
 static void esp_spp_cb(esp_spp_cb_event_t, esp_spp_cb_param_t*);
 bool initialize_bluetooth(void);
-esp_err_t save_dummy_data(uint8_t[]);
-uint32_t SquareRootRounded(uint32_t);
+static void check_efuse();
+static void print_char_val_type(esp_adc_cal_value_t);
+void nvs_full(esp_err_t*);
+void reset_requested(esp_err_t*);
 
 void app_main() {
-    esp_err_t err = nvs_flash_init();
-    if (err == ESP_ERR_NVS_NO_FREE_PAGES) {
-        ESP_ERROR_CHECK(nvs_flash_erase());
-        err = nvs_flash_init();
-    }
-    ESP_ERROR_CHECK( err );
-
     gpio_set_direction(GPIO_NUM_5, GPIO_MODE_DEF_OUTPUT);
     gpio_set_level(GPIO_NUM_5, 0);
+    gpio_set_direction(GPIO_NUM_0, GPIO_MODE_DEF_INPUT);
 
-    uint8_t dummyData[] = {DUMMY_DATA};
+    esp_err_t err = nvs_flash_init();
 
-    err = save_dummy_data(dummyData);
-    if (err != ESP_OK)
-    ESP_LOGE(SPP_TAG,"%s while saving dummy data to NVS\n", esp_err_to_name(err));
-
-    ESP_ERROR_CHECK(print_dummy_data());
+    if (!gpio_get_level(GPIO_NUM_0)){
+        reset_requested(&err);
+    }
 
     if (!initialize_bluetooth()){
         ESP_LOGI(SPP_TAG,"Restarting...");
         esp_restart();
     }
 
-    BaseType_t sample_audio_type;
+    if (err == ESP_ERR_NVS_NO_FREE_PAGES){
+        nvs_full(&err);
+    }
 
+    gpio_set_level(GPIO_NUM_5, 0);
+    ESP_ERROR_CHECK( err );
+
+    BaseType_t sample_audio_type;
     sample_audio_type = xTaskCreate(sample_audio, "AudioSampler",
                                      AUDIO_SAMPLE_MEM, (void*) 1,
-                                     configMAX_PRIORITIES - 1,
+                                     configMAX_PRIORITIES < 1,
                                      &sample_audio_handle);
 }
 
@@ -95,7 +121,7 @@ static void esp_spp_cb(esp_spp_cb_event_t event, esp_spp_cb_param_t *param){
         // SPP Profile initialization event
         case ESP_SPP_INIT_EVT:
             ESP_LOGI(SPP_TAG, "ESP_SPP_INIT_EVT");
-            esp_bt_dev_set_device_name(EXAMPLE_DEVICE_NAME);
+            esp_bt_dev_set_device_name(DEVICE_NAME);
             esp_bt_gap_set_scan_mode(ESP_BT_SCAN_MODE_CONNECTABLE_DISCOVERABLE);
             esp_spp_start_srv(sec_mask,role_slave, 0, SPP_SERVER_NAME);
             break;
@@ -196,178 +222,226 @@ bool initialize_bluetooth(){
     return true;
 }
 
-esp_err_t print_dummy_data(void){
-    esp_err_t err;
-    size_t dummyValues = 0;
-    uint8_t* dummyData = NULL;
+void sample_audio(void* params){
+    check_efuse();
 
-    err = get_dummy_data(&dummyData, &dummyValues);
-    if (err != ESP_OK) return err;
+    adc1_config_width(ADC_WIDTH_BIT_12);
+    adc1_config_channel_atten(I2S_ADC_CHANNEL, I2S_ADC_ATTEN);
+    //Characterize ADC
+    adc_chars = calloc(1, sizeof(esp_adc_cal_characteristics_t));
+    esp_adc_cal_value_t val_type = esp_adc_cal_characterize(I2S_ADC_UNIT, I2S_ADC_ATTEN, ADC_WIDTH_BIT_12, DEFAULT_VREF, adc_chars);
+    print_char_val_type(val_type);
+    adc_set_data_inv(I2S_ADC_UNIT, true);
 
-    printf("There are %i values. They are:\n", dummyValues);
+    i2s_config_t i2s_config = {
+       .mode = I2S_MODE_MASTER | I2S_MODE_RX | I2S_MODE_ADC_BUILT_IN,
+       .sample_rate =  I2S_SAMPLE_RATE,
+       .bits_per_sample = I2S_SAMPLE_BITS,
+       .communication_format = I2S_COMM_FORMAT_I2S_LSB,
+       .channel_format = I2S_FORMAT,
+       .intr_alloc_flags = 0,
+       .dma_buf_count = 8,
+       .dma_buf_len = 1024,
+       .use_apll = false
+    };
 
-    for (size_t i = 0; i < dummyValues; i++) {
-        printf("%i\n", dummyData[i]);
-    }
+    //install and start i2s driver
+    i2s_driver_install(I2S_NUM, &i2s_config, 0, NULL);
+    //init ADC pad
+    i2s_set_adc_mode(I2S_ADC_UNIT, I2S_ADC_CHANNEL);
 
-    free(dummyData);
-    return ESP_OK;
-}
+    uint16_t* reading_buffer = malloc(I2S_READ_LEN*sizeof(int16_t));
+    TickType_t record_delay = pdMS_TO_TICKS(125);
 
-esp_err_t save_dummy_data(uint8_t dummyData[]){
-    nvs_handle my_handle;
-    esp_err_t err;
-    size_t required_size = 0;
-    // Open
-    err = nvs_open(STORAGE_NAMESPACE, NVS_READWRITE, &my_handle);
-    if (err != ESP_OK) return err;
-
-    err = nvs_get_blob(my_handle, DUMMY_KEY, NULL, &required_size);
-    if (err == ESP_ERR_NVS_NOT_FOUND){
-        ESP_LOGI(SPP_TAG, "Previous data not found. Writing new data.");
-        err = nvs_set_blob(my_handle, DUMMY_KEY, dummyData, (DUMMY_VALUES*sizeof(uint8_t)));
-        if (err != ESP_OK) return err;
-
-        err = nvs_commit(my_handle);
-        if (err != ESP_OK) return err;
-    } else
-        ESP_LOGI(SPP_TAG, "Previous dummy data found.");
-
-    nvs_close(my_handle);
-    return ESP_OK;
-}
-
-esp_err_t get_dummy_data(uint8_t** dummyData, size_t* dummyValues){
-    nvs_handle my_handle;
-    esp_err_t err;
-
-    free(*dummyData);
-    *dummyData = NULL;
-
-    // Open
-    err = nvs_open(STORAGE_NAMESPACE, NVS_READONLY, &my_handle);
-    if (err != ESP_OK) return err;
-
-    err = nvs_get_blob(my_handle, DUMMY_KEY, *dummyData, dummyValues);
-    if (err != ESP_OK) return err;
-
-    *dummyData = malloc(*dummyValues);
-
-    err = nvs_get_blob(my_handle, DUMMY_KEY, *dummyData, dummyValues);
-    if (err != ESP_OK) return err;
-
-    // Close
-    nvs_close(my_handle);
-    return ESP_OK;
-}
-
-void sample_audio(void * params){
-    ESP_LOGI(SPP_TAG, "Starting audio sampling task.");
-    TickType_t pxPreviousWakeTime = xTaskGetTickCount();
-    int16_t* reading_buffer = malloc(READING_BUFFER_SIZE*sizeof(int16_t));
     BaseType_t process_audio_type;
     process_audio_type = xTaskCreate(process_audio, "AudioProcessor",
-                                    PROCESS_AUDIO_MEM, reading_buffer,
-                                    configMAX_PRIORITIES >> 1,
-                                    &process_audio_handle);
-    esp_err_t err = ESP_OK;
-
-    if ((err = adc1_config_width(ADC_WIDTH_BIT_12)) != ESP_OK)
-        ESP_LOGE(SPP_TAG, "%s ADC initialization failed, err=%s", __func__, esp_err_to_name(err));
-
-    if ((err = adc1_config_channel_atten(ADC_CHANNEL_7, ADC_ATTEN_DB_11)) != ESP_OK)
-        ESP_LOGE(SPP_TAG, "%s ADC initialization failed, err=%s", __func__, esp_err_to_name(err));
-
-    uint16_t iterator = 0;
-    while(true) {
-        /*if (atomic_load(&recording)){
-            ESP_LOGI(SPP_TAG, "Recording.");
-        }
-        if (atomic_load(&connection_open)) {
-            ESP_LOGI(SPP_TAG, "Connected.");
-        }*/
-        if (atomic_load(&recording) || atomic_load(&connection_open)){
-            int32_t adc_reading = 0;
-            for (int i = 0; i < MULTISAMPLE_SIZE; i++){
-                adc_reading += adc1_get_raw(ADC_CHANNEL_7);
-            }
-            adc_reading >>= 5;
-            //ESP_LOGI(SPP_TAG, "Multisampled reading: %i", adc_reading);
-            reading_buffer[iterator++] = adc_reading;
-            if (iterator == READING_BUFFER_SIZE){
-                //ESP_LOGI(SPP_TAG, "Buffer is full, processing buffer.");
-                vTaskResume(process_audio_handle);
-                iterator = 0;
-            }
-            vTaskDelayUntil(&pxPreviousWakeTime,1);
-        } else {
-            iterator = 0;
-            vTaskSuspend(NULL);
-            pxPreviousWakeTime = xTaskGetTickCount();
-        }
-    }
-}
-
-void process_audio(void* reading_buffer){
-    int16_t* process_buffer = malloc(READING_BUFFER_SIZE*sizeof(int16_t));;
-    uint32_t processed_value = 0;
+                                     AUDIO_PROCESS_MEM, reading_buffer,
+                                     configMAX_PRIORITIES < 2,
+                                     &process_audio_handle);
     while (true){
-        vTaskSuspend(NULL);
-        memcpy(process_buffer,reading_buffer,READING_BUFFER_SIZE*sizeof(int16_t));
-        for (int i = 0; i < READING_BUFFER_SIZE; i++){
-            processed_value += (process_buffer[i] - DC_OFFSET)*(process_buffer[i] - DC_OFFSET);
+        while (!atomic_load(&connection_open) && !atomic_load(&recording)){
+            i2s_adc_disable(I2S_NUM);
+            vTaskResume(record_data_handle);
+            vTaskSuspend(NULL);
+            i2s_adc_enable(I2S_NUM);
         }
-        processed_value /= READING_BUFFER_SIZE;
-        processed_value = SquareRootRounded(processed_value);
-
-        if (atomic_load(&connection_open) && atomic_load(&connection_ready)){
-            esp_spp_write(bt_handle, sizeof(uint32_t), &processed_value);
+        int16_t bytesRead = i2s_read_bytes(I2S_NUM,(char*)reading_buffer, I2S_READ_LEN*sizeof(uint16_t), record_delay);
+        if (bytesRead == I2S_READ_LEN*2){
+            /*printf("4 samples out of %i:\n", I2S_READ_LEN);
+            //printf("%i\n",reading_buffer[0]);
+            //printf("%i\n",reading_buffer[I2S_READ_LEN/4]);
+            printf("%i\n",reading_buffer[I2S_READ_LEN/2]);
+            printf("%i\n",reading_buffer[3*I2S_READ_LEN/4]);*/
+            vTaskResume(process_audio_handle);
         }
     }
 }
 
-/**
- * \brief    Fast Square root algorithm, with rounding
- *
- * This does arithmetic rounding of the result. That is, if the real answer
- * would have a fractional part of 0.5 or greater, the result is rounded up to
- * the next integer.
- *      - SquareRootRounded(2) --> 1
- *      - SquareRootRounded(3) --> 2
- *      - SquareRootRounded(4) --> 2
- *      - SquareRootRounded(6) --> 2
- *      - SquareRootRounded(7) --> 3
- *      - SquareRootRounded(8) --> 3
- *      - SquareRootRounded(9) --> 3
- *
- * \param[in] a_nInput - unsigned integer for which to find the square root
- *
- * \return Integer square root of the input value.
- */
-uint32_t SquareRootRounded(uint32_t a_nInput){
-    uint32_t op  = a_nInput;
-    uint32_t res = 0;
-    uint32_t one = 1uL << 30; // The second-to-top bit is set: use 1u << 14 for uint16_t type; use 1uL<<30 for uint32_t type
-
-
-    // "one" starts at the highest power of four <= than the argument.
-    while (one > op) {
-        one >>= 2;
-    }
-
-    while (one != 0) {
-        if (op >= res + one) {
-            op = op - (res + one);
-            res = res +  2 * one;
+void process_audio(void* buffer){
+    int16_t* process_buffer = malloc(I2S_READ_LEN*sizeof(uint16_t));
+    uint8_t* write_buffer = malloc(BLOB_SIZE*sizeof(uint8_t));
+    BaseType_t record_data_type;
+    record_data_type = xTaskCreate(record_data, "DataRecorder",
+                                     DATA_RECORDER_MEM, write_buffer,
+                                     configMAX_PRIORITIES < 2,
+                                     &record_data_handle);
+    while(true){
+        vTaskSuspend(NULL);
+        uint64_t readings = I2S_READ_LEN;
+        //printf("Processing %llu readings...\n", readings);
+        memcpy(process_buffer,buffer,I2S_READ_LEN*sizeof(uint16_t));
+        uint64_t total_holder = 0;
+        for (int i = 0; i < readings; i++){
+            total_holder += ((process_buffer[i]-2048)*(process_buffer[i]-2048));
         }
-        res >>= 1;
-        one >>= 2;
+        //printf("Total holder is: %llu\n",total_holder);
+        uint64_t mean_square = (double) total_holder/readings;
+        //printf("Mean square is: %llu\n", mean_square);
+        double adc_rms_value = sqrt((double) mean_square);
+        //printf("ADC RMS value: %f\n",adc_rms_value);
+        double voltage_rms_value = adc_rms_value*3.3/4096*1.5;
+        //printf("Compensated voltage RMS value: %f\n",voltage_rms_value);
+        double log_value = 20*log10(voltage_rms_value/MIC_VPA);
+        //printf("DB value: %f\n", log_value);
+        uint8_t processed_value = (uint8_t)((log_value-39.0)/14.867262*256);
+        printf("Processed: %i\n", processed_value);
+        if (atomic_load(&connection_open) && atomic_load(&connection_ready)){
+            esp_spp_write(bt_handle, sizeof(uint8_t), &processed_value);
+        }
+        if (atomic_load(&recording)){
+            uint16_t data_in_buffer = atomic_load(&data_to_write);
+            write_buffer[data_in_buffer++] = processed_value;
+            printf("Recorded value #%i\n", data_in_buffer);
+            atomic_store(&data_to_write, data_in_buffer);
+            if (data_in_buffer == BLOB_SIZE){
+                printf("We have %i values, preparing for write to flash.\n", data_in_buffer);
+                vTaskResume(record_data_handle);
+            }
+        }
+    }
+}
+
+void record_data(void* write_buffer){
+    uint8_t* ready_buffer = malloc(BLOB_SIZE*sizeof(uint8_t));
+    while(true){
+        vTaskSuspend(NULL);
+        uint16_t to_write = atomic_load(&data_to_write);
+        if (to_write > 0){
+            printf("Will write %i to flash\n", to_write);
+            nvs_handle my_handle;
+            esp_err_t err;
+            // Open
+            err = nvs_open(STORAGE_NAMESPACE, NVS_READWRITE, &my_handle);
+            if (err != ESP_OK)
+                ESP_LOGE(SPP_TAG, "%s nvs open failed err=%s\n", __func__, esp_err_to_name(err));
+
+            uint16_t blobs_in_tow = 0;
+            err = nvs_get_u16(my_handle, NUMBER_OF_BLOBS, &blobs_in_tow);
+            if (err == ESP_ERR_NVS_NOT_FOUND){
+                ESP_LOGI(SPP_TAG, "No blob in storage.");
+                err = nvs_set_u16(my_handle, NUMBER_OF_BLOBS, blobs_in_tow);
+            }
+            if (err != ESP_OK){
+                ESP_LOGE(SPP_TAG, "%s couldn't get blob tracker err=%s\n", __func__, esp_err_to_name(err));
+            } else {
+                char blob_prefix[] = BLOB_PREFIX;
+                char* blob_key = malloc(15*sizeof(char));
+                sprintf(blob_key,"%s%i",blob_prefix,++blobs_in_tow);
+                printf("Blob key is: %s\n", blob_key);
+                err = nvs_set_blob(my_handle, blob_key, ready_buffer, (to_write*sizeof(uint8_t)));
+                if (err != ESP_OK){
+                    ESP_LOGE(SPP_TAG, "%s new blob write failed err=%s\n", __func__, esp_err_to_name(err));
+                } else {
+                    err = nvs_set_u16(my_handle, NUMBER_OF_BLOBS, blobs_in_tow);
+                    if (err != ESP_OK)
+                        ESP_LOGE(SPP_TAG, "%s blob tracker update failed err=%s\n", __func__, esp_err_to_name(err));
+                }
+
+
+                err = nvs_commit(my_handle);
+                if (err != ESP_OK)
+                    ESP_LOGE(SPP_TAG, "%s nvs commit failed err=%s\n", __func__, esp_err_to_name(err));
+                free(blob_key);
+            }
+            if (err == ESP_OK)
+                atomic_store(&data_to_write, 0);
+            nvs_close(my_handle);
+        }
+    }
+}
+
+static void check_efuse(){
+    //Check TP is burned into eFuse
+    if (esp_adc_cal_check_efuse(ESP_ADC_CAL_VAL_EFUSE_TP) == ESP_OK) {
+        printf("eFuse Two Point: Supported\n");
+    } else {
+        printf("eFuse Two Point: NOT supported\n");
     }
 
-    /* Do arithmetic rounding to nearest integer */
-    if (op > res) {
-        res++;
+    //Check Vref is burned into eFuse
+    if (esp_adc_cal_check_efuse(ESP_ADC_CAL_VAL_EFUSE_VREF) == ESP_OK) {
+        printf("eFuse Vref: Supported\n");
+    } else {
+        printf("eFuse Vref: NOT supported\n");
     }
+}
 
-    return res;
+static void print_char_val_type(esp_adc_cal_value_t val_type){
+    if (val_type == ESP_ADC_CAL_VAL_EFUSE_TP) {
+        printf("Characterized using Two Point Value\n");
+    } else if (val_type == ESP_ADC_CAL_VAL_EFUSE_VREF) {
+        printf("Characterized using eFuse Vref\n");
+    } else {
+        printf("Characterized using Default Vref\n");
+    }
+}
+
+void nvs_full(esp_err_t* err){
+    while(*err == ESP_ERR_NVS_NO_FREE_PAGES){
+        TickType_t flash_wait = pdMS_TO_TICKS(125);
+        gpio_set_level(GPIO_NUM_5, 1);
+        vTaskDelay(flash_wait);
+        if (!gpio_get_level(GPIO_NUM_0)){
+            reset_requested(err);
+        }
+        gpio_set_level(GPIO_NUM_5, 0);
+    }
+}
+
+void reset_requested(esp_err_t* err){
+    TickType_t reset_wait = pdMS_TO_TICKS(500);
+    gpio_set_level(GPIO_NUM_5, 1);
+    vTaskDelay(reset_wait);
+    if (!gpio_get_level(GPIO_NUM_0)){
+        gpio_set_level(GPIO_NUM_5, 0);
+        vTaskDelay(reset_wait);
+        if (!gpio_get_level(GPIO_NUM_0)){
+            gpio_set_level(GPIO_NUM_5, 1);
+            vTaskDelay(reset_wait);
+            if (!gpio_get_level(GPIO_NUM_0)){
+                gpio_set_level(GPIO_NUM_5, 0);
+                vTaskDelay(reset_wait);
+                if (!gpio_get_level(GPIO_NUM_0)){
+                    gpio_set_level(GPIO_NUM_5, 1);
+                    vTaskDelay(reset_wait);
+                    if (!gpio_get_level(GPIO_NUM_0)){
+                        gpio_set_level(GPIO_NUM_5, 0);
+                        vTaskDelay(reset_wait);
+                        if (!gpio_get_level(GPIO_NUM_0)){
+                            gpio_set_level(GPIO_NUM_5, 1);
+                            *err = nvs_flash_erase();
+                            *err = nvs_flash_init();
+                            if (*err == ESP_OK){
+                                ESP_LOGI(SPP_TAG,"Flash erased");
+                            } else {
+                                ESP_LOGE(SPP_TAG,"%s flash erase failed err=%s",__func__, esp_err_to_name(*err));
+                            }
+                            esp_restart();
+                        }
+                    }
+                }
+            }
+        }
+    }
+    gpio_set_level(GPIO_NUM_5, 0);
 }
