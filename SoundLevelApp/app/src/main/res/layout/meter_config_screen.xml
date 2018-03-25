@@ -119,4 +119,16 @@
         app:layout_constraintTop_toBottomOf="@+id/progressBar"
         app:layout_constraintVertical_bias="0.13" />
 
+    <Button
+        android:id="@+id/button5"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="32dp"
+        android:layout_marginEnd="8dp"
+        android:layout_marginStart="8dp"
+        android:text="RECORD"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toStartOf="@+id/button2"
+        app:layout_constraintStart_toEndOf="@+id/saveButton" />
+
 </android.support.constraint.ConstraintLayout>
