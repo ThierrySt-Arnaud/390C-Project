@@ -22,7 +22,9 @@ import android.widget.Toast;
 import android.content.Intent;
 import android.content.DialogInterface;
 
+import java.io.UnsupportedEncodingException;
 import java.sql.Time;
+import java.util.Arrays;
 
 import static android.support.v4.os.LocaleListCompat.create;
 
@@ -119,10 +121,11 @@ public class MeterConfigScreen extends AppCompatActivity{
         mReceiver = new BroadcastReceiver() {
             @Override
             public void onReceive(Context context, Intent intent) {
-                String msg = intent.getStringExtra("message");
-                Log.d("Receiver", "got message: "+ msg);
+                byte[] values = intent.getByteArrayExtra("message");
+                String str = Arrays.toString(values);
+                Log.d("Receiver", "got message: "+ str);
 
-                if(isDownloadRequestSend && isDownloadRequestOK){
+                /*if(isDownloadRequestSend && isDownloadRequestOK){
                     // expect config file
                     if (msg.contains("<<<")){
                         isDownloadRequestOK = false;
@@ -159,22 +162,21 @@ public class MeterConfigScreen extends AppCompatActivity{
                         isDownloadRequestOK = true;
                         Log.d("MeterConfig", "Received OK");
                     }
-                }
+                }*/
 
-                try{
-                    int value = Integer.parseInt(msg);
-
-                    if (value >= 0 && value <= 255){
-                        int dB = value / 4 + 39;
+                /*try{
+                    if (value >= 0 && value <= 255){*/
+                        byte value = values[0];
+                        double dB = value / 4.0 + 39;
                         Log.d("DEBUG", ": 8bit int: "+ Integer.toString(value));
-                        DataText.setText(Integer.toString(dB));
-                    }else{
+                        DataText.setText(Double.toString(dB));
+                    /*}else{
                         Log.w("WARN", "int not 8bit");
                     }
 
                 }catch (NumberFormatException e){
                     Log.w("DEBUG", "Ill formated int");
-                }
+                }*/
             }
         };
 
