@@ -6,15 +6,18 @@ package ca.concordia.teamc.soundlevelapp;
 
 public class Meter {
 
+    int sensorId;
     String sensorName;
     String macAddress;
     String location;
     String lastKnownProject;
     String lastConnectionDate;
-    Boolean recordingStatus;
+    int recordingStatus;
     String startRecordingDate;
 
-    public Meter(String sensorName, String macAddress, String location, String lastKnownProject, String lastConnectionDate, Boolean recordingStatus, String startRecordingDate) {
+    public Meter(int sensorId, String sensorName, String macAddress, String location, String lastKnownProject, String lastConnectionDate, int recordingStatus, String startRecordingDate) {
+        this.sensorId = sensorId;
+
         this.sensorName = sensorName;
         this.macAddress = macAddress;
         this.location = location;
@@ -24,6 +27,14 @@ public class Meter {
         this.startRecordingDate = startRecordingDate;
     }
 
+    public int getSensorId(){
+        return sensorId;
+    }
+  
+    public void setSensorId(int sensorId) {
+        this.sensorId = sensorId;
+    }
+  
     public String getSensorName() {
         return sensorName;
     }
@@ -64,11 +75,11 @@ public class Meter {
         this.lastConnectionDate = lastConnectionDate;
     }
 
-    public Boolean getRecordingStatus() {
+    public int getRecordingStatus() {
         return recordingStatus;
     }
 
-    public void setRecordingStatus(Boolean recordingStatus) {
+    public void setRecordingStatus(int recordingStatus) {
         this.recordingStatus = recordingStatus;
     }
 
