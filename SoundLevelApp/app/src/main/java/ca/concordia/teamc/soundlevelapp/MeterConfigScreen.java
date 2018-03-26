@@ -22,6 +22,8 @@ import android.widget.Toast;
 import android.content.Intent;
 import android.content.DialogInterface;
 
+import java.sql.Time;
+
 import static android.support.v4.os.LocaleListCompat.create;
 
 
@@ -32,14 +34,22 @@ public class MeterConfigScreen extends AppCompatActivity{
     protected ProgressBar Storage = null;
     protected Button saveButton = null;
     protected Button downloadButton = null;
+    protected static Button btn;
+
     Profile profile = new Profile();
+    Meter meter = null;
+    DataFile dataFile= null;
+    DataSet dataSet = null;
+
     BroadcastReceiver mReceiver;
     BluetoothService BTService;
     boolean bound=false;
-    boolean startData = false; // we got a message with config started
 
+    boolean isDownloadRequestSend = false;
+    boolean isDownloadRequestOK = false;
+    boolean isUploadRequestSend = false;
+    boolean isUploadRequestOk = false;
 
- public static Button btn;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -89,7 +99,17 @@ public class MeterConfigScreen extends AppCompatActivity{
         downloadButton.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
                 Log.d("SEND", "download");
-                BTService.write("download");
+                if(isDownloadRequestSend && isDownloadRequestOK){
+                    // expect config file, do nothing
+                    Log.d("MeterConfig", "Still waiting for config and data file");
+                }else if (isDownloadRequestSend && !isDownloadRequestOK){
+                    // expect ok, wait for ok
+                    Log.d("MeterConfig", "Still waiting for OK");
+                }else{
+                 // send download message
+                    BTService.write("{{{");
+                    isDownloadRequestSend = true;
+                }
             }
         });
 
@@ -101,46 +121,59 @@ public class MeterConfigScreen extends AppCompatActivity{
             public void onReceive(Context context, Intent intent) {
                 String msg = intent.getStringExtra("message");
                 Log.d("Receiver", "got message: "+ msg);
-                if (msg.lastIndexOf((char) 0x1A) != -1){
-                    Log.d("DETECTED", "detected EOF");
-                }
 
-                if (msg.lastIndexOf((char) 0x0A) != -1 || msg.lastIndexOf((char) 0x0D) != -1){
-                    Log.d("DETECTED", "detected NL");
-                    msg = msg.replace((char) 0x0A, '\n');
-                    msg = msg.replace((char) 0x0D, '\n');
-                }
+                if(isDownloadRequestSend && isDownloadRequestOK){
+                    // expect config file
+                    if (msg.contains("<<<")){
+                        isDownloadRequestOK = false;
+                        isDownloadRequestSend = false;
 
-                if(msg.contains("<<<")){
-                    Log.d("DETECTED", "Start of Data");
-                    startData = true;
-                }
+                        msg = msg.replace((char) 0x0A, '\n');
+                        msg = msg.replace((char) 0x0D, '\n');
 
-                if (msg.contains(">>>")){
-                    Log.d("DETECTED", "End of Data");
-                    startData = false;
+                        try{
+                            String[] file = msg.split("<<<");
+                            String[] config = file[0].split("\n");
+                            String data = file[1].replace(">>>","");
+
+                            for(String str : config){
+                                Log.d("CONFIG", str);
+                            }
+
+                            Log.d("DATA", data);
+
+                            ProjectText.setText(config[0]);
+                            LocationText.setText(config[1]);
+                            Storage.setProgress(Integer.parseInt(config[2]));
+                            DataText.setTextSize(20);
+                            DataText.setText(data);
+
+
+                        }catch (ArrayIndexOutOfBoundsException exception){
+                            Log.w("MeterConfig", "Ill formatted file!");
+                        }
+                    }
+                }else if(isDownloadRequestSend && !isDownloadRequestOK){
+                    // expect ok
+                    if (msg.equalsIgnoreCase("ok")){
+                        isDownloadRequestOK = true;
+                        Log.d("MeterConfig", "Received OK");
+                    }
                 }
 
                 try{
-                    String[] file = msg.split("<<<");
-                    String[] config = file[0].split("\n");
-                    String data = file[1].replace(">>>","");
+                    int value = Integer.parseInt(msg);
 
-                    for(String str : config){
-                        Log.d("CONFIG", str);
+                    if (value >= 0 && value <= 255){
+                        int dB = value / 4 + 39;
+                        Log.d("DEBUG", ": 8bit int: "+ Integer.toString(value));
+                        DataText.setText(Integer.toString(dB));
+                    }else{
+                        Log.w("WARN", "int not 8bit");
                     }
 
-                    Log.d("DATA", data);
-
-                    ProjectText.setText(config[0]);
-                    LocationText.setText(config[1]);
-                    Storage.setProgress(Integer.parseInt(config[2]));
-                    DataText.setTextSize(20);
-                    DataText.setText(data);
-
-
-                }catch (ArrayIndexOutOfBoundsException exception){
-                    Log.d("DEBUG", "Ill formated message");
+                }catch (NumberFormatException e){
+                    Log.w("DEBUG", "Ill formated int");
                 }
             }
         };

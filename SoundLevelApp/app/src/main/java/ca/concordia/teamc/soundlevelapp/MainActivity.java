@@ -20,13 +20,13 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         setContentView(R.layout.activity_main);
 
         // DataFile test
-//        DataSet ds = new DataSet();
-//        ds.setProjectName("TestProject");
-//        float[] f = new float[] { 1.2f, 9.7f, 3.4f };
-//        DataFile df = new DataFile(getApplicationContext(),ds,f);
-//
-//        Log.d("MainActivity", df.readFile());
-//        df.deleteFile();
+        DataSet ds = new DataSet();
+        ds.setProjectName("TestProject");
+        float[] f = new float[] { 1.2f, 9.7f, 3.4f };
+        DataFile df = new DataFile(getApplicationContext(),ds,f);
+
+        Log.d("MainActivity", df.readFile());
+        df.deleteFile();
 
         sharedPreferenceHelper = new SharedPreferenceHelper(MainActivity.this);
 
