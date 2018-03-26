@@ -23,12 +23,18 @@
 
 #define SPP_TAG "SoundMeterFirmware"
 #define SPP_SERVER_NAME "SMF_SPP_SERVER"
-#define EXAMPLE_DEVICE_NAME "SoundMeter"
+#define DEVICE_NAME "SoundMeter"
 
 #define STORAGE_NAMESPACE "BLOB_SPACE"
+#define CONFIG_NAMESPACE "config_space"
 #define BLOB_PREFIX "set-"
 #define NUMBER_OF_BLOBS "blob-tracker"
 #define BLOB_SIZE 1024
+#define PROJECT_NAME "project"
+#define LOCATION "location"
+
+=======
+>>>>>>> Stashed changes
 #define AUDIO_SAMPLE_MEM 4096
 #define AUDIO_PROCESS_MEM 4096
 #define DATA_RECORDER_MEM 4096
@@ -63,6 +69,7 @@ static const esp_spp_mode_t esp_spp_mode = ESP_SPP_MODE_CB;
 static atomic_bool connection_ready = ATOMIC_VAR_INIT(false);
 static atomic_bool connection_open = ATOMIC_VAR_INIT(false);
 static atomic_bool recording = ATOMIC_VAR_INIT(false);
+static atomic_bool uploading = ATOMIC_VAR_INIT(false);
 static atomic_uint data_to_write = ATOMIC_VAR_INIT(0);
 
 static TaskHandle_t sample_audio_handle = NULL;
@@ -75,6 +82,9 @@ static esp_adc_cal_characteristics_t *adc_chars;
 void sample_audio(void*);
 void process_audio(void*);
 void record_data(void*);
+void send_data(void*);
+void send_config(void*);
+void record_config(void*);
 static void esp_spp_cb(esp_spp_cb_event_t, esp_spp_cb_param_t*);
 bool initialize_bluetooth(void);
 static void check_efuse();
@@ -117,7 +127,7 @@ static void esp_spp_cb(esp_spp_cb_event_t event, esp_spp_cb_param_t *param){
         // SPP Profile initialization event
         case ESP_SPP_INIT_EVT:
             ESP_LOGI(SPP_TAG, "ESP_SPP_INIT_EVT");
-            esp_bt_dev_set_device_name(EXAMPLE_DEVICE_NAME);
+            esp_bt_dev_set_device_name(DEVICE_NAME);
             esp_bt_gap_set_scan_mode(ESP_BT_SCAN_MODE_CONNECTABLE_DISCOVERABLE);
             esp_spp_start_srv(sec_mask,role_slave, 0, SPP_SERVER_NAME);
             break;
@@ -363,6 +373,66 @@ void record_data(void* write_buffer){
                 atomic_store(&data_to_write, 0);
             nvs_close(my_handle);
         }
+    }
+}
+
+void record_config(void*){
+
+}
+void send_config(void*){
+
+}
+
+void send_data(void *){
+    while(true){
+        vTaskSuspend(NULL);
+        char open_data[]= "<<<"
+        esp_spp_write(bt_handle,sizeof(open_data),open_data);
+        nvs_handle my_handle;
+        esp_err_t err;
+        // Open
+        err = nvs_open(STORAGE_NAMESPACE, NVS_READWRITE, &my_handle);
+        if (err != ESP_OK)
+            ESP_LOGE(SPP_TAG, "%s nvs open failed err=%s\n", __func__, esp_err_to_name(err));
+
+        uint16_t blobs_in_tow = 0;
+        err = nvs_get_u16(my_handle, NUMBER_OF_BLOBS, &blobs_in_tow);
+        if (err != ESP_OK){
+            ESP_LOGE(SPP_TAG, "%s couldn't get blob tracker err=%s\n", __func__, esp_err_to_name(err));
+        } else {
+            char blob_prefix[] = BLOB_PREFIX;
+            char* blob_key = malloc(15*sizeof(char));
+            for (int i = 1; i < blobs_in_tow;i++){
+                sprintf(blob_key,"%s%i",blob_prefix,i);
+                printf("Blob key is: %s\n", blob_key);
+                uint16_t blob_size = 0;
+                uint8_t* blob_holder = NULL;
+                err = nvs_get_blob(my_handle, blob_key, blob_holder, &blob_size);
+                if (err != ESP_OK){
+                    ESP_LOGE(SPP_TAG, "%s couldn't get %s err=%s\n", __func__, blob_key, esp_err_to_name(err));
+                    break;
+                }
+
+                blob_holder = malloc(blob_size);
+
+                err = nvs_get_blob(my_handle, blob_key, blob_holder, &blob_size);
+                if (err != ESP_OK){
+                    ESP_LOGE(SPP_TAG, "%s couldn't get %s err=%s\n", __func__, blob_key, esp_err_to_name(err));
+                    free(blob_holder);
+                    break;
+                }
+
+                free(blob_holder);
+                nvs_erase_all(my)
+            }
+            free(blob_key);
+        }
+        char close_data[]= ">>>\026";
+        esp_spp_write(bt_handle,sizeof(close_data),close_data);
+        atomic_store(&uploading,false);
+        if (err == ESP_OK)
+            atomic_store(&data_to_write, 0);
+        nvs_close(my_handle);
     }
 }
 
