@@ -19,7 +19,7 @@ public class myDataSets_Detailed extends AppCompatActivity{
     @Override
     public boolean onCreateOptionsMenu (Menu menu){
         MenuInflater inflater = getMenuInflater();
-        inflater.inflate(R.menu.actionbutton_metersinfo, menu);
+        inflater.inflate(R.menu.actionbutton_datasets, menu);
         return super.onCreateOptionsMenu(menu);
     }
 

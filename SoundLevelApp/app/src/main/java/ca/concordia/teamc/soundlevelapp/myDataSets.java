@@ -30,10 +30,10 @@ public class myDataSets extends AppCompatActivity {
         ArrayAdapter<String> adapter = new ArrayAdapter<String>(this,android.R.layout.simple_list_item_1,Mylist);
         listView.setAdapter(adapter);*/
 
-        List<Data> Mylist = new ArrayList<>();
-        Data dataA = new Data("Project A","Location","Date Started","Date Downloaded" );
-        Data dataB = new Data("Project B","Location","Date Started","Date Downloaded");
-        Data dataC = new Data("Project C","Location","Date Started","Date Downloaded");
+        List<DataSet> Mylist = new ArrayList<>();
+        DataSet dataA = new DataSet("Project A","Location",00-00-00,00-00-00,"","");
+        DataSet dataB = new DataSet("Project B","Location",00-00-00,00-00-00,"","");
+        DataSet dataC = new DataSet("Project C","Location",00-00-00,00-00-00,"","");
 
         Mylist.add(dataA);
         Mylist.add(dataB);

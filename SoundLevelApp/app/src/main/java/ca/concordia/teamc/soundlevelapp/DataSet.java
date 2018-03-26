@@ -15,21 +15,16 @@ public class DataSet {
     String datafile;
 
 
-    public DataSet(int datSetId, String projectName, String location, int dateOfDownload, int dateStartRecord, String meterReferenceRecord, String datafile) {
-        this.datSetId = datSetId;
+    public DataSet(String projectName, String location, int dateOfDownload, int dateStartRecord, String meterReferenceRecord, String datafile) {
+      
         this.projectName = projectName;
         this.location = location;
         this.dateOfDownload = dateOfDownload;
         this.dateStartRecord = dateStartRecord;
         this.meterReferenceRecord = meterReferenceRecord;
         this.datafile = datafile;
+
     }
-
-
-    public DataSet() {
-    }
-
-    ;
 
     public int getDatSetId() {
         return datSetId;
