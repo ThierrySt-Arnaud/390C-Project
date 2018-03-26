@@ -15,11 +15,9 @@ public class Meter {
     int recordingStatus;
     String startRecordingDate;
 
-    public Meter(){
-    };
-
     public Meter(int sensorId, String sensorName, String macAddress, String location, String lastKnownProject, String lastConnectionDate, int recordingStatus, String startRecordingDate) {
         this.sensorId = sensorId;
+
         this.sensorName = sensorName;
         this.macAddress = macAddress;
         this.location = location;
@@ -32,9 +30,11 @@ public class Meter {
     public int getSensorId(){
         return sensorId;
     }
+  
     public void setSensorId(int sensorId) {
         this.sensorId = sensorId;
     }
+  
     public String getSensorName() {
         return sensorName;
     }

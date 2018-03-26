@@ -10,6 +10,7 @@ import android.widget.ListView;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
+import java.lang.String;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -24,9 +25,9 @@ public class metersinfo extends AppCompatActivity {
 
 
         List<Meter> Mylist = new ArrayList<>();
-        Meter meterA = new Meter("Meter A","First meter");
-        Meter meterB = new Meter("Meter B","Second meter");
-        Meter meterC = new Meter("Meter C","Third meter");
+        Meter meterA = new Meter("Meter A","","Location","Project A","",false,"");
+        Meter meterB = new Meter("Meter B", "", "Location","Project B","",false,"");
+        Meter meterC = new Meter("Meter C","","Location","Project C","",true,"");
 
         Mylist.add(meterA);
         Mylist.add(meterB);
