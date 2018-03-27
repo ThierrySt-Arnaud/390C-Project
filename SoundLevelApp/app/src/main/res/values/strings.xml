@@ -1,12 +1,13 @@
 <resources>
     <string name="app_name">SoundLevelApp</string>
     <string name="save_button_text">Save</string>
+    <string name="download_button_text">Download</string>
     <string name="_text">Project Name</string>
     <string name="name_text">Name</string>
     <string name="dbA_text">dbA</string>
     <string name="location_text">Location</string>
     <string name="phone_location_text">Phone Location</string>
-    <string name="textview_text">TextView</string>
+    <string name="textview_text">Meter Data</string>
     <string name="storage_space_text">Storage Space:</string>
     <string name="meters_info_button">Meters Info</string>
     <string name="datasets_button">Datasets</string>

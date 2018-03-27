@@ -17,7 +17,7 @@ import android.widget.Toast;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
-
+import android.os.Parcelable;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -30,6 +30,7 @@ public class ListDevicesActivity extends AppCompatActivity {
     private Set<BluetoothDevice> pairedDevices;
     private ArrayAdapter<String> BTArrayAdapter;
     Thread listen;
+    BroadcastReceiver btReceiver;
 
     private BluetoothSocket BTSocket = null; // bi-directional client-to-client data path
 
@@ -73,6 +74,32 @@ public class ListDevicesActivity extends AppCompatActivity {
         receivedLegend = findViewById(R.id.device_legend);
         receivedChars = findViewById(R.id.received_chars);
 
+        btReceiver = new BroadcastReceiver() {
+            public void onReceive(Context context, Intent intent) {
+                String action = intent.getAction();
+                // new device found
+                if (BluetoothDevice.ACTION_FOUND.equals(action)) {
+                    // Get the BluetoothDevice
+                    BluetoothDevice device = intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE);
+                    // show name & address
+                    BTArrayAdapter.add(device.getName() + "\n" + device.getAddress());
+                    //update array adapter with new data
+                    BTArrayAdapter.notifyDataSetChanged();
+                }else if (BluetoothDevice.ACTION_ACL_CONNECTED.equals(action)){
+                    // device connected, go to meter config screen
+                    Log.d("BT SERVICE", "Device connected, show config");
+                    Intent meterConfigScreenIntent = new Intent(ListDevicesActivity.this, MeterConfigScreen.class);
+                    //meterConfigScreenIntent.putExtra("projectName", "MyProjectName");
+                    //meterConfigScreenIntent.putExtra("meterLocation", "Room123");
+                    startActivity(meterConfigScreenIntent);
+                }
+            }
+        };
+
+        IntentFilter filter = new IntentFilter();
+        filter.addAction(BluetoothDevice.ACTION_FOUND);
+        filter.addAction(BluetoothDevice.ACTION_ACL_CONNECTED);
+        registerReceiver(btReceiver, filter);
     }
 
     @Override
@@ -92,7 +119,6 @@ public class ListDevicesActivity extends AppCompatActivity {
         BTArrayAdapter.clear();
         //get paired devices
         pairedDevices = bluetooth.getBondedDevices();
-        BTArrayAdapter.add("ExampleDevice\n00:00:00:00:00:00");
         for (BluetoothDevice device : pairedDevices){
             // show name & address
             BTArrayAdapter.add(device.getName() + "\n" + device.getAddress() );
@@ -110,158 +136,23 @@ public class ListDevicesActivity extends AppCompatActivity {
         Toast.makeText(getApplicationContext(), "Searching for Devices", Toast.LENGTH_SHORT).show();
     }
 
-    private void updateReceivedChars(String received){
-        receivedChars.setText(received);
-    }
-
-    final BroadcastReceiver btReceiver = new BroadcastReceiver() {
-        public void onReceive(Context context, Intent intent) {
-            String action = intent.getAction();
-            // new device found
-            if (BluetoothDevice.ACTION_FOUND.equals(action)) {
-                // Get the BluetoothDevice
-                BluetoothDevice device = intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE);
-                // show name & address
-                BTArrayAdapter.add(device.getName() + "\n" + device.getAddress());
-                //update array adapter with new data
-                BTArrayAdapter.notifyDataSetChanged();
-            }
-        }
-    };
 
     private AdapterView.OnItemClickListener devicesClickListener = new AdapterView.OnItemClickListener() {
         public void onItemClick(AdapterView<?> av, View v, int arg2, long arg3) {
-
-            if(!bluetooth.isEnabled()) {
-                Toast.makeText(getBaseContext(), "Bluetooth not on", Toast.LENGTH_SHORT).show();
-                return;
-            }
 
             // Get the device MAC address, which is the last 17 chars in the View
             String info = ((TextView) v).getText().toString();
             final String address = info.substring(info.length() - 17);
 
-            boolean fail = false;
-            try {
-                Log.d(TAG,"Cancelling discovery if open");
-                bluetooth.cancelDiscovery();
-            } catch(Exception e){
-                Log.e(TAG,"Couldn't cancel discovery",e);
-            }
-
-            if (address.equals("00:00:00:00:00:00")){
-
-                Intent intent = new Intent(v.getContext(), MeterConfigScreen.class);
-                startActivity(intent);
-
-            } else {
-                BluetoothDevice device = bluetooth.getRemoteDevice(address);
-
-                try {
-                    Log.d(TAG, "Creating socket");
-                    BTSocket = createBluetoothSocket(device);
-                } catch (IOException e) {
-                    fail = true;
-                    Toast.makeText(getBaseContext(),
-                            "Socket creation failed", Toast.LENGTH_SHORT).show();
-                }
-                // Establish the Bluetooth socket connection.
-                try {
-                    Log.d(TAG, "Connecting");
-                    BTSocket.connect();
-                } catch (IOException e) {
-                    try {
-                        fail = true;
-                        BTSocket.close();
-                        return;
-                    } catch (IOException e2) {
-                        //insert code to deal with this
-                        Toast.makeText(getBaseContext(),
-                                "Socket creation failed", Toast.LENGTH_SHORT).show();
-                    }
-                }
-                if (!fail) {
-                    Log.d(TAG, "Starting listen mode");
-                    deviceName.setText(device.getName());
-                    deviceAddress.setText(device.getAddress());
-                    receivedChars.setText("");
-                    bluetoothDevicesList.setVisibility(View.GONE);
-                    deviceName.setVisibility(View.VISIBLE);
-                    deviceAddress.setVisibility(View.VISIBLE);
-                    receivedLegend.setVisibility(View.VISIBLE);
-                    receivedChars.setVisibility(View.VISIBLE);
-
-                    listen = new Thread(new Runnable() {
-                        @Override
-                        public void run() {
-                            Log.d(TAG, "Started listen thread");
-
-                            final InputStream mmInStream;
-                            InputStream tmpIn = null;
-
-                            // Get the input and output streams, using temp objects because
-                            // member streams are final
-                            try
-
-                            {
-                                tmpIn = BTSocket.getInputStream();
-                            } catch (
-                                    IOException e)
-
-                            {
-                                Log.e(TAG, "Couldn't get input stream", e);
-                            }
-
-                            mmInStream = tmpIn;
-                            byte[] buffer = new byte[1024];  // buffer store for the stream
-                            int bytes; // bytes returned from read()
-                            // Keep listening to the InputStream until an exception occurs
-                            while (true) {
-                                Log.d(TAG, "Starting listen loop");
-                                try {
-                                    // Read from the InputStream
-                                    assert mmInStream != null;
-                                    bytes = mmInStream.read(buffer);
-                                    if (bytes > 0) {
-                                        Log.d(TAG, "Received data:");
-                                        char[] string = new char[bytes];
-                                        for (int i = 0; i < bytes; i++) {
-                                            string[i] = (char) buffer[i];
-                                        }
-                                        final String received = String.valueOf(string);
-                                        Log.d(TAG, received);
-                                        runOnUiThread(new Runnable() {
-                                            @Override
-                                            public void run() {
-                                                updateReceivedChars(received);
-                                            }
-                                        });
-                                    }
-                                } catch (IOException e) {
-                                    Log.d(TAG, "Input stream disconnected.", e);
-                                    break;
-                                }
-                            }
-                        }
-                    });
-                    listen.start();
-                }
-            }
+            Intent intent = new Intent(ListDevicesActivity.this.getBaseContext(), BluetoothService.class);
+            intent.putExtra("address", address);
+            startService(intent);
         }
     };
 
-    private BluetoothSocket createBluetoothSocket(BluetoothDevice device) throws IOException {
-        return  device.createInsecureRfcommSocketToServiceRecord(BTMODULEUUID);
-        //creates insecure outgoing connection with BT device using UUID
-    }
     @Override
     protected void onPause() {
         super.onPause();
-        try{
-            BTSocket.close();
-        } catch (Exception e){
-            Log.e(TAG,"Couldn't close socket.", e);
-        }
     }
 
     @Override
@@ -284,25 +175,17 @@ public class ListDevicesActivity extends AppCompatActivity {
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
 
-
         if (item.getItemId() == R.id.action_datasets) {
-
-
             Intent intent= new Intent(this, myDataSets.class);
             startActivity(intent);
             return true;
-
         }
 
         if (item.getItemId() == R.id.action_knownmeters) {
-
-
             Intent intent= new Intent(this, metersinfo.class);
             startActivity(intent);
             return true;
-
         }
         return super.onOptionsItemSelected(item);
     }
-
 }
