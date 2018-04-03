@@ -41,11 +41,11 @@ public class DataSetController extends SQLiteOpenHelper{
 
     @Override
     public void onUpgrade(SQLiteDatabase sqLiteDatabase, int i, int i1) {
-        sqLiteDatabase.execSQL("DROP IF TABLE EXISTS "+ TABLE_DATASET);
+        sqLiteDatabase.execSQL("DROP TABLE IF EXISTS "+ TABLE_DATASET);
         onCreate(sqLiteDatabase);
     }
 
-    public void addMeterData(DataSet dataSet){
+    public void addDataSet(DataSet dataSet){
         SQLiteDatabase sqLiteDatabase = this.getWritableDatabase();
 
         ContentValues contentValues = new ContentValues();
