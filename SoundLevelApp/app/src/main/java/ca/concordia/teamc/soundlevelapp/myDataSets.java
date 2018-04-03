@@ -2,6 +2,9 @@ package ca.concordia.teamc.soundlevelapp;
 
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.util.Log;
+import android.view.View;
+import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
 import android.view.Menu;
@@ -12,21 +15,46 @@ import android.content.Intent;
 import java.util.ArrayList;
 import java.util.List;
 
+import static android.content.ContentValues.TAG;
+
 public class myDataSets extends AppCompatActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_mydatasets);
-        List<String> Mylist = new ArrayList<>();
+       /* List<String> Mylist = new ArrayList<>();
         Mylist.add("For Sprint 2");
 
         ListView listView = (ListView) findViewById(R.id.listview);
         ArrayAdapter<String> adapter = new ArrayAdapter<String>(this,android.R.layout.simple_list_item_1,Mylist);
-        listView.setAdapter(adapter);
+        listView.setAdapter(adapter);*/
 
+        List<DataSet> Mylist = new ArrayList<>();
+        DataSet dataA = new DataSet("Project A","Location",00-00-00,00-00-00,"","");
+        DataSet dataB = new DataSet("Project B","Location",00-00-00,00-00-00,"","");
+        DataSet dataC = new DataSet("Project C","Location",00-00-00,00-00-00,"","");
 
+        Mylist.add(dataA);
+        Mylist.add(dataB);
+        Mylist.add(dataC);
+
+        DataListAdapter dataListAdapter = new DataListAdapter(this, Mylist);
+        ListView listView = (ListView) findViewById(R.id.listview);
+
+        listView.setAdapter(dataListAdapter);
+        listView.setOnItemClickListener(dataListListener);
     }
+
+    AdapterView.OnItemClickListener dataListListener = new AdapterView.OnItemClickListener() {
+
+        @Override
+        public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
+            Log.d(TAG, "Item " + i + "  got clicked");
+            Intent myIntent = new Intent(adapterView.getContext(), myDataSets_Detailed.class);
+            startActivity(myIntent);
+        }
+    };
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
