@@ -3,9 +3,7 @@
   <component name="ProjectModuleManager">
     <modules>
       <module fileurl="file://$PROJECT_DIR$/SoundLevelApp.iml" filepath="$PROJECT_DIR$/SoundLevelApp.iml" />
-      <module fileurl="file://C:\Users\Thilak\Documents\GitHub\390C-Project\SoundLevelApp\SoundLevelApp.iml" filepath="C:\Users\Thilak\Documents\GitHub\390C-Project\SoundLevelApp\SoundLevelApp.iml" />
       <module fileurl="file://$PROJECT_DIR$/app/app.iml" filepath="$PROJECT_DIR$/app/app.iml" />
-      <module fileurl="file://C:\Users\Thilak\Documents\GitHub\390C-Project\SoundLevelApp\app\app.iml" filepath="C:\Users\Thilak\Documents\GitHub\390C-Project\SoundLevelApp\app\app.iml" />
     </modules>
   </component>
 </project>
