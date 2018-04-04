@@ -151,10 +151,6 @@ void app_main() {
 
     gpio_set_level(GPIO_NUM_5, 0);
 
-    /*if(get_recording_status > 0){
-        atomic_store(&recording,true);
-    }*/
-
     BaseType_t sample_audio_type;
     sample_audio_type = xTaskCreate(sample_audio, "AudioSampler",
                                      AUDIO_SAMPLE_MEM, (void*) NULL,
@@ -750,25 +746,3 @@ void reset_requested(esp_err_t* err){
     }
     gpio_set_level(GPIO_NUM_5, 0);
 }
-
-/*esp_err_t save_recording_status(){
-    nvs_handle my_handle;
-    esp_err_t err = ESP_OK;
-    err = nvs_open(CONFIG_NAMESPACE,NVS_READWRITE,&my_handle);
-    if (err != ESP_OK){
-        ESP_LOGE(SPP_TAG,"Error opening NVS err=%s", esp_err_to_name(err));
-        return err;
-    }
-    err = nvs_set_u8(my_handle, RECORDING_STATUS, atomic_load(&recording));
-    if (err != ESP_OK){
-        ESP_LOGE(SPP_TAG,"Error saving recording status err=%s", esp_err_to_name(err));
-        return err;
-    }
-
-}
-
-uint8_t get_recording_status(){
-    nvs_handle my_handle;
-    esp_err_t err = ESP_OK;
-    err = nvs_open(CONFIG_NAMESPACE,NVS_READONLY,&my_handle);
-}*/
