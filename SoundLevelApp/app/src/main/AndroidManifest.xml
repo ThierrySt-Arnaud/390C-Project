@@ -13,73 +13,82 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/Theme.AppCompat">
-
-        <service android:name=".BluetoothService"/>
+        <service android:name=".BluetoothService" />
 
         <activity android:name=".MainActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
-
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
         <activity
-            android:name="ca.concordia.teamc.soundlevelapp.MeterConfigScreen"
+            android:name=".MeterConfigScreen"
             android:label="Meter Configuration"
-            android:parentActivityName=".ListDevicesActivity" >
+            android:parentActivityName=".ListDevicesActivity">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value=".ListDevicesActivity" />
-            <intent-filter>
-                <action android:name="android.bluetooth.device.action.ACL_CONNECTED" />
-                <action android:name="android.bluetooth.device.action.ACL_DISCONNECT_REQUESTED" />
-                <action android:name="android.bluetooth.device.action.ACL_DISCONNECTED" />
-            </intent-filter>
-        </activity>
-        <activity android:name=".ListDevicesActivity"
-            android:screenOrientation="portrait"
-            android:configChanges="keyboardHidden|orientation|screenSize"
-            android:parentActivityName=".MainActivity"
-            android:label="Meters In Range">
-            <meta-data
-                android:name="android.support.PARENT_ACTIVITY"
-                android:value=".MainActivity" />
-            <intent-filter>
-                <action android:name="android.bluetooth.device.action.ACL_CONNECTED" />
-                <action android:name="android.bluetooth.device.action.ACL_DISCONNECT_REQUESTED" />
-                <action android:name="android.bluetooth.device.action.ACL_DISCONNECTED" />
-            </intent-filter>
-        </activity>
-        <activity android:name=".myDataSets"
-            android:parentActivityName=".MainActivity"
-            android:label="DataSets">
-            <meta-data
-                android:name="android.support.PARENT_ACTIVITY"
-                android:value=".MainActivity" />
-        </activity>
-        <activity android:name=".metersinfo"
-            android:parentActivityName=".MainActivity"
-            android:label="Known Meters">
-            <meta-data
-                android:name="android.support.PARENT_ACTIVITY"
-                android:value=".MainActivity" />
-        </activity>
-        <activity android:name=".metersinfopts"
-            android:parentActivityName=".metersinfo"
-            >
 
+            <intent-filter>
+                <action android:name="android.bluetooth.device.action.ACL_CONNECTED" />
+                <action android:name="android.bluetooth.device.action.ACL_DISCONNECT_REQUESTED" />
+                <action android:name="android.bluetooth.device.action.ACL_DISCONNECTED" />
+            </intent-filter>
+        </activity>
+        <activity
+            android:name=".ListDevicesActivity"
+            android:configChanges="keyboardHidden|orientation|screenSize"
+            android:label="Meters In Range"
+            android:parentActivityName=".MainActivity"
+            android:screenOrientation="portrait">
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value=".MainActivity" />
+
+            <intent-filter>
+                <action android:name="android.bluetooth.device.action.ACL_CONNECTED" />
+                <action android:name="android.bluetooth.device.action.ACL_DISCONNECT_REQUESTED" />
+                <action android:name="android.bluetooth.device.action.ACL_DISCONNECTED" />
+            </intent-filter>
+        </activity>
+        <activity
+            android:name=".myDataSets"
+            android:label="DataSets"
+            android:parentActivityName=".MainActivity">
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value=".MainActivity" />
+        </activity>
+        <activity
+            android:name=".metersinfo"
+            android:label="Known Meters"
+            android:parentActivityName=".MainActivity">
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value=".MainActivity" />
+        </activity>
+        <activity
+            android:name=".metersinfopts"
+            android:parentActivityName=".metersinfo">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value=".metersinfo" />
         </activity>
-        <activity android:name=".myDataSets_Detailed"
-            android:parentActivityName=".myDataSets"
-            >
-
+        <activity
+            android:name=".myDataSets_Detailed"
+            android:parentActivityName=".myDataSets">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value=".myDataSets" />
+        </activity>
+
+        <activity
+            android:name=".myGraph"
+            android:parentActivityName=".myDataSets_Detailed">
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value=".myDataSets_Detailed" />
         </activity>
     </application>
 
