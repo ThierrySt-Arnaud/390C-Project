@@ -111,24 +111,15 @@ public class ListDevicesActivity extends AppCompatActivity {
         deviceAddress.setVisibility(View.GONE);
         receivedLegend.setVisibility(View.GONE);
         receivedChars.setVisibility(View.GONE);
-
-    }
-
-    public void listPairedDevices(View V) {
-        // clear list
-        BTArrayAdapter.clear();
         //get paired devices
         pairedDevices = bluetooth.getBondedDevices();
         for (BluetoothDevice device : pairedDevices){
             // show name & address
             BTArrayAdapter.add(device.getName() + "\n" + device.getAddress() );
         }
-        Toast.makeText(getApplicationContext(), "Showing Paired Devices", Toast.LENGTH_SHORT).show();
     }
 
     public void listNewDevices(View view) {
-        //clear list
-        BTArrayAdapter.clear();
         // start searching for all devices in range
         bluetooth.startDiscovery();
         //call receiver

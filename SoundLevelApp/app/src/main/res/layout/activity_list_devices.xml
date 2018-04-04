@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<android.support.constraint.ConstraintLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
@@ -18,13 +17,13 @@
         android:onClick="listNewDevices"
         android:text="@string/search_new_device_button"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toTopOf="parent"/>
+        app:layout_constraintTop_toTopOf="parent" />
 
     <ListView
         android:id="@+id/listView"
         android:layout_width="0dp"
         android:layout_height="0dp"
-        android:layout_below="@+id/searchBluetoothButton"
+        android:layout_below="@+id/searchNewDeviceButton"
         android:layout_centerHorizontal="true"
         android:layout_marginTop="8dp"
         android:visibility="visible"
@@ -32,60 +31,14 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.533"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/searchBluetoothButton" />
+        app:layout_constraintTop_toBottomOf="@+id/discovered_list" />
 
-    <Button
-        android:id="@+id/searchBluetoothButton"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignParentTop="true"
-        android:layout_alignStart="@+id/listView"
-        android:layout_marginStart="8dp"
-        android:layout_marginTop="8dp"
-        android:onClick="listPairedDevices"
-        android:text="@string/list_paired_button"
+    <ListView
+        android:id="@+id/discovered_list"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
-
-    <TextView
-        android:id="@+id/device_name"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="8dp"
-        android:layout_marginTop="24dp"
-        android:visibility="gone"
-        android:text="DeviceName"
-        app:layout_constraintStart_toStartOf="@+id/searchBluetoothButton"
-        app:layout_constraintTop_toBottomOf="@+id/searchBluetoothButton" />
-
-    <TextView
-        android:id="@+id/device_legend"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="16dp"
-        android:visibility="gone"
-        android:text="Received:"
-        app:layout_constraintEnd_toEndOf="@+id/device_name"
-        app:layout_constraintTop_toBottomOf="@+id/device_name" />
-
-    <TextView
-        android:id="@+id/received_chars"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:visibility="gone"
-        android:text="TextView"
-        android:textAppearance="@style/TextAppearance.AppCompat.Medium"
-        app:layout_constraintBottom_toBottomOf="@+id/device_legend"
-        app:layout_constraintStart_toStartOf="@+id/device_address" />
-
-    <TextView
-        android:id="@+id/device_address"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="24dp"
-        android:visibility="gone"
-        android:text="DeviceAddress"
-        app:layout_constraintStart_toEndOf="@+id/device_name"
-        app:layout_constraintTop_toTopOf="@+id/device_name" />
+        app:layout_constraintTop_toBottomOf="@+id/searchNewDeviceButton" />
 
 </android.support.constraint.ConstraintLayout>
