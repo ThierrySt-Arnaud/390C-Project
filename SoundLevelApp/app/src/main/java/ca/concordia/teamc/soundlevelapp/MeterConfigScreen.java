@@ -22,6 +22,10 @@ import android.widget.Toast;
 import android.content.Intent;
 import android.content.DialogInterface;
 
+import java.io.UnsupportedEncodingException;
+import java.sql.Time;
+import java.util.Arrays;
+
 import static android.support.v4.os.LocaleListCompat.create;
 
 
@@ -61,9 +65,6 @@ public class MeterConfigScreen extends AppCompatActivity{
 
         saveButton = (Button) findViewById(R.id.saveButton);
         downloadButton = (Button) findViewById(R.id.downloadButton);
-
-        editText(false);
-
 
         final SharedPreferenceHelper sharedPreferenceHelper = new SharedPreferenceHelper(MeterConfigScreen.this);
 
@@ -112,14 +113,17 @@ public class MeterConfigScreen extends AppCompatActivity{
         mReceiver = new BroadcastReceiver() {
             @Override
             public void onReceive(Context context, Intent intent) {
-                String msg = intent.getStringExtra("message");
-                Log.d("Receiver", "got message: "+ msg);
+                byte[] values = intent.getByteArrayExtra("message");
+                String str = Arrays.toString(values);
+                Log.d("Receiver", "got message: "+ str);
 
                 if(isDownloadRequestSend && isDownloadRequestOK){
                     // expect config file
+
                     if (msg.contains("<<<")){
                         isDownloadRequestOK = false;
                         isDownloadRequestSend = false;
+<<<<<<< HEAD
 
                         msg = msg.replace((char) 0x0A, '\n');
                         msg = msg.replace((char) 0x0D, '\n');
@@ -150,6 +154,30 @@ public class MeterConfigScreen extends AppCompatActivity{
                             DataText.setText(data);
 
 
+=======
+
+                        msg = msg.replace((char) 0x0A, '\n');
+                        msg = msg.replace((char) 0x0D, '\n');
+
+                        try{
+                            String[] file = msg.split("<<<");
+                            String[] config = file[0].split("\n");
+                            String data = file[1].replace(">>>","");
+
+                            for(String str : config){
+                                Log.d("CONFIG", str);
+                            }
+
+                            Log.d("DATA", data);
+
+                            ProjectText.setText(config[0]);
+                            LocationText.setText(config[1]);
+                            Storage.setProgress(Integer.parseInt(config[2]));
+                            DataText.setTextSize(20);
+                            DataText.setText(data);
+
+
+>>>>>>> bluetooth-fix
                         }catch (ArrayIndexOutOfBoundsException exception){
                             Log.w("MeterConfig", "Ill formatted file!");
                         }
@@ -158,10 +186,26 @@ public class MeterConfigScreen extends AppCompatActivity{
                     // expect ok
                     if (msg.equalsIgnoreCase("ok")){
                         isDownloadRequestOK = true;
+<<<<<<< HEAD
                         Log.d("MeterConfig", "Received download OK");
+=======
+                        Log.d("MeterConfig", "Received OK");
+                    }
+                }*/
+
+                /*try{
+                    if (value >= 0 && value <= 255){*/
+                        byte value = values[0];
+                        double dB = value / 4.0 + 39;
+                        Log.d("DEBUG", ": 8bit int: "+ Integer.toString(value));
+                        DataText.setText(Double.toString(dB));
+                    /*}else{
+                        Log.w("WARN", "int not 8bit");
+>>>>>>> bluetooth-fix
                     }
                 }
 
+<<<<<<< HEAD
                 if(isUploadRequestSend && isUploadRequestOk){
                     // expect config file
                     if (msg.contains("RCV")){
@@ -199,6 +243,11 @@ public class MeterConfigScreen extends AppCompatActivity{
                 }catch (NumberFormatException e){
                     Log.w("DEBUG", "Ill formated int");
                 }
+=======
+                }catch (NumberFormatException e){
+                    Log.w("DEBUG", "Ill formated int");
+                }*/
+>>>>>>> bluetooth-fix
             }
         };
 
