@@ -451,7 +451,7 @@ void process_audio(void* buffer){
         double voltage_rms_value = adc_rms_value*3.3/4096*1.5;
         printf("Compensated voltage RMS value: %f\n",voltage_rms_value);
         double log_value = 20*log10(voltage_rms_value/MIC_VPA);
-        printf("DB value: %f\n", log_value+54);
+        printf("DB value: %f\n", log_value+8);
         uint8_t processed_value = (int8_t) round(((log_value+12.26779888)/66.22235685*256)-128);
         printf("Processed: %i\n", processed_value);
         if (atomic_load(&connection_open) && atomic_load(&connection_ready)){

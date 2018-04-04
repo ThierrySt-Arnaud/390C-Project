@@ -19,6 +19,8 @@ import android.widget.Toast;
 import android.content.Intent;
 import android.content.DialogInterface;
 
+import java.util.Arrays;
+
 
 public class MeterConfigScreen extends AppCompatActivity {
     protected EditText ProjectText = null;
@@ -99,7 +101,13 @@ public class MeterConfigScreen extends AppCompatActivity {
         mReceiver = new BroadcastReceiver() {
             @Override
             public void onReceive(Context context, Intent intent) {
-
+                byte[] values = intent.getByteArrayExtra("message");
+                String str = Arrays.toString(values);
+                Log.d("Receiver", "got message: "+ str);
+                byte value = values[0];
+                double dB = ((value+128)*66.22235685/256)-4.26779888;
+                Log.d("DEBUG", ": 8bit int: "+ Integer.toString(value));
+                DataText.setText(Double.toString(dB));
             }
         };
 
@@ -129,7 +137,7 @@ public class MeterConfigScreen extends AppCompatActivity {
     @Override
     public void onResume() {
         super.onResume();
-        BTService.reconnect();
+        //BTService.reconnect();
     }
 
     /**
