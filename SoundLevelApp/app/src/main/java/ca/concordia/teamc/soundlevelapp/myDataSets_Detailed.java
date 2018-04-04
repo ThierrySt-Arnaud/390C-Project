@@ -7,6 +7,8 @@ import android.support.v7.app.AppCompatActivity;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
+import android.view.View;
+import android.widget.Button;
 
 public class myDataSets_Detailed extends AppCompatActivity{
 
@@ -14,6 +16,14 @@ public class myDataSets_Detailed extends AppCompatActivity{
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_mydatasets_detailed);
+
+        Button yourButton = (Button) findViewById(R.id.button_viewgraph);
+
+        yourButton.setOnClickListener(new View.OnClickListener(){
+            public void onClick(View v){
+                startActivity(new Intent(myDataSets_Detailed.this, myGraph.class));
+            }
+        });
     }
 
     @Override
