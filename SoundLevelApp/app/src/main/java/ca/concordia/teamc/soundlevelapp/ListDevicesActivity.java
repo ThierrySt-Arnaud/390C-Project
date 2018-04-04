@@ -89,8 +89,6 @@ public class ListDevicesActivity extends AppCompatActivity {
                     // device connected, go to meter config screen
                     Log.d("BT SERVICE", "Device connected, show config");
                     Intent meterConfigScreenIntent = new Intent(ListDevicesActivity.this, MeterConfigScreen.class);
-                    //meterConfigScreenIntent.putExtra("projectName", "MyProjectName");
-                    //meterConfigScreenIntent.putExtra("meterLocation", "Room123");
                     startActivity(meterConfigScreenIntent);
                 }
             }

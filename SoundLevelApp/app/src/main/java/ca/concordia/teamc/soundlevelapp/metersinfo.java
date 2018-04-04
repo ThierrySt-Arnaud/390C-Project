@@ -3,9 +3,12 @@ package ca.concordia.teamc.soundlevelapp;
 import android.content.Intent;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.util.Log;
 import android.view.View;
 import android.widget.AdapterView;
+import android.widget.EditText;
 import android.widget.ListView;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -18,26 +21,45 @@ import static android.content.ContentValues.TAG;
 
 public class metersinfo extends AppCompatActivity {
 
+    private MeterListAdapter meterListAdapter;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_metersinfo);
+        final EditText meterSearch = (EditText) findViewById(R.id.MeterSearch);
 
 
         List<Meter> Mylist = new ArrayList<>();
-        Meter meterA = new Meter("Meter A","","Location","Project A","",false,"");
-        Meter meterB = new Meter("Meter B", "", "Location","Project B","",false,"");
-        Meter meterC = new Meter("Meter C","","Location","Project C","",true,"");
+        Meter meterA = new Meter(1, "test 1", "test mac address 1", "location 1", "project A", "00-00-00", 1, "00-00-00");
+        Meter meterB = new Meter(2, "test 2", "test mac address 2", "location 2", "project B", "00-00-00", 1, "00-00-00");
+        Meter meterC = new Meter(3, "test 3", "test mac address 3", "location 3", "project C", "00-00-00", 1, "00-00-00");
 
         Mylist.add(meterA);
         Mylist.add(meterB);
         Mylist.add(meterC);
 
-        MeterListAdapter meterListAdapter = new MeterListAdapter(this, Mylist);
+        meterListAdapter = new MeterListAdapter(this, Mylist);
         ListView listView = (ListView) findViewById(R.id.listview);
 
         listView.setAdapter(meterListAdapter);
         listView.setOnItemClickListener(meterListListener);
+
+        meterSearch.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+
+            }
+
+            @Override
+            public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+                (metersinfo.this).meterListAdapter.getFilter().filter(meterSearch.getText().toString());
+            }
+
+            @Override
+            public void afterTextChanged(Editable editable) {
+
+            }
+        });
     }
 
     AdapterView.OnItemClickListener meterListListener = new AdapterView.OnItemClickListener() {
