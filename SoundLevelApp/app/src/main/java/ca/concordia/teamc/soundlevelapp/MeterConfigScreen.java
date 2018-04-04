@@ -38,6 +38,7 @@ public class MeterConfigScreen extends AppCompatActivity{
     Meter meter = null;
     DataFile dataFile= null;
     DataSet dataSet = null;
+    DataFileController dfc = null;
 
     BroadcastReceiver mReceiver;
     BluetoothService BTService;
@@ -134,9 +135,8 @@ public class MeterConfigScreen extends AppCompatActivity{
 
                             Log.d("DATA", data);
 
-                            dataFile = new DataFile(context, config[0], config[1], data.getBytes());
-                            DataFileController dfc = new DataFileController(context);
-                            dfc.addDataFile(dataFile);
+                            dfc = new DataFileController(context, config[0], config[1], data.getBytes());
+                            dfc.addDataFile();
 
                             // DataRef is place holder
                             dataSet = new DataSet(config[0],config[1], System.currentTimeMillis(), System.currentTimeMillis(), "meterRef", dataFile.getFile().getAbsolutePath());

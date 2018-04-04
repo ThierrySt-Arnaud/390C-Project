@@ -10,6 +10,7 @@ import android.util.Log;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
 
@@ -19,6 +20,8 @@ import java.util.ArrayList;
 
 public class DataFileController extends SQLiteOpenHelper {
     private Context context;
+    private DataFile dataFile = null;
+
     private static final String DATABASE_NAME = "SoundLevelApp.db";
     private static final String TABLE_DATAFILE = "DataFileTable";
 
@@ -29,9 +32,11 @@ public class DataFileController extends SQLiteOpenHelper {
 
     private static final String[] COLUMNS = {COL0,COL1,COL2,COL3};
 
-    public DataFileController(Context context){
+    public DataFileController(Context context, String pName, String pLocation, byte[] data){
         super(context, DATABASE_NAME,null,1);
         this.context = context;
+        this.dataFile = new DataFile(context,pName,pLocation,data);
+        writeFile();
     }
 
     @Override
@@ -47,7 +52,7 @@ public class DataFileController extends SQLiteOpenHelper {
         onCreate(sqLiteDatabase);
     }
 
-    public void addDataFile(DataFile dataFile){
+    public void addDataFile(){
         SQLiteDatabase sqLiteDatabase = this.getWritableDatabase();
 
         ContentValues contentValues = new ContentValues();
@@ -102,7 +107,7 @@ public class DataFileController extends SQLiteOpenHelper {
         return dataFile;
     }
 
-    public int updateDataFileRecord(DataFile dataFile){
+    public int updateDataFileRecord(){
         SQLiteDatabase sqLiteDatabase = this.getWritableDatabase();
 
         ContentValues contentValues = new ContentValues();
@@ -115,10 +120,134 @@ public class DataFileController extends SQLiteOpenHelper {
     }
 
 
-    public void deleteDatasetRecord(DataFile dataFile){
+    public void deleteDatasetRecord(){
         SQLiteDatabase sqLiteDatabase = this.getWritableDatabase();
         sqLiteDatabase.delete(TABLE_DATAFILE, COL0 + " =?",
                 new String[] {String.valueOf(dataFile.getId())});
         sqLiteDatabase.close();
+    }
+
+    public void writeFile(){
+        String fileString = dataFile.getProjectName();
+
+        for (int i =0; i<dataFile.getData().length;i++){
+            fileString += Byte.toString(dataFile.getData()[i]);
+            if ( i != dataFile.getData().length-1){
+                fileString += ",";
+            }
+        }
+
+        Log.d("DataFileController", "File= "+ fileString);
+
+        dataFile.setFile(new File(context.getFilesDir(), Long.toString(System.currentTimeMillis())));
+        File file = dataFile.getFile();
+        Log.d("DataFileController", "File Path: " + file.getPath());
+        Log.d("DataFileController", "File Path: " + file.getAbsolutePath());
+        try{
+            file.createNewFile();
+            Log.d("DataFileController", "File created");
+            FileWriter fileWriter = new FileWriter(file, false);
+            fileWriter.write(fileString);
+            fileWriter.flush();
+            fileWriter.close();
+            Log.d("DataFileController", "File written");
+        }catch (IOException e){
+            Log.e("DataFileController", "Can not create/write file " + file.getPath(), e);
+        }
+    }
+
+    public void writeFile(byte[] data){
+        String fileString = dataFile.getProjectName()+",";
+
+        for (int i =0; i<data.length;i++){
+            fileString += Float.toString(data[i]);
+            if ( i != data.length-1){
+                fileString += ",";
+            }
+        }
+
+        Log.d("DataFileController", "File= "+ fileString);
+
+        dataFile.setFile(new File(context.getFilesDir(), Long.toString(System.currentTimeMillis())));
+        File file = dataFile.getFile();
+
+        Log.d("DataFileController", "File Path: " + file.getPath());
+        Log.d("DataFileController", "File Path: " + file.getAbsolutePath());
+        try{
+            file.createNewFile();
+            Log.d("DataFileController", "File created");
+            FileWriter fileWriter = new FileWriter(file, false);
+            fileWriter.write(fileString);
+            fileWriter.flush();
+            fileWriter.close();
+            Log.d("DataFileController", "File written");
+        }catch (IOException e){
+            Log.e("DataFileController", "Can not create/write file " + file.getPath(), e);
+        }
+    }
+
+    public String readFile(){
+        File file = dataFile.getFile();
+        try{
+            char[] cbuf = new char[1024];
+            FileReader fileReader = new FileReader(file);
+            int charRead = fileReader.read(cbuf, 0, 1024);
+            String readFile = new String(cbuf,0,charRead);
+
+            return readFile;
+        }catch (FileNotFoundException e){
+            Log.e("DataFileController", "Can not read file " + file.getPath(), e);
+        }catch (IOException e){
+            Log.e("DataFileController", "Can not create/write file " + file.getPath(), e);
+        }
+
+        return "ERROR";
+    }
+
+    public boolean deleteFile(){
+        File file = dataFile.getFile();
+
+        if(file.delete()){
+            Log.d("DataFileController", "File Deleted");
+            return true;
+        }else{
+            Log.d("DataFileController", "File Not Deleted");
+            return false;
+        }
+    }
+
+    public static String readFile(File f){
+        try{
+            char[] cbuf = new char[1024];
+            FileReader fileReader = new FileReader(f);
+            int charRead = fileReader.read(cbuf, 0, 1024);
+            String readFile = new String(cbuf,0,charRead);
+
+            return readFile;
+        }catch (FileNotFoundException e){
+            Log.e("DataFileController", "Can not read file " + f.getPath(), e);
+        }catch (IOException e){
+            Log.e("DataFileController", "Can not create/write file " + f.getPath(), e);
+        }
+
+        return "ERROR";
+    }
+
+    public static String readFile(String path){
+        try{
+            File f = new File(path);
+            char[] cbuf = new char[1024];
+            FileReader fileReader = new FileReader(f);
+            int charRead = fileReader.read(cbuf, 0, 1024);
+            String readFile = new String(cbuf,0,charRead);
+
+            return readFile;
+        }catch (FileNotFoundException e){
+            Log.e("DataFileController", "Can not read file ");
+        }catch (IOException e){
+            Log.e("DataFileController", "Can not create/write file ");
+        }
+
+        return "ERROR";
     }
 }
