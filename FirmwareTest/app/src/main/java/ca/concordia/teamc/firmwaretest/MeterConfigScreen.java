@@ -27,10 +27,10 @@ public class MeterConfigScreen extends AppCompatActivity {
     protected ProgressBar Storage = null;
     protected Button saveButton = null;
     protected Button downloadButton = null;
+    protected  Button recordButton = null;
     BroadcastReceiver mReceiver;
     BluetoothService BTService;
     boolean bound = false;
-    boolean startData = false; // we got a message with config started
 
 
     public static Button btn;
@@ -47,6 +47,7 @@ public class MeterConfigScreen extends AppCompatActivity {
 
         saveButton = (Button) findViewById(R.id.saveButton);
         downloadButton = (Button) findViewById(R.id.downloadButton);
+        recordButton = (Button) findViewById(R.id.recordButton);
 
 
         saveButton.setOnClickListener(new View.OnClickListener() {
@@ -74,61 +75,38 @@ public class MeterConfigScreen extends AppCompatActivity {
             }
         });
 
+
+        saveButton.setOnClickListener(new View.OnClickListener() {
+            public void onClick(View v) {
+                Log.d("SEND", "}}}");
+                BTService.write("}}}");
+            }
+        });
+
+
+        recordButton.setOnClickListener(new View.OnClickListener() {
+            public void onClick(View v) {
+                Log.d("SEND", "###");
+                BTService.write("###");
+            }
+        });
+
+
         IntentFilter filter = new IntentFilter();
         filter.addAction(BluetoothService.BT_MESSAGE);
+
 
         mReceiver = new BroadcastReceiver() {
             @Override
             public void onReceive(Context context, Intent intent) {
-                String msg = intent.getStringExtra("message");
-                Log.d("Receiver", "got message: " + msg);
-                if (msg.lastIndexOf((char) 0x1A) != -1) {
-                    Log.d("DETECTED", "detected EOF");
-                }
 
-                if (msg.lastIndexOf((char) 0x0A) != -1 || msg.lastIndexOf((char) 0x0D) != -1) {
-                    Log.d("DETECTED", "detected NL");
-                    msg = msg.replace((char) 0x0A, '\n');
-                    msg = msg.replace((char) 0x0D, '\n');
-                }
-
-                if (msg.contains("<<<")) {
-                    Log.d("DETECTED", "Start of Data");
-                    startData = true;
-                }
-
-                if (msg.contains(">>>")) {
-                    Log.d("DETECTED", "End of Data");
-                    startData = false;
-                }
-
-                try {
-                    String[] file = msg.split("<<<");
-                    String[] config = file[0].split("\n");
-                    String data = file[1].replace(">>>", "");
-
-                    for (String str : config) {
-                        Log.d("CONFIG", str);
-                    }
-
-                    Log.d("DATA", data);
-
-                    ProjectText.setText(config[0]);
-                    LocationText.setText(config[1]);
-                    Storage.setProgress(Integer.parseInt(config[2]));
-                    DataText.setTextSize(20);
-                    DataText.setText(data);
-
-
-                } catch (ArrayIndexOutOfBoundsException exception) {
-                    Log.d("DEBUG", "Ill formated message");
-                }
             }
         };
 
         registerReceiver(mReceiver, filter);
     }
 
+    @Override
     public void onStart() {
         super.onStart();
         Intent intent = getIntent();
@@ -140,6 +118,18 @@ public class MeterConfigScreen extends AppCompatActivity {
 
         Intent BTSIntent = new Intent(this, BluetoothService.class);
         bindService(BTSIntent, connection, Context.BIND_AUTO_CREATE);
+    }
+
+    @Override
+    public void onPause() {
+        super.onPause();
+        BTService.disconnect();
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        BTService.reconnect();
     }
 
     /**

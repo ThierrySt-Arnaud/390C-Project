@@ -120,6 +120,21 @@ public class BluetoothService extends Service {
         return super.onStartCommand(intent, flags, startId);
     }
 
+    public void disconnect(){
+        bluetoothIn.removeCallbacksAndMessages(null);
+        stopThread = true;
+        if (mConnectedThread != null) {
+            mConnectedThread.closeStreams();
+        }
+        if (mConnectingThread != null) {
+            mConnectingThread.closeSocket();
+        }
+    }
+
+    protected void reconnect(){
+        stopThread = false;
+        checkBTState();
+    }
 
     @Override
     public void onDestroy() {
