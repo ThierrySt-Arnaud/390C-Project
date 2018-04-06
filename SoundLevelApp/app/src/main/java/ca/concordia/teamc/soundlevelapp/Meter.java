@@ -12,10 +12,11 @@ public class Meter {
     String location;
     String lastKnownProject;
     String lastConnectionDate;
-    int recordingStatus;
+    boolean recordingStatus;
     String startRecordingDate;
 
-    public Meter(int sensorId, String sensorName, String macAddress, String location, String lastKnownProject, String lastConnectionDate, int recordingStatus, String startRecordingDate) {
+    /*
+    public Meter(int sensorId, String sensorName, String macAddress, String location, String lastKnownProject, String lastConnectionDate, boolean recordingStatus, String startRecordingDate) {
         this.sensorId = sensorId;
 
         this.sensorName = sensorName;
@@ -34,7 +35,9 @@ public class Meter {
     public void setSensorId(int sensorId) {
         this.sensorId = sensorId;
     }
-  
+     */
+
+
     public String getSensorName() {
         return sensorName;
     }
@@ -75,11 +78,11 @@ public class Meter {
         this.lastConnectionDate = lastConnectionDate;
     }
 
-    public int getRecordingStatus() {
+    public boolean getRecordingStatus() {
         return recordingStatus;
     }
 
-    public void setRecordingStatus(int recordingStatus) {
+    public void setRecordingStatus(boolean recordingStatus) {
         this.recordingStatus = recordingStatus;
     }
 
