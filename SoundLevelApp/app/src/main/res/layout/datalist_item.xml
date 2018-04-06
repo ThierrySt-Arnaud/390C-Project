@@ -12,6 +12,7 @@
         android:layout_width="88dp"
         android:layout_height="36dp"
         android:layout_marginStart="8dp"
+        android:textAppearance="@style/TextAppearance.AppCompat.Large"
         app:layout_constraintStart_toStartOf="parent" />
 
     <TextView
@@ -19,6 +20,7 @@
         android:layout_width="97dp"
         android:layout_height="36dp"
         android:layout_marginStart="8dp"
+        android:textAppearance="@style/TextAppearance.AppCompat.Large"
         app:layout_constraintStart_toEndOf="@+id/text_view_project_name"
         tools:layout_editor_absoluteY="0dp" />
 
@@ -27,6 +29,7 @@
         android:layout_width="78dp"
         android:layout_height="36dp"
         android:layout_marginStart="8dp"
+        android:textAppearance="@style/TextAppearance.AppCompat.Large"
         app:layout_constraintStart_toEndOf="@+id/text_view_item_location"
         tools:layout_editor_absoluteY="0dp" />
 
@@ -36,6 +39,7 @@
         android:layout_height="36dp"
         android:layout_marginEnd="8dp"
         android:layout_marginStart="8dp"
+        android:textAppearance="@style/TextAppearance.AppCompat.Large"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toEndOf="@+id/text_view_item_datestarted"
         tools:layout_editor_absoluteY="0dp" />

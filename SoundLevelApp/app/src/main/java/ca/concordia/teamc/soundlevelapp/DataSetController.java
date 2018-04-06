@@ -72,7 +72,7 @@ public class DataSetController extends SQLiteOpenHelper{
         if (cursor.moveToFirst()){
             do{
                 DataSet dataSet = new DataSet();
-                dataSet.setDatSetId(Integer.parseInt(cursor.getString(0)));
+                dataSet.setDataSetID(Integer.parseInt(cursor.getString(0)));
                 dataSet.setProjectName(cursor.getString(1));
                 dataSet.setLocation(cursor.getString(2));
                 dataSet.setDateOfDownload(Integer.parseInt(cursor.getString(3)));
@@ -98,7 +98,7 @@ public class DataSetController extends SQLiteOpenHelper{
             cursor.moveToFirst();
 
         DataSet dataSet = new DataSet();
-        dataSet.setDatSetId(Integer.parseInt(cursor.getString(0)));
+        dataSet.setDataSetID(Integer.parseInt(cursor.getString(0)));
         dataSet.setProjectName(cursor.getString(1));
         dataSet.setLocation(cursor.getString(2));
         dataSet.setDateOfDownload(Integer.parseInt(cursor.getString(3)));
@@ -121,14 +121,14 @@ public class DataSetController extends SQLiteOpenHelper{
         contentValues.put(COL6, dataSet.getDatafile());
 
         return sqLiteDatabase.update(TABLE_DATASET, contentValues, COL0 + " = ?",
-                new String[] { String.valueOf(dataSet.getDatSetId()) });
+                new String[] { String.valueOf(dataSet.getDataSetID()) });
     }
 
 
     public void deleteDatasetRecord(DataSet dataSet){
         SQLiteDatabase sqLiteDatabase = this.getWritableDatabase();
         sqLiteDatabase.delete(TABLE_DATASET, COL0 + " =?",
-                new String[] {String.valueOf(dataSet.getDatSetId())});
+                new String[] {String.valueOf(dataSet.getDataSetID())});
         sqLiteDatabase.close();
     }
 

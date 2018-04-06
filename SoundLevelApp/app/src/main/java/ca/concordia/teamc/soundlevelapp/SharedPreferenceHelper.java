@@ -16,8 +16,11 @@ public class SharedPreferenceHelper {
         SharedPreferences.Editor editor = sharedPreferences.edit();
         editor.putString("profileProject",profile.getProject() );
         editor.putString("profileLocation",profile.getLocation() );
+        editor.putString("lastdate",profile.getLastDate() );
         editor.commit();
     }
+
+
 
     public String getProfileProject()
     {
@@ -27,6 +30,9 @@ public class SharedPreferenceHelper {
     {
         return sharedPreferences.getString("profileLocation", null);
     }
-
+    public String getLastDate()
+    {
+        return sharedPreferences.getString("profilelastdate",null);
+    }
 }
 

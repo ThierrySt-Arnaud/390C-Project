@@ -28,6 +28,7 @@ import static android.support.v4.os.LocaleListCompat.create;
 public class MeterConfigScreen extends AppCompatActivity{
     protected EditText ProjectText =null;
     protected EditText LocationText =null;
+    protected EditText LastDateText =null;
     protected TextView DataText = null;
     protected ProgressBar Storage = null;
     protected Button saveButton = null;
@@ -47,6 +48,7 @@ public class MeterConfigScreen extends AppCompatActivity{
 
         ProjectText = (EditText) findViewById(R.id.ProjectEditText);
         LocationText = (EditText) findViewById(R.id.LocationEditText);
+        LastDateText = (EditText) findViewById(R.id.LastDateEditText);
         DataText = (TextView) findViewById(R.id.textView2);
         Storage = (ProgressBar) findViewById(R.id.progressBar);
 
@@ -66,17 +68,18 @@ public class MeterConfigScreen extends AppCompatActivity{
             public void onClick(View v) {
 
                 if ((LocationText.getText().toString().matches(""))
-                        || (ProjectText.getText().toString().matches(""))) {
+                        || (ProjectText.getText().toString().matches("")) || (LastDateText.getText().toString().matches(""))) {
                     Toast msg = Toast.makeText(getApplicationContext(), "Invalid Input!", Toast.LENGTH_LONG);
                     msg.show();
                 } else {
                     profile.setProject(ProjectText.getText().toString());
                     profile.setLocation(LocationText.getText().toString());
+                    profile.setLastDate(LastDateText.getText().toString());
 
                     sharedPreferenceHelper.saveProfileName(profile);
 
-                    Log.d("SEND", ProjectText.getText().toString() + "\n" + LocationText.getText().toString());
-                    BTService.write(ProjectText.getText().toString() + "\n" + LocationText.getText().toString());
+                    Log.d("SEND", ProjectText.getText().toString() + "\n" + LocationText.getText().toString() + "/n" + LastDateText.getText().toString());
+                    BTService.write(ProjectText.getText().toString() + "\n" + LocationText.getText().toString() + "/n" + LastDateText.getText().toString() );
                     //BTService.write("location: "+ LocationText.getText().toString());
 
                     editText(false);
@@ -153,9 +156,11 @@ public class MeterConfigScreen extends AppCompatActivity{
         Intent intent = getIntent();
         String project = intent.getStringExtra("projectName");
         String location = intent.getStringExtra("meterLocation");
+        String lastdate = intent.getStringExtra("profilelastdate");
 
         ProjectText.setText(project);
         LocationText.setText(location);
+        LastDateText.setText(lastdate);
 
         Intent BTSIntent = new Intent(this, BluetoothService.class);
         bindService(BTSIntent, connection, Context.BIND_AUTO_CREATE);
@@ -185,7 +190,7 @@ public class MeterConfigScreen extends AppCompatActivity{
         @Override
         public void onClick(View view) {
             if ((LocationText.getText().toString().matches(""))
-                    || (ProjectText.getText().toString().matches(""))) {
+                    || (ProjectText.getText().toString().matches(""))|| (LastDateText.getText().toString().matches("")) ) {
                 Toast msg = Toast.makeText(getApplicationContext(), "Please fill any empty fields.", Toast.LENGTH_LONG);
                 msg.show();
             } else {

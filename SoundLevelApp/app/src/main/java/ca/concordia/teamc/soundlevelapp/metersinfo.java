@@ -25,9 +25,9 @@ public class metersinfo extends AppCompatActivity {
 
 
         List<Meter> Mylist = new ArrayList<>();
-        Meter meterA = new Meter("Meter A","","Location","Project A","",false,"");
-        Meter meterB = new Meter("Meter B", "", "Location","Project B","",false,"");
-        Meter meterC = new Meter("Meter C","","Location","Project C","",true,"");
+        Meter meterA = new Meter("Meter A","","Location","Project A","",  false,"");
+        Meter meterB = new Meter("Meter B", "", "Location","Project B","",  false,"");
+        Meter meterC = new Meter("Meter C","","Location","Project C","", true,"");
 
         Mylist.add(meterA);
         Mylist.add(meterB);

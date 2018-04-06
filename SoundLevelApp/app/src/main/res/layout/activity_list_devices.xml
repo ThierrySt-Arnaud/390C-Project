@@ -4,41 +4,70 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:visibility="visible"
     tools:context="ca.concordia.teamc.soundlevelapp.ListDevicesActivity">
 
-    <Button
-        android:id="@+id/searchNewDeviceButton"
+    <TextView
+        android:id="@+id/NewDevices"
         android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="New Devices:"
+        android:visibility="visible"
+        app:layout_constraintBottom_toTopOf="@+id/discovered_list"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/toggleButton2" />
+
+    <TextView
+        android:id="@+id/PairedDevices"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="8dp"
+        android:text="Paired Devices:"
+        android:visibility="visible"
+        app:layout_constraintBottom_toTopOf="@+id/listView"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/discovered_list" />
+
+    <ToggleButton
+        android:id="@+id/toggleButton2"
+        style="@android:style/Widget.DeviceDefault.Button.Toggle"
+        android:layout_width="200dp"
         android:layout_height="wrap_content"
         android:layout_alignEnd="@+id/listView"
         android:layout_alignParentTop="true"
         android:layout_marginEnd="8dp"
         android:layout_marginTop="8dp"
         android:onClick="listNewDevices"
-        android:text="@string/search_new_device_button"
+        android:text="Search New Devices"
+        android:textAppearance="@android:style/TextAppearance.DeviceDefault.Large"
+        android:textOff="Search"
+        android:textOn="Searching..."
+        android:textSize="24sp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
+
 
     <ListView
         android:id="@+id/listView"
         android:layout_width="0dp"
-        android:layout_height="0dp"
-        android:layout_below="@+id/searchNewDeviceButton"
+        android:layout_height="wrap_content"
         android:layout_centerHorizontal="true"
         android:layout_marginTop="8dp"
         android:visibility="visible"
-        app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.533"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/discovered_list" />
+        app:layout_constraintTop_toBottomOf="@+id/PairedDevices" >
+
+    </ListView>
 
     <ListView
         android:id="@+id/discovered_list"
         android:layout_width="0dp"
-        android:layout_height="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:visibility="visible"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/searchNewDeviceButton" />
+        app:layout_constraintTop_toBottomOf="@+id/toggleButton2" />
 
 </android.support.constraint.ConstraintLayout>
