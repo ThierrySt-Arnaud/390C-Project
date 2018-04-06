@@ -1,0 +1,245 @@
+<?xml version="1.0" encoding="utf-8"?>
+<android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context="com.example.thilak.testdatabase.MainActivity">
+
+    <RelativeLayout
+        android:layout_width="368dp"
+        android:layout_height="495dp"
+        tools:layout_editor_absoluteX="0dp"
+        tools:layout_editor_absoluteY="0dp">
+
+        <Button
+            android:id="@+id/buttonAdd"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignLeft="@+id/textStartRecordingDate"
+            android:layout_alignStart="@+id/textStartRecordingDate"
+            android:layout_below="@+id/textStartRecordingDate"
+            android:text="ADD"
+            tools:layout_editor_absoluteX="32dp"
+            tools:layout_editor_absoluteY="378dp" />
+
+        <EditText
+            android:id="@+id/etStartRecordingDate"
+            android:layout_width="182dp"
+            android:layout_height="32dp"
+            android:layout_alignEnd="@+id/etLocation"
+            android:layout_alignRight="@+id/etLocation"
+            android:layout_alignTop="@+id/textStartRecordingDate"
+            android:ems="10"
+            android:inputType="textPersonName"
+            android:text="START_RECORDING_DATA"
+            android:textSize="10sp"
+            tools:layout_editor_absoluteX="186dp"
+            tools:layout_editor_absoluteY="321dp" />
+
+        <TextView
+            android:id="@+id/textStartRecordingDate"
+            android:layout_width="136dp"
+            android:layout_height="31dp"
+            android:layout_alignLeft="@+id/textLastConnectionDate"
+            android:layout_alignStart="@+id/textLastConnectionDate"
+            android:layout_below="@+id/etRecordingStatus"
+            android:layout_marginTop="12dp"
+            android:text="START_RECORDING_DATA"
+            android:textSize="10sp"
+            tools:layout_editor_absoluteX="16dp"
+            tools:layout_editor_absoluteY="321dp" />
+
+        <EditText
+            android:id="@+id/etRecordingStatus"
+            android:layout_width="187dp"
+            android:layout_height="35dp"
+            android:layout_alignLeft="@+id/etLastConnectionDate"
+            android:layout_alignStart="@+id/etLastConnectionDate"
+            android:layout_alignTop="@+id/textRecordingStatus"
+            android:ems="10"
+            android:inputType="textPersonName"
+            android:text="RECORDING_STATUS"
+            android:textSize="10sp"
+            tools:layout_editor_absoluteX="181dp"
+            tools:layout_editor_absoluteY="263dp" />
+
+        <EditText
+            android:id="@+id/etLastConnectionDate"
+            android:layout_width="182dp"
+            android:layout_height="32dp"
+            android:layout_alignLeft="@+id/etLocation"
+            android:layout_alignStart="@+id/etLocation"
+            android:layout_alignTop="@+id/textLastConnectionDate"
+            android:ems="10"
+            android:inputType="textPersonName"
+            android:text="LAST_CONNECTION_DATE"
+            android:textSize="10sp"
+            tools:layout_editor_absoluteX="186dp"
+            tools:layout_editor_absoluteY="218dp" />
+
+        <EditText
+            android:id="@+id/etLastKnownProject"
+            android:layout_width="181dp"
+            android:layout_height="34dp"
+            android:layout_alignEnd="@+id/etRecordingStatus"
+            android:layout_alignRight="@+id/etRecordingStatus"
+            android:layout_alignTop="@+id/textLastKnownProject"
+            android:ems="10"
+            android:inputType="textPersonName"
+            android:text="LAST_KNOWN_PROJECT"
+            android:textSize="10sp"
+            tools:layout_editor_absoluteX="187dp"
+            tools:layout_editor_absoluteY="170dp" />
+
+        <EditText
+            android:id="@+id/etLocation"
+            android:layout_width="181dp"
+            android:layout_height="32dp"
+            android:layout_above="@+id/textLastKnownProject"
+            android:layout_alignEnd="@+id/etMacAddress"
+            android:layout_alignRight="@+id/etMacAddress"
+            android:ems="10"
+            android:inputType="textPersonName"
+            android:text="LOCATION"
+            android:textSize="10sp"
+            tools:layout_editor_absoluteX="187dp"
+            tools:layout_editor_absoluteY="125dp" />
+
+        <EditText
+            android:id="@+id/etMacAddress"
+            android:layout_width="174dp"
+            android:layout_height="32dp"
+            android:layout_alignLeft="@+id/etSensorName"
+            android:layout_alignStart="@+id/etSensorName"
+            android:layout_alignTop="@+id/textMacAddress"
+            android:ems="10"
+            android:inputType="textPersonName"
+            android:text="MAC_ADDRESS"
+            android:textSize="10sp"
+            tools:layout_editor_absoluteX="181dp"
+            tools:layout_editor_absoluteY="83dp" />
+
+        <EditText
+            android:id="@+id/etSensorName"
+            android:layout_width="180dp"
+            android:layout_height="31dp"
+            android:layout_alignParentEnd="true"
+            android:layout_alignParentRight="true"
+            android:layout_alignTop="@+id/textSensorName"
+            android:layout_marginEnd="19dp"
+            android:layout_marginRight="19dp"
+            android:ems="10"
+            android:inputType="textPersonName"
+            android:text="SENSOR_NAME"
+            android:textSize="10sp"
+            tools:layout_editor_absoluteX="188dp"
+            tools:layout_editor_absoluteY="36dp" />
+
+        <TextView
+            android:id="@+id/textRecordingStatus"
+            android:layout_width="133dp"
+            android:layout_height="26dp"
+            android:layout_alignEnd="@+id/textLastConnectionDate"
+            android:layout_alignRight="@+id/textLastConnectionDate"
+            android:layout_below="@+id/textLastConnectionDate"
+            android:layout_marginTop="16dp"
+            android:text="RECORDING_STATUS"
+            android:textSize="10sp"
+            tools:layout_editor_absoluteX="16dp"
+            tools:layout_editor_absoluteY="263dp" />
+
+        <TextView
+            android:id="@+id/textLastConnectionDate"
+            android:layout_width="134dp"
+            android:layout_height="26dp"
+            android:layout_alignLeft="@+id/textLocation"
+            android:layout_alignStart="@+id/textLocation"
+            android:layout_below="@+id/textLastKnownProject"
+            android:layout_marginTop="12dp"
+            android:text="LAST_CONNECTION_DATE"
+            android:textSize="10sp"
+            tools:layout_editor_absoluteX="16dp"
+            tools:layout_editor_absoluteY="218dp" />
+
+        <TextView
+            android:id="@+id/textLastKnownProject"
+            android:layout_width="138dp"
+            android:layout_height="31dp"
+            android:layout_alignLeft="@+id/textMacAddress"
+            android:layout_alignStart="@+id/textMacAddress"
+            android:layout_below="@+id/textLocation"
+            android:layout_marginTop="12dp"
+            android:text="LAST_KNOWN_PROJECT"
+            android:textSize="10sp"
+            tools:layout_editor_absoluteX="16dp"
+            tools:layout_editor_absoluteY="170dp" />
+
+        <TextView
+            android:id="@+id/textLocation"
+            android:layout_width="132dp"
+            android:layout_height="34dp"
+            android:layout_alignEnd="@+id/textMacAddress"
+            android:layout_alignRight="@+id/textMacAddress"
+            android:layout_below="@+id/textMacAddress"
+            android:layout_marginTop="12dp"
+            android:text="LOCATION"
+            android:textSize="10sp"
+            tools:layout_editor_absoluteX="16dp"
+            tools:layout_editor_absoluteY="125dp" />
+
+        <TextView
+            android:id="@+id/textMacAddress"
+            android:layout_width="137dp"
+            android:layout_height="30dp"
+            android:layout_alignEnd="@+id/textSensorName"
+            android:layout_alignRight="@+id/textSensorName"
+            android:layout_below="@+id/textSensorName"
+            android:layout_marginTop="19dp"
+            android:text="MAC_ADDRESS"
+            android:textSize="10sp"
+            tools:layout_editor_absoluteX="16dp"
+            tools:layout_editor_absoluteY="83dp" />
+
+        <TextView
+            android:id="@+id/textSensorName"
+            android:layout_width="138dp"
+            android:layout_height="31dp"
+            android:layout_alignParentTop="true"
+            android:layout_toLeftOf="@+id/etLocation"
+            android:layout_toStartOf="@+id/etLocation"
+            android:text="SENSOR_NAME"
+            android:textSize="10sp"
+            tools:layout_editor_absoluteX="16dp"
+            tools:layout_editor_absoluteY="36dp" />
+
+        <Button
+            android:id="@+id/buttonView"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/etStartRecordingDate"
+            android:layout_toEndOf="@+id/buttonAdd"
+            android:layout_toRightOf="@+id/buttonAdd"
+            android:text="ViewData" />
+
+        <Button
+            android:id="@+id/buttonDelete"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/textStartRecordingDate"
+            android:layout_toEndOf="@+id/buttonView"
+            android:layout_toRightOf="@+id/buttonView"
+            android:text="delete" />
+
+        <Button
+            android:id="@+id/buttonUpdate"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignLeft="@+id/textRecordingStatus"
+            android:layout_alignStart="@+id/textRecordingStatus"
+            android:layout_below="@+id/buttonView"
+            android:text="update" />
+
+    </RelativeLayout>
+
+</android.support.constraint.ConstraintLayout>
