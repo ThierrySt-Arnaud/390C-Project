@@ -75,8 +75,8 @@ public class DataListAdapter extends BaseAdapter implements Filterable
         //sets the text for item name and item description from the current item object
         textViewItemName.setText(currentItem.getProjectName());
         textViewItemLocation.setText(currentItem.getLocation());
-        textViewItemDateStarted.setText(Long.toString(currentItem.getDateStartRecord()));
-        textViewItemDateDownloaded.setText(Long.toString(currentItem.getDateOfDownload()));
+        textViewItemDateStarted.setText(currentItem.getDateStartRecord());
+        textViewItemDateDownloaded.setText(currentItem.getDateOfDownload());
 
         // returns the view for the current row
         return convertView;

@@ -30,9 +30,9 @@ public class metersinfo extends AppCompatActivity {
 
 
         List<Meter> Mylist = new ArrayList<>();
-        Meter meterA = new Meter(1, "test 1", "test mac address 1", "location 1", "project A", "00-00-00", 1, "00-00-00");
-        Meter meterB = new Meter(2, "test 2", "test mac address 2", "location 2", "project B", "00-00-00", 1, "00-00-00");
-        Meter meterC = new Meter(3, "test 3", "test mac address 3", "location 3", "project C", "00-00-00", 1, "00-00-00");
+        Meter meterA = new Meter("test 1", "test mac address 1", "location 1", "project A", "00-00-00", false, "00-00-00");
+        Meter meterB = new Meter("test 2", "test mac address 2", "location 2", "project B", "00-00-00", false, "00-00-00");
+        Meter meterC = new Meter("test 3", "test mac address 3", "location 3", "project C", "00-00-00", true, "00-00-00");
 
         Mylist.add(meterA);
         Mylist.add(meterB);

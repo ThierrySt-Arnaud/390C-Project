@@ -18,6 +18,7 @@ import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.os.Parcelable;
+import android.widget.ToggleButton;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -28,22 +29,21 @@ public class ListDevicesActivity extends AppCompatActivity {
     private static final String TAG = "ListDevices activity";
     private BluetoothAdapter bluetooth;
     private Set<BluetoothDevice> pairedDevices;
+    private Set<BluetoothDevice> discoveredDevices;
     private ArrayAdapter<String> BTArrayAdapter;
+    private ArrayAdapter<String> discoveredBTArrayAdapter;
     Thread listen;
     BroadcastReceiver btReceiver;
+
+    ToggleButton Tbutton;
 
     private BluetoothSocket BTSocket = null; // bi-directional client-to-client data path
 
     private static final UUID BTMODULEUUID = UUID.fromString("00001101-0000-1000-8000-00805F9B34FB"); // "random" unique identifier
 
+
     ListView bluetoothDevicesList;
-
-    //Demo test views
-    TextView deviceName;
-    TextView deviceAddress;
-    TextView receivedChars;
-    TextView receivedLegend;
-
+    ListView discoveredDevicesList;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -66,14 +66,15 @@ public class ListDevicesActivity extends AppCompatActivity {
         BTArrayAdapter = new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1);
         //set adapter for list view
         bluetoothDevicesList.setAdapter(BTArrayAdapter);
-
         bluetoothDevicesList.setOnItemClickListener(devicesClickListener);
 
-        deviceAddress = findViewById(R.id.device_address);
-        deviceName = findViewById(R.id.device_name);
-        receivedLegend = findViewById(R.id.device_legend);
-        receivedChars = findViewById(R.id.received_chars);
+        discoveredDevicesList = (ListView) findViewById(R.id.discovered_list);
 
+        discoveredBTArrayAdapter = new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1);
+
+        discoveredBTArrayAdapter.add("Test device" + "\n" + "00:00:00:00:00");
+        discoveredDevicesList.setAdapter(discoveredBTArrayAdapter);
+        discoveredDevicesList.setOnItemClickListener(devicesClickListener);
         btReceiver = new BroadcastReceiver() {
             public void onReceive(Context context, Intent intent) {
                 String action = intent.getAction();
@@ -82,9 +83,9 @@ public class ListDevicesActivity extends AppCompatActivity {
                     // Get the BluetoothDevice
                     BluetoothDevice device = intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE);
                     // show name & address
-                    BTArrayAdapter.add(device.getName() + "\n" + device.getAddress());
+                    discoveredBTArrayAdapter.add(device.getName() + "\n" + device.getAddress());
                     //update array adapter with new data
-                    BTArrayAdapter.notifyDataSetChanged();
+                    discoveredBTArrayAdapter.notifyDataSetChanged();
                 }else if (BluetoothDevice.ACTION_ACL_CONNECTED.equals(action)){
                     // device connected, go to meter config screen
                     Log.d("BT SERVICE", "Device connected, show config");
@@ -98,40 +99,39 @@ public class ListDevicesActivity extends AppCompatActivity {
         filter.addAction(BluetoothDevice.ACTION_FOUND);
         filter.addAction(BluetoothDevice.ACTION_ACL_CONNECTED);
         registerReceiver(btReceiver, filter);
+        Tbutton = (ToggleButton)findViewById(R.id.toggleButton2);
+        Tbutton.setOnClickListener(new View.OnClickListener() {
+
+            @Override
+            public void onClick(View v) {
+                if(Tbutton.isChecked())
+
+                {
+                    Toast.makeText(getApplicationContext(), "Searching for New Devices", Toast.LENGTH_SHORT).show();
+                }
+            }
+        });
     }
 
     @Override
     protected void onStart(){
         super.onStart();
 
-        bluetoothDevicesList.setVisibility(View.VISIBLE);
-        deviceName.setVisibility(View.GONE);
-        deviceAddress.setVisibility(View.GONE);
-        receivedLegend.setVisibility(View.GONE);
-        receivedChars.setVisibility(View.GONE);
-
-    }
-
-    public void listPairedDevices(View V) {
-        // clear list
-        BTArrayAdapter.clear();
-        //get paired devices
+        Tbutton.setChecked(false);
         pairedDevices = bluetooth.getBondedDevices();
         for (BluetoothDevice device : pairedDevices){
             // show name & address
             BTArrayAdapter.add(device.getName() + "\n" + device.getAddress() );
         }
-        Toast.makeText(getApplicationContext(), "Showing Paired Devices", Toast.LENGTH_SHORT).show();
     }
 
     public void listNewDevices(View view) {
-        //clear list
-        BTArrayAdapter.clear();
         // start searching for all devices in range
         bluetooth.startDiscovery();
         //call receiver
         registerReceiver(btReceiver, new IntentFilter(BluetoothDevice.ACTION_FOUND));
-        Toast.makeText(getApplicationContext(), "Searching for Devices", Toast.LENGTH_SHORT).show();
+
+
     }
 
 
@@ -149,7 +149,10 @@ public class ListDevicesActivity extends AppCompatActivity {
     };
 
     @Override
-    protected void onPause() {
+    protected void onPause(){
+        if(bluetooth.isDiscovering()) {
+            bluetooth.cancelDiscovery();
+        }
         super.onPause();
     }
 

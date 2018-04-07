@@ -6,36 +6,33 @@ package ca.concordia.teamc.soundlevelapp;
 
 public class DataSet {
 
-    int datSetId;
+    int DataSetID;
     String projectName;
     String location;
-    long dateOfDownload;
-    long dateStartRecord;
+    String dateOfDownload;
+    String dateStartRecord;
     String meterReferenceRecord;
     String datafile;
 
-    public DataSet(String projectName, String location, long dateOfDownload, long dateStartRecord, String meterReferenceRecord, String datafile) {
+    public DataSet() {
+    }
+
+    public DataSet(String projectName, String location, String dateOfDownload, String dateStartRecord, String meterReferenceRecord, String datafile) {
         this.projectName = projectName;
         this.location = location;
         this.dateOfDownload = dateOfDownload;
         this.dateStartRecord = dateStartRecord;
         this.meterReferenceRecord = meterReferenceRecord;
         this.datafile = datafile;
-
     }
 
-    public DataSet(){
-
+    public int getDataSetID() {
+        return DataSetID;
     }
 
-    public int getDatSetId() {
-        return datSetId;
+    public void setDataSetID(int dataSetID) {
+        DataSetID = dataSetID;
     }
-
-    public void setDatSetId(int datSetId) {
-        this.datSetId = datSetId;
-    }
-
     public String getProjectName() {
         return projectName;
     }
@@ -52,19 +49,19 @@ public class DataSet {
         this.location = location;
     }
 
-    public long getDateOfDownload() {
+    public String getDateOfDownload() {
         return dateOfDownload;
     }
 
-    public void setDateOfDownload(int dateOfDownload) {
+    public void setDateOfDownload(String dateOfDownload) {
         this.dateOfDownload = dateOfDownload;
     }
 
-    public long getDateStartRecord() {
+    public String getDateStartRecord() {
         return dateStartRecord;
     }
 
-    public void setDateStartRecord(int dateStartRecord) {
+    public void setDateStartRecord(String dateStartRecord) {
         this.dateStartRecord = dateStartRecord;
     }
 

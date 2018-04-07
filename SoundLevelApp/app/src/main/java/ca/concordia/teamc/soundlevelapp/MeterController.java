@@ -42,12 +42,105 @@ public class MeterController extends SQLiteOpenHelper {
 
     @Override
     public void onUpgrade(SQLiteDatabase sqLiteDatabase, int i, int i1) {
-        sqLiteDatabase.execSQL("DROP IF TABLE EXISTS "+ TABLE_METER);
+        sqLiteDatabase.execSQL("DROP TABLE IF EXISTS "+ TABLE_METER);
         onCreate(sqLiteDatabase);
     }
 
     //create meter record
 
+    public boolean addMeterData(Meter meter){
+        SQLiteDatabase sqLiteDatabase = this.getWritableDatabase();
+
+        ContentValues contentValues = new ContentValues();
+        contentValues.put(COL1, meter.getSensorName());
+        contentValues.put(COL2, meter.getMacAddress());
+        contentValues.put(COL3, meter.getLocation());
+        contentValues.put(COL4, meter.getLastKnownProject());
+        contentValues.put(COL5, meter.getLastConnectionDate());
+        contentValues.put(COL6, meter.getRecordingStatus());
+        contentValues.put(COL7, meter.getStartRecordingDate());
+
+        long result = sqLiteDatabase.insert(TABLE_METER, null, contentValues);
+        //sqLiteDatabase.close();
+        //return result;
+        if(result == -1) {
+            return false;
+        }else{
+            return true;
+        }
+    }
+    public Cursor showData(){
+        SQLiteDatabase sqLiteDatabase = this.getWritableDatabase();
+        Cursor data = sqLiteDatabase.rawQuery("SELECT * FROM "+ TABLE_METER, null);
+        return data;
+    }
+
+
+    public Integer deleteMeterData(String SensorName){
+        SQLiteDatabase sqLiteDatabase = this.getWritableDatabase();
+        return sqLiteDatabase.delete(TABLE_METER, "SENSOR_NAME = ?", new String[] {SensorName});
+
+    }
+
+    public int updateMeterRecord(Meter meter){
+        SQLiteDatabase sqLiteDatabase = this.getWritableDatabase();
+
+        ContentValues contentValues = new ContentValues();
+        contentValues.put(COL1, meter.getSensorName());
+        contentValues.put(COL2, meter.getMacAddress());
+        contentValues.put(COL3, meter.getLocation());
+        contentValues.put(COL4, meter.getLastKnownProject());
+        contentValues.put(COL5, meter.getLastConnectionDate());
+        contentValues.put(COL6, meter.getRecordingStatus());
+        contentValues.put(COL7, meter.getStartRecordingDate());
+
+        //long result1 = sqLiteDatabase.update(TABLE_METER,contentValues,"SENSOR_NAME = ?", new String[] {String.valueOf(meter.getSensorName())});
+        return sqLiteDatabase.update(TABLE_METER, contentValues,  "SENSOR_NAME = ?", new String[] { String.valueOf(meter.getSensorName()) });
+
+    }
+
+    public ArrayList<Meter> getAllMeterRecord(){
+        ArrayList<Meter> meterRecordList = new ArrayList<Meter>();
+
+        String selectQuery = "SELECT * FROM " + TABLE_METER;
+
+        SQLiteDatabase sqLiteDatabase = this.getWritableDatabase();
+        Cursor cursor = sqLiteDatabase.rawQuery(selectQuery, null);
+
+        if (cursor.moveToFirst()){
+            do{
+                Meter meter;
+                meter = new Meter(cursor.getString(1),cursor.getString(2),cursor.getString(3),cursor.getString(4),cursor.getString(5),Boolean.parseBoolean(cursor.getString(6)),cursor.getString(7));
+                meter.setSensorId(Integer.parseInt(cursor.getString(0)));
+
+                meterRecordList.add(meter);
+            }   while (cursor.moveToNext());
+        }
+        return meterRecordList;
+    }
+
+
+    public Meter getSelectedMeterRecord(String sensorName){
+
+        SQLiteDatabase sqLiteDatabase = this.getReadableDatabase();
+
+        Cursor cursor = sqLiteDatabase.query(TABLE_METER, COLUMNS, "SENSOR_NAME = ?",
+                new String[] { String.valueOf(sensorName)}, null, null, null, null);
+        //Cursor cursor = sqLiteDatabase.rawQuery("SELECT * FROM "+ TABLE_METER + "WHERE " + SENSOR_NAME + "&&" + MAC_ADDRESS + "=?", new String[]{});
+
+        if (cursor != null){
+            cursor.moveToFirst();
+        }
+
+        Meter meter = new Meter(cursor.getString(1),cursor.getString(2),cursor.getString(3),cursor.getString(4),cursor.getString(5),Boolean.parseBoolean(cursor.getString(6)),cursor.getString(7));
+        meter.setSensorId(Integer.parseInt(cursor.getString(0)));
+
+        return meter;
+    }
+}
+
+
+/*
     public void addMeterData(Meter meter){
         SQLiteDatabase sqLiteDatabase = this.getWritableDatabase();
 
@@ -76,13 +169,12 @@ public class MeterController extends SQLiteOpenHelper {
         if (cursor.moveToFirst()){
             do{
                 Meter meter = new Meter();
-                meter.setSensorId(Integer.parseInt(cursor.getString(0)));
                 meter.setSensorName(cursor.getString(1));
                 meter.setMacAddress(cursor.getString(2));
                 meter.setLocation(cursor.getString(3));
                 meter.setLastKnownProject(cursor.getString(4));
                 meter.setLastConnectionDate(cursor.getString(5));
-                meter.setRecordingStatus(cursor.getInt(6));
+                //meter.setRecordingStatus(cursor.getInt(6));
                 meter.setStartRecordingDate(cursor.getString(7));
 
                 meterRecordList.add(meter);
@@ -91,19 +183,18 @@ public class MeterController extends SQLiteOpenHelper {
         return meterRecordList;
     }
 
-    public Meter getSelectedMeterRecord(String sensorName){
+   /*public Meter getSelectedMeterRecord(String sensorName){
 
       SQLiteDatabase sqLiteDatabase = this.getReadableDatabase();
 
       Cursor cursor = sqLiteDatabase.query(TABLE_METER, COLUMNS, " sensorName = ?",
               new String[] { String.valueOf(sensorName)}, null, null, null, null);
-      //Cursor cursor = sqLiteDatabase.rawQuery("SELECT * FROM "+ TABLE_METER + "WHERE " + SENSOR_NAME + "&&" + MAC_ADDRESS + "=?", new String[]{});
+      Cursor cursor = sqLiteDatabase.rawQuery("SELECT * FROM "+ TABLE_METER + "WHERE " + SENSOR_NAME + "&&" + MAC_ADDRESS + "=?", new String[]{});
 
       if (cursor != null)
           cursor.moveToFirst();
 
-      Meter meter = new Meter();
-      meter.setSensorId(Integer.parseInt(cursor.getString(0)));
+      Meter meter = new Meter(cursor.getString(1),cursor.getString(2));
       meter.setSensorName(cursor.getString(1));
       meter.setMacAddress(cursor.getString(2));
       meter.setLocation(cursor.getString(3));
@@ -137,13 +228,7 @@ public class MeterController extends SQLiteOpenHelper {
         sqLiteDatabase.delete(TABLE_METER, COL0 + " =?",
                 new String[] {String.valueOf(meter.getSensorId())});
         sqLiteDatabase.close();
-    }
-
-
-
-    }
-
-
+    }*/
 
     /*    public ArrayList<Meter> getSelectedMeterInfo(string sensorName, String macAddress){
         ArrayList<Meter> selectedMeterRecordList = new ArrayList<Meter>();

@@ -28,7 +28,7 @@ public class myGraph extends AppCompatActivity {
         double  n = 0;
         //Dummy data of the sound recorded
         //int mySoundData[]={33,3,4,5,56,76,87,35,7,67,86,87};
-        int mySoundData[]=new int[99];
+        int mySoundData[]=new int[99999];
         //Lenght of the array of sound recorded
         //int lengthOfmySoundData = mySoundData.length;
 
@@ -37,12 +37,12 @@ public class myGraph extends AppCompatActivity {
 
         //creating graph
         series = new LineGraphSeries <DataPoint>();
-        for (int i=0; i<98; i++){
+        for (int i=0; i<99998; i++){
             n = 80+4*rand.nextGaussian();
             mySoundData[i] = (int) (n);
             x=1+x;
 
-            series.appendData(new DataPoint(x , mySoundData[i] ), true ,100);
+            series.appendData(new DataPoint(x , mySoundData[i] ), true ,100000);
 
         }
 
@@ -52,7 +52,17 @@ public class myGraph extends AppCompatActivity {
         graph.getGridLabelRenderer().setVerticalAxisTitle("Level of dB");
         graph.getGridLabelRenderer().setHorizontalAxisTitle("Time in s");
         series.setColor(Color.RED);
+        graph.getViewport().setScalable(true);
 
+        // set manual Y bounds
+        graph.getViewport().setYAxisBoundsManual(true);
+        graph.getViewport().setMinY(40);
+        graph.getViewport().setMaxY(120);
+
+        //set manual X bounds
+        graph.getViewport().setXAxisBoundsManual(true);
+        graph.getViewport().setMinX(40);
+        graph.getViewport().setMaxX(120);
 
 
 
