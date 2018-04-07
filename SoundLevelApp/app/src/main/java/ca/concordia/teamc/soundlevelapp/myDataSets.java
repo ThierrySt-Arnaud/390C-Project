@@ -28,7 +28,7 @@ public class myDataSets extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_mydatasets);
         final EditText dataSetSearch = (EditText) findViewById(R.id.DataSetSearch);
-       /* List<String> Mylist = new ArrayList<>();
+        /* List<String> Mylist = new ArrayList<>();
         Mylist.add("For Sprint 2");
 
         ListView listView = (ListView) findViewById(R.id.listview);
