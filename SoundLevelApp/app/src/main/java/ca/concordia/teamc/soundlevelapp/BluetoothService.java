@@ -74,13 +74,14 @@ public class BluetoothService extends Service {
             public void handleMessage(android.os.Message msg) {
                 Log.d("DEBUG", "handleMessage");
                 if (msg.what == handlerState) { //if message is what we want
-                    String readMessage = (String) msg.obj;   // msg.arg1 = bytes from connect thread
-                    recDataString.append(readMessage);
-                    Log.d("RECORDED", recDataString.toString());
+                    //String readMsg = (String) msg.obj;
+                    byte[] readValues = (byte[]) msg.obj;   // msg.arg1 = bytes from connect thread
+                    //recDataString.append(readMessage);
+                    // Log.d("RECORDED", readMsg);
                     // Do stuff here with your data, like adding it to the database
-                    Log.d("RECORDED", "Broadcasting message");
+                    // Log.d("RECORDED", "Broadcasting message");
                     Intent i = new Intent(BT_MESSAGE);
-                    i.putExtra("message", recDataString.toString());
+                    i.putExtra("message", readValues);
                     sendBroadcast(i);
                 }
                 recDataString.delete(0, recDataString.length());  //clear all string data
@@ -273,10 +274,10 @@ public class BluetoothService extends Service {
             while (!stopThread) {
                 try {
                     bytes = mmInStream.read(buffer);            //read bytes from input buffer
-                    String readMessage = new String(buffer, 0, bytes, Charset.forName("UTF-8"));
-                    Log.d("DEBUG BT PART", "CONNECTED THREAD " + readMessage);
+                    //String readMessage = new String(buffer, 0, bytes, Charset.forName("UTF-8"));
+                    // Log.d("DEBUG BT PART", "CONNECTED THREAD " + readMessage);
                     // Send the obtained bytes to the UI Activity via handler
-                    bluetoothIn.obtainMessage(handlerState, bytes, -1, readMessage).sendToTarget();
+                    bluetoothIn.obtainMessage(handlerState, bytes, -1, buffer).sendToTarget();
                 } catch (IOException e) {
                     Log.d("DEBUG BT", e.toString());
                     Log.d("BT SERVICE", "UNABLE TO READ/WRITE, STOPPING SERVICE");
