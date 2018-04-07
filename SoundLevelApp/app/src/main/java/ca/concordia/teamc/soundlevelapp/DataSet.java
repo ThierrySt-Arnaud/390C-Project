@@ -9,23 +9,21 @@ public class DataSet {
     int DataSetID;
     String projectName;
     String location;
-    int dateOfDownload;
-    int dateStartRecord;
+    String dateOfDownload;
+    String dateStartRecord;
     String meterReferenceRecord;
     String datafile;
 
     public DataSet() {
     }
 
-    public DataSet(String projectName, String location, int dateOfDownload, int dateStartRecord, String meterReferenceRecord, String datafile) {
-      
+    public DataSet(String projectName, String location, String dateOfDownload, String dateStartRecord, String meterReferenceRecord, String datafile) {
         this.projectName = projectName;
         this.location = location;
         this.dateOfDownload = dateOfDownload;
         this.dateStartRecord = dateStartRecord;
         this.meterReferenceRecord = meterReferenceRecord;
         this.datafile = datafile;
-
     }
 
     public int getDataSetID() {
@@ -35,7 +33,6 @@ public class DataSet {
     public void setDataSetID(int dataSetID) {
         DataSetID = dataSetID;
     }
-
     public String getProjectName() {
         return projectName;
     }
@@ -52,19 +49,19 @@ public class DataSet {
         this.location = location;
     }
 
-    public int getDateOfDownload() {
+    public String getDateOfDownload() {
         return dateOfDownload;
     }
 
-    public void setDateOfDownload(int dateOfDownload) {
+    public void setDateOfDownload(String dateOfDownload) {
         this.dateOfDownload = dateOfDownload;
     }
 
-    public int getDateStartRecord() {
+    public String getDateStartRecord() {
         return dateStartRecord;
     }
 
-    public void setDateStartRecord(int dateStartRecord) {
+    public void setDateStartRecord(String dateStartRecord) {
         this.dateStartRecord = dateStartRecord;
     }
 
@@ -83,6 +80,4 @@ public class DataSet {
     public void setDatafile(String datafile) {
         this.datafile = datafile;
     }
-
-
 }

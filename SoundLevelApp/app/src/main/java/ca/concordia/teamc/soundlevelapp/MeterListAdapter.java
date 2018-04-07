@@ -9,6 +9,8 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.BaseAdapter;
+import android.widget.Filter;
+import android.widget.Filterable;
 import android.widget.ImageView;
 import android.widget.TextView;
 
@@ -18,26 +20,29 @@ import java.util.List;
 import static android.content.ContentValues.TAG;
 
 
-public class MeterListAdapter extends BaseAdapter
+public class MeterListAdapter extends BaseAdapter implements Filterable
 
 {
     private Context context; //context
     private List<Meter> meters; //data source of the list adapter
+    protected List<Meter> meters_filtered;
+    private MeterListAdapter.ItemFilter mFilter = new MeterListAdapter.ItemFilter();
 
     //public constructor
     public MeterListAdapter(Context context, List<Meter> meters) {
         this.context = context;
         this.meters = meters;
+        this.meters_filtered = meters;
     }
 
     @Override
     public int getCount() {
-        return meters.size(); //returns total of items in the list
+        return meters_filtered.size(); //returns total of items in the list
     }
 
     @Override
     public Object getItem(int position) {
-        return meters.get(position); //returns list item at the specified position
+        return meters_filtered.get(position); //returns list item at the specified position
     }
 
     @Override
@@ -82,6 +87,58 @@ public class MeterListAdapter extends BaseAdapter
 
         // returns the view for the current row
         return convertView;
+    }
+
+    public Filter getFilter() {
+        return mFilter;
+    }
+
+    private class ItemFilter extends Filter {
+        @Override
+        protected FilterResults performFiltering(CharSequence constraint) {
+
+            Log.d("MeterListAdapter", "Filtering ...");
+            String filterString = constraint.toString().toLowerCase();
+
+            FilterResults results = new FilterResults();
+
+            final List<Meter> list = meters;
+
+            int count = list.size();
+            final ArrayList<Meter> nlist = new ArrayList<Meter>(count);
+
+            String filterableStringSensorName;
+            String filterableStringLastProjectName ;
+
+            Log.d("MeterListAdapter", "Searching for: " + filterString);
+
+            for (int i = 0; i < count; i++) {
+                filterableStringSensorName = list.get(i).getSensorName();
+                filterableStringLastProjectName = list.get(i).getLastKnownProject();
+
+                Log.d("MeterListAdapter", "matching with"+ filterableStringSensorName);
+                Log.d("MeterListAdapter", "matching with"+ filterableStringLastProjectName);
+
+                if (filterableStringSensorName.toLowerCase().contains(filterString) || filterableStringLastProjectName.toLowerCase().contains(filterString)) {
+                    Log.d("MeterListAdapter", "Found item, adding to nList");
+                    nlist.add(list.get(i));
+                }
+            }
+
+            results.values = nlist;
+            results.count = nlist.size();
+
+            return results;
+        }
+
+        @SuppressWarnings("unchecked")
+        @Override
+        protected void publishResults(CharSequence constraint, FilterResults results) {
+            meters_filtered = (ArrayList<Meter>) results.values;
+            Log.d("MeterListAdapter", "Publishing results");
+            notifyDataSetChanged();
+            notifyDataSetInvalidated();
+        }
     }
 
 

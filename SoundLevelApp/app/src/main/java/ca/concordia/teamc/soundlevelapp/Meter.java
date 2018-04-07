@@ -35,7 +35,8 @@ public class Meter {
     public void setSensorId(int sensorId) {
         this.sensorId = sensorId;
     }
-  
+
+
     public String getSensorName() {
         return sensorName;
     }
