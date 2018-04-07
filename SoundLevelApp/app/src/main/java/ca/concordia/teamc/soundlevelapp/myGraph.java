@@ -48,7 +48,7 @@ public class myGraph extends AppCompatActivity {
         series = new LineGraphSeries <DataPoint>();
         for (int i=0; i<fileData.length; i++){
             x=1+x;
-            series.appendData(new DataPoint(x , mySoundData[i] ), true ,102);
+            series.appendData(new DataPoint(x , mySoundData[i] ), true ,1024*1024);
         }
 
         graph.addSeries(series);
@@ -57,6 +57,18 @@ public class myGraph extends AppCompatActivity {
         graph.getGridLabelRenderer().setVerticalAxisTitle("Level of dB");
         graph.getGridLabelRenderer().setHorizontalAxisTitle("Time in s");
         series.setColor(Color.RED);
+
+        graph.getViewport().setScalable(true);
+
+        // set manual Y bounds
+        graph.getViewport().setYAxisBoundsManual(true);
+        graph.getViewport().setMinY(40);
+        graph.getViewport().setMaxY(120);
+
+        //set manual X bounds
+        graph.getViewport().setXAxisBoundsManual(true);
+        graph.getViewport().setMinX(40);
+        graph.getViewport().setMaxX(120);
     }
 
 }

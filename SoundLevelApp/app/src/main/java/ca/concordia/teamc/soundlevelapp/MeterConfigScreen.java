@@ -23,10 +23,11 @@ import android.widget.TextView;
 import android.widget.Toast;
 import android.content.Intent;
 import android.content.DialogInterface;
-
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
+import java.io.UnsupportedEncodingException;
+import java.sql.Time;
 
 import static android.support.v4.os.LocaleListCompat.create;
 
@@ -34,6 +35,7 @@ import static android.support.v4.os.LocaleListCompat.create;
 public class MeterConfigScreen extends AppCompatActivity{
     protected EditText ProjectText =null;
     protected EditText LocationText =null;
+    protected EditText LastDateText =null;
     protected TextView DataText = null;
     protected ProgressBar Storage = null;
     protected Button saveButton = null;
@@ -70,14 +72,12 @@ public class MeterConfigScreen extends AppCompatActivity{
 
         ProjectText = (EditText) findViewById(R.id.ProjectEditText);
         LocationText = (EditText) findViewById(R.id.LocationEditText);
+        LastDateText = (EditText) findViewById(R.id.LastDateEditText);
         DataText = (TextView) findViewById(R.id.textView2);
         Storage = (ProgressBar) findViewById(R.id.progressBar);
 
         saveButton = (Button) findViewById(R.id.saveButton);
         downloadButton = (Button) findViewById(R.id.downloadButton);
-
-        editText(false);
-
 
         final SharedPreferenceHelper sharedPreferenceHelper = new SharedPreferenceHelper(MeterConfigScreen.this);
 
@@ -87,7 +87,6 @@ public class MeterConfigScreen extends AppCompatActivity{
 
         saveButton.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
-
                 Log.d("SEND", "upload");
                 if(isUploadRequestSend && isUploadRequestOk){
                     // expect RCV
@@ -132,19 +131,11 @@ public class MeterConfigScreen extends AppCompatActivity{
                 Log.d("Receiver", "got length: "+ msgLength);
                 Log.d("Receiver", Arrays.toString(msg));
 
-                //Log.d("Receiver", "got message: "+ msg);
-                //Log.d("BYTE ARRAY", Arrays.toString(msg));
-
                 if(isDownloadRequestSend && isDownloadRequestOK){
                     // expect config file
-
                     if (indexOf(msg,configStartSequence) != -1){
                         isDownloadRequestOK = false;
                         isDownloadRequestSend = false;
-
-//                        msg = msg.replace((char) 0x0A, '\n');
-//                        msg = msg.replace((char) 0x0D, '\n');
-
                         try{
                             //byte[] file = msg.split("<<<");
                             byte[] configByte = Arrays.copyOfRange(msg,0, indexOf(msg,configStartSequence)-1);
@@ -174,8 +165,6 @@ public class MeterConfigScreen extends AppCompatActivity{
                             Storage.setProgress(Integer.parseInt(config[2]));
                             DataText.setTextSize(20);
                             DataText.setText(Arrays.toString(data));
-
-
                         }catch (ArrayIndexOutOfBoundsException exception){
                             Log.w("MeterConfig", "Ill formatted file!");
                         }
@@ -185,9 +174,9 @@ public class MeterConfigScreen extends AppCompatActivity{
                     if (indexOf(msg,okSequence) != -1){
                         isDownloadRequestOK = true;
                         Log.d("MeterConfig", "Received download OK");
+                        Log.d("MeterConfig", "Received OK");
                     }
                 }
-
                 if(isUploadRequestSend && isUploadRequestOk){
                     // expect config file
                     if (indexOf(msg,rcvSequence) != -1){
@@ -243,9 +232,11 @@ public class MeterConfigScreen extends AppCompatActivity{
         Intent intent = getIntent();
         String project = intent.getStringExtra("projectName");
         String location = intent.getStringExtra("meterLocation");
+        String lastdate = intent.getStringExtra("profilelastdate");
 
         ProjectText.setText(project);
         LocationText.setText(location);
+        LastDateText.setText(lastdate);
 
         Intent BTSIntent = new Intent(this, BluetoothService.class);
         bindService(BTSIntent, connection, Context.BIND_AUTO_CREATE);
@@ -275,7 +266,7 @@ public class MeterConfigScreen extends AppCompatActivity{
         @Override
         public void onClick(View view) {
             if ((LocationText.getText().toString().matches(""))
-                    || (ProjectText.getText().toString().matches(""))) {
+                    || (ProjectText.getText().toString().matches(""))|| (LastDateText.getText().toString().matches("")) ) {
                 Toast msg = Toast.makeText(getApplicationContext(), "Please fill any empty fields.", Toast.LENGTH_LONG);
                 msg.show();
             } else {

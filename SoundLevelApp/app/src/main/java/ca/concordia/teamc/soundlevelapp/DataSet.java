@@ -6,7 +6,7 @@ package ca.concordia.teamc.soundlevelapp;
 
 public class DataSet {
 
-    int datSetId;
+    int DataSetID;
     String projectName;
     String location;
     long dateOfDownload;
@@ -14,26 +14,24 @@ public class DataSet {
     String meterReferenceRecord;
     String datafile;
 
-    public DataSet(String projectName, String location, long dateOfDownload, long dateStartRecord, String meterReferenceRecord, String datafile) {
+    public DataSet() {
+    }
+
+    public DataSet(String projectName, String location, String dateOfDownload, String dateStartRecord, String meterReferenceRecord, String datafile) {
         this.projectName = projectName;
         this.location = location;
         this.dateOfDownload = dateOfDownload;
         this.dateStartRecord = dateStartRecord;
         this.meterReferenceRecord = meterReferenceRecord;
         this.datafile = datafile;
-
     }
 
-    public DataSet(){
-
+    public int getDataSetID() {
+        return DataSetID;
     }
 
-    public int getDatSetId() {
-        return datSetId;
-    }
-
-    public void setDatSetId(int datSetId) {
-        this.datSetId = datSetId;
+    public void setDataSetID(int dataSetID) {
+        DataSetID = dataSetID;
     }
 
     public String getProjectName() {
@@ -52,7 +50,7 @@ public class DataSet {
         this.location = location;
     }
 
-    public long getDateOfDownload() {
+    public String getDateOfDownload() {
         return dateOfDownload;
     }
 
@@ -60,7 +58,7 @@ public class DataSet {
         this.dateOfDownload = dateOfDownload;
     }
 
-    public long getDateStartRecord() {
+    public String getDateStartRecord() {
         return dateStartRecord;
     }
 

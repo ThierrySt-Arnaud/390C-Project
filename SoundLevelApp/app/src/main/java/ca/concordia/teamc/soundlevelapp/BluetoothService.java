@@ -80,7 +80,7 @@ public class BluetoothService extends Service {
                     //recDataString.append(readMessage);
                     Log.d("RECORDED", recDataString.toString());
                     // Do stuff here with your data, like adding it to the database
-                    Log.d("RECORDED", "Broadcasting message");
+                    // Log.d("RECORDED", "Broadcasting message");
                     Intent i = new Intent(BT_MESSAGE);
                     i.putExtra("message", readMessage);
                     i.putExtra("length", msg.arg1);

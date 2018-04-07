@@ -7,7 +7,6 @@ import android.text.TextWatcher;
 import android.util.Log;
 import android.view.View;
 import android.widget.AdapterView;
-import android.widget.ArrayAdapter;
 import android.widget.EditText;
 import android.widget.ListView;
 import android.view.Menu;
@@ -31,29 +30,27 @@ public class myDataSets extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_mydatasets);
         final EditText dataSetSearch = (EditText) findViewById(R.id.DataSetSearch);
-       /* List<String> Mylist = new ArrayList<>();
+        /* List<String> Mylist = new ArrayList<>();
         Mylist.add("For Sprint 2");
 
         ListView listView = (ListView) findViewById(R.id.listview);
         ArrayAdapter<String> adapter = new ArrayAdapter<String>(this,android.R.layout.simple_list_item_1,Mylist);
         listView.setAdapter(adapter);*/
 
-//        List<DataSet> Mylist = new ArrayList<>();
-//        DataSet dataA = new DataSet("Project x","Location A",00-00-00,00-00-00,"","");
-//        DataSet dataB = new DataSet("Project y","Location B",00-00-00,00-00-00,"","");
-//        DataSet dataC = new DataSet("Project z","Location C",00-00-00,00-00-00,"","");
-//        DataSet dataD = new DataSet("Project 1","Location D",00-00-00,00-00-00,"","");
-//        DataSet dataE = new DataSet("Project 2","Location E",00-00-00,00-00-00,"","");
-//        DataSet dataF = new DataSet("Project 3","Location F",00-00-00,00-00-00,"","");
-//
-//        Mylist.add(dataA);
-//        Mylist.add(dataB);
-//        Mylist.add(dataC);
-//        Mylist.add(dataD);
-//        Mylist.add(dataE);
-//        Mylist.add(dataF);
+        List<DataSet> Mylist = new ArrayList<>();
+        DataSet dataA = new DataSet("Project x","Location A","00-00-00","00-00-00","","");
+        DataSet dataB = new DataSet("Project y","Location B","00-00-00","00-00-00","","");
+        DataSet dataC = new DataSet("Project z","Location C","00-00-00","00-00-00","","");
+        DataSet dataD = new DataSet("Project 1","Location D","00-00-00","00-00-00","","");
+        DataSet dataE = new DataSet("Project 2","Location E","00-00-00","00-00-00","","");
+        DataSet dataF = new DataSet("Project 3","Location F","00-00-00","00-00-00","","");
 
-        Mylist = dsc.getAllDataSetRecord();
+        Mylist.add(dataA);
+        Mylist.add(dataB);
+        Mylist.add(dataC);
+        Mylist.add(dataD);
+        Mylist.add(dataE);
+        Mylist.add(dataF);
 
         dataListAdapter = new DataListAdapter(this, Mylist);
         ListView listView = (ListView) findViewById(R.id.listview);
