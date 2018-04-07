@@ -230,12 +230,6 @@ public class MeterController extends SQLiteOpenHelper {
         sqLiteDatabase.close();
     }*/
 
-
-*/
-
-
-
-
     /*    public ArrayList<Meter> getSelectedMeterInfo(string sensorName, String macAddress){
         ArrayList<Meter> selectedMeterRecordList = new ArrayList<Meter>();
 
