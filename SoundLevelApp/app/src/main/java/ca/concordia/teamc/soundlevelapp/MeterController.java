@@ -169,13 +169,12 @@ public class MeterController extends SQLiteOpenHelper {
         if (cursor.moveToFirst()){
             do{
                 Meter meter = new Meter();
-                meter.setSensorId(Integer.parseInt(cursor.getString(0)));
                 meter.setSensorName(cursor.getString(1));
                 meter.setMacAddress(cursor.getString(2));
                 meter.setLocation(cursor.getString(3));
                 meter.setLastKnownProject(cursor.getString(4));
                 meter.setLastConnectionDate(cursor.getString(5));
-                meter.setRecordingStatus(cursor.getInt(6));
+                //meter.setRecordingStatus(cursor.getInt(6));
                 meter.setStartRecordingDate(cursor.getString(7));
 
                 meterRecordList.add(meter);
@@ -184,19 +183,18 @@ public class MeterController extends SQLiteOpenHelper {
         return meterRecordList;
     }
 
-    public Meter getSelectedMeterRecord(String sensorName){
+   /*public Meter getSelectedMeterRecord(String sensorName){
 
       SQLiteDatabase sqLiteDatabase = this.getReadableDatabase();
 
       Cursor cursor = sqLiteDatabase.query(TABLE_METER, COLUMNS, " sensorName = ?",
               new String[] { String.valueOf(sensorName)}, null, null, null, null);
-      //Cursor cursor = sqLiteDatabase.rawQuery("SELECT * FROM "+ TABLE_METER + "WHERE " + SENSOR_NAME + "&&" + MAC_ADDRESS + "=?", new String[]{});
+      Cursor cursor = sqLiteDatabase.rawQuery("SELECT * FROM "+ TABLE_METER + "WHERE " + SENSOR_NAME + "&&" + MAC_ADDRESS + "=?", new String[]{});
 
       if (cursor != null)
           cursor.moveToFirst();
 
-      Meter meter = new Meter();
-      meter.setSensorId(Integer.parseInt(cursor.getString(0)));
+      Meter meter = new Meter(cursor.getString(1),cursor.getString(2));
       meter.setSensorName(cursor.getString(1));
       meter.setMacAddress(cursor.getString(2));
       meter.setLocation(cursor.getString(3));
@@ -230,7 +228,7 @@ public class MeterController extends SQLiteOpenHelper {
         sqLiteDatabase.delete(TABLE_METER, COL0 + " =?",
                 new String[] {String.valueOf(meter.getSensorId())});
         sqLiteDatabase.close();
-    }
+    }*/
 
 
 */

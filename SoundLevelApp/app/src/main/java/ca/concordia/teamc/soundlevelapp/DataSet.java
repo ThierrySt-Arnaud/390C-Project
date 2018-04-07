@@ -6,14 +6,13 @@ package ca.concordia.teamc.soundlevelapp;
 
 public class DataSet {
 
-    int datSetId;
+    int DataSetID;
     String projectName;
     String location;
     String dateOfDownload;
     String dateStartRecord;
     String meterReferenceRecord;
     String datafile;
-
 
     public DataSet() {
     }
@@ -27,12 +26,12 @@ public class DataSet {
         this.datafile = datafile;
     }
 
-    public int getDatSetId() {
-        return datSetId;
+    public int getDataSetID() {
+        return DataSetID;
     }
 
-    public void setDatSetId(int datSetId) {
-        this.datSetId = datSetId;
+    public void setDataSetID(int dataSetID) {
+        DataSetID = dataSetID;
     }
     public String getProjectName() {
         return projectName;
