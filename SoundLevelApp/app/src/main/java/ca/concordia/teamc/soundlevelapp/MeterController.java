@@ -15,6 +15,7 @@ import java.util.ArrayList;
 public class MeterController extends SQLiteOpenHelper {
 
     private static final String TAG = "MeterController";
+    Meter meter = null;
 
     private static final String DATABASE_NAME = "SoundLevelApp.db";
     private static final String TABLE_METER = "SoundMeterTable";
@@ -30,25 +31,34 @@ public class MeterController extends SQLiteOpenHelper {
 
     private static final String[] COLUMNS = {COL0,COL1,COL2,COL3,COL4,COL5,COL6,COL7};
 
+    public MeterController(Context context, int sensorId, String sensorName, String macAddress, String location, String lastKnownProject, long lastConnectionDate, boolean recordingStatus, long startRecordingDate){
+        super(context, DATABASE_NAME, null,1);
+        this.meter = new Meter(sensorId,  sensorName, macAddress, location, lastKnownProject, lastConnectionDate, recordingStatus, startRecordingDate);
+    }
+
     public MeterController(Context context){
         super(context, DATABASE_NAME, null,1);
     }
+
     @Override
     public void onCreate(SQLiteDatabase sqLiteDatabase) {
-        String createTable = "CREATE TABLE " + TABLE_METER + "(ID INTEGER PRIMARY KEY AUTOINCREMENT, " +
-                " SENSOR_NAME TEXT, MAC_ADDRESS TEXT, LOCATION TEXT, LAST_KNOWN_PROJECT TEXT, LAST_CONNECTION_DATE TEXT, RECORDING_STATUS TEXT, START_RECORDING_DATA TEXT)";
-        sqLiteDatabase.execSQL(createTable);
+        String createDataSetTable = "CREATE TABLE DataSetTable (ID INTEGER PRIMARY KEY AUTOINCREMENT, PROJECT_NAME TEXT, LOCATION TEXT, DATE_OF_DOWNLOAD INTEGER, DATE_START_RECORD INTEGER, METER_REFERENCE_RECORD TEXT, DATA_FILE TEXT)";
+        String createDataFileTable = "CREATE TABLE DataFileTable (ID INTEGER PRIMARY KEY AUTOINCREMENT, PROJECT_NAME TEXT, LOCATION TEXT, DATA TEXT)";
+        String createMeterTable = "CREATE TABLE SoundMeterTable (ID INTEGER PRIMARY KEY AUTOINCREMENT, SENSOR_NAME TEXT, MAC_ADDRESS TEXT, LOCATION TEXT, LAST_KNOWN_PROJECT TEXT, LAST_CONNECTION_DATE INTEGER, RECORDING_STATUS TEXT, START_RECORDING_DATA INTEGER)";
+        sqLiteDatabase.execSQL(createDataSetTable);
+        sqLiteDatabase.execSQL(createDataFileTable);
+        sqLiteDatabase.execSQL(createMeterTable);
     }
 
     @Override
     public void onUpgrade(SQLiteDatabase sqLiteDatabase, int i, int i1) {
-        sqLiteDatabase.execSQL("DROP IF TABLE EXISTS "+ TABLE_METER);
+        sqLiteDatabase.execSQL("DROP TABLE IF EXISTS "+ TABLE_METER);
         onCreate(sqLiteDatabase);
     }
 
     //create meter record
 
-    public void addMeterData(Meter meter){
+    public void addMeterData(){
         SQLiteDatabase sqLiteDatabase = this.getWritableDatabase();
 
         ContentValues contentValues = new ContentValues();
@@ -81,9 +91,9 @@ public class MeterController extends SQLiteOpenHelper {
                 meter.setMacAddress(cursor.getString(2));
                 meter.setLocation(cursor.getString(3));
                 meter.setLastKnownProject(cursor.getString(4));
-                meter.setLastConnectionDate(cursor.getString(5));
-                meter.setRecordingStatus(cursor.getInt(6));
-                meter.setStartRecordingDate(cursor.getString(7));
+                meter.setLastConnectionDate(cursor.getLong(5));
+                meter.setRecordingStatus(cursor.getInt(6) > 0);
+                meter.setStartRecordingDate(cursor.getLong(7));
 
                 meterRecordList.add(meter);
             }   while (cursor.moveToNext());
@@ -108,14 +118,35 @@ public class MeterController extends SQLiteOpenHelper {
       meter.setMacAddress(cursor.getString(2));
       meter.setLocation(cursor.getString(3));
       meter.setLastKnownProject(cursor.getString(4));
-      meter.setLastConnectionDate(cursor.getString(5));
-      meter.setRecordingStatus(cursor.getInt(6));
-      meter.setStartRecordingDate(cursor.getString(7));
+      meter.setLastConnectionDate(cursor.getLong(5));
+      meter.setRecordingStatus(cursor.getInt(6) > 0);
+      meter.setStartRecordingDate(cursor.getLong(7));
 
       return meter;
     }
 
-    public int updateMeterRecord(Meter meter){
+    public Meter getSelectedMeterRecord(int sensorID){
+
+        SQLiteDatabase sqLiteDatabase = this.getReadableDatabase();
+
+        Cursor cursor = sqLiteDatabase.query(TABLE_METER, COLUMNS, " ID = ?", new String[] { Integer.toString(sensorID)}, null, null, null, null);
+        Meter meter = new Meter();
+
+        if (cursor != null && cursor.moveToFirst()){
+            meter.setSensorId(cursor.getInt(0));
+            meter.setSensorName(cursor.getString(1));
+            meter.setMacAddress(cursor.getString(2));
+            meter.setLocation(cursor.getString(3));
+            meter.setLastKnownProject(cursor.getString(4));
+            meter.setLastConnectionDate(cursor.getLong(5));
+            meter.setRecordingStatus(cursor.getInt(6) > 0);
+            meter.setStartRecordingDate(cursor.getLong(7));
+        }
+
+        return meter;
+    }
+
+    public int updateMeterRecord(){
         SQLiteDatabase sqLiteDatabase = this.getWritableDatabase();
 
         ContentValues contentValues = new ContentValues();
@@ -132,7 +163,7 @@ public class MeterController extends SQLiteOpenHelper {
     }
 
 
-    public void deleteMeterRecord(Meter meter){
+    public void deleteMeterRecord(){
         SQLiteDatabase sqLiteDatabase = this.getWritableDatabase();
         sqLiteDatabase.delete(TABLE_METER, COL0 + " =?",
                 new String[] {String.valueOf(meter.getSensorId())});

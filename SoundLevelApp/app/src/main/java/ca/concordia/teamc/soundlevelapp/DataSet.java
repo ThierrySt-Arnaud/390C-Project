@@ -56,7 +56,7 @@ public class DataSet {
         return dateOfDownload;
     }
 
-    public void setDateOfDownload(int dateOfDownload) {
+    public void setDateOfDownload(long dateOfDownload) {
         this.dateOfDownload = dateOfDownload;
     }
 
@@ -64,7 +64,7 @@ public class DataSet {
         return dateStartRecord;
     }
 
-    public void setDateStartRecord(int dateStartRecord) {
+    public void setDateStartRecord(long dateStartRecord) {
         this.dateStartRecord = dateStartRecord;
     }
 

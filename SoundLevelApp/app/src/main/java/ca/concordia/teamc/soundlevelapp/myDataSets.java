@@ -23,6 +23,8 @@ import static android.content.ContentValues.TAG;
 public class myDataSets extends AppCompatActivity {
 
     private DataListAdapter dataListAdapter;
+    private DataSetController dsc = new DataSetController(this);
+    private List<DataSet> Mylist=null;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -36,20 +38,22 @@ public class myDataSets extends AppCompatActivity {
         ArrayAdapter<String> adapter = new ArrayAdapter<String>(this,android.R.layout.simple_list_item_1,Mylist);
         listView.setAdapter(adapter);*/
 
-        List<DataSet> Mylist = new ArrayList<>();
-        DataSet dataA = new DataSet("Project x","Location A",00-00-00,00-00-00,"","");
-        DataSet dataB = new DataSet("Project y","Location B",00-00-00,00-00-00,"","");
-        DataSet dataC = new DataSet("Project z","Location C",00-00-00,00-00-00,"","");
-        DataSet dataD = new DataSet("Project 1","Location D",00-00-00,00-00-00,"","");
-        DataSet dataE = new DataSet("Project 2","Location E",00-00-00,00-00-00,"","");
-        DataSet dataF = new DataSet("Project 3","Location F",00-00-00,00-00-00,"","");
+//        List<DataSet> Mylist = new ArrayList<>();
+//        DataSet dataA = new DataSet("Project x","Location A",00-00-00,00-00-00,"","");
+//        DataSet dataB = new DataSet("Project y","Location B",00-00-00,00-00-00,"","");
+//        DataSet dataC = new DataSet("Project z","Location C",00-00-00,00-00-00,"","");
+//        DataSet dataD = new DataSet("Project 1","Location D",00-00-00,00-00-00,"","");
+//        DataSet dataE = new DataSet("Project 2","Location E",00-00-00,00-00-00,"","");
+//        DataSet dataF = new DataSet("Project 3","Location F",00-00-00,00-00-00,"","");
+//
+//        Mylist.add(dataA);
+//        Mylist.add(dataB);
+//        Mylist.add(dataC);
+//        Mylist.add(dataD);
+//        Mylist.add(dataE);
+//        Mylist.add(dataF);
 
-        Mylist.add(dataA);
-        Mylist.add(dataB);
-        Mylist.add(dataC);
-        Mylist.add(dataD);
-        Mylist.add(dataE);
-        Mylist.add(dataF);
+        Mylist = dsc.getAllDataSetRecord();
 
         dataListAdapter = new DataListAdapter(this, Mylist);
         ListView listView = (ListView) findViewById(R.id.listview);
@@ -82,6 +86,8 @@ public class myDataSets extends AppCompatActivity {
         public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
             Log.d(TAG, "Item " + i + "  got clicked");
             Intent myIntent = new Intent(adapterView.getContext(), myDataSets_Detailed.class);
+            int id = Mylist.get(i).getDatSetId();
+            myIntent.putExtra("ID", id);
             startActivity(myIntent);
         }
     };
