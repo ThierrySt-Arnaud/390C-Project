@@ -9,20 +9,22 @@ public class DataSet {
     int datSetId;
     String projectName;
     String location;
-    int dateOfDownload;
-    int dateStartRecord;
+    long dateOfDownload;
+    long dateStartRecord;
     String meterReferenceRecord;
     String datafile;
 
-
-    public DataSet(String projectName, String location, int dateOfDownload, int dateStartRecord, String meterReferenceRecord, String datafile) {
-      
+    public DataSet(String projectName, String location, long dateOfDownload, long dateStartRecord, String meterReferenceRecord, String datafile) {
         this.projectName = projectName;
         this.location = location;
         this.dateOfDownload = dateOfDownload;
         this.dateStartRecord = dateStartRecord;
         this.meterReferenceRecord = meterReferenceRecord;
         this.datafile = datafile;
+
+    }
+
+    public DataSet(){
 
     }
 
@@ -50,7 +52,7 @@ public class DataSet {
         this.location = location;
     }
 
-    public int getDateOfDownload() {
+    public long getDateOfDownload() {
         return dateOfDownload;
     }
 
@@ -58,7 +60,7 @@ public class DataSet {
         this.dateOfDownload = dateOfDownload;
     }
 
-    public int getDateStartRecord() {
+    public long getDateStartRecord() {
         return dateStartRecord;
     }
 
@@ -81,6 +83,4 @@ public class DataSet {
     public void setDatafile(String datafile) {
         this.datafile = datafile;
     }
-
-
 }

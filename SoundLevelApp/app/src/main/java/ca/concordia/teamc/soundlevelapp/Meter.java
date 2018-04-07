@@ -27,6 +27,10 @@ public class Meter {
         this.startRecordingDate = startRecordingDate;
     }
 
+    public Meter(){
+
+    }
+
     public int getSensorId(){
         return sensorId;
     }
