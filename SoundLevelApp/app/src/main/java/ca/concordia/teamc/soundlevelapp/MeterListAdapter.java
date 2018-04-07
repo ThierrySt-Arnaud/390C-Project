@@ -71,7 +71,7 @@ public class MeterListAdapter extends BaseAdapter implements Filterable
         ImageView microphoneset = convertView.findViewById(R.id.microphone_On);
         ImageView microphoneNot = convertView.findViewById(R.id.microphone_Off);
 
-        if (currentItem.getRecordingStatus() != 0) {
+        if (currentItem.getRecordingStatus()) {
             microphoneset.setVisibility(View.VISIBLE);
             microphoneNot.setVisibility(View.GONE);
         } else {

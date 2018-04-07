@@ -139,7 +139,8 @@ public class MeterConfigScreen extends AppCompatActivity{
                             dfc.addDataFile();
 
                             // DataRef is place holder
-                            dataSet = new DataSet(config[0],config[1], System.currentTimeMillis(), System.currentTimeMillis(), "meterRef", dataFile.getFile().getAbsolutePath());
+                            // dataSet = new DataSet(config[0],config[1], System.currentTimeMillis(), System.currentTimeMillis(), "meterRef", dataFile.getFile().getAbsolutePath());
+                            dataSet = new DataSet();
                             DataSetController dsc = new DataSetController(context);
                             dsc.addDataSet(dataSet);
 
@@ -179,7 +180,8 @@ public class MeterConfigScreen extends AppCompatActivity{
                         long time = System.currentTimeMillis();
                         BTService.write(projectName +">"+projectLocation);
                         // place holder verify later
-                        meter = new Meter(0,projectName, BTService.MACAddress, projectLocation,projectName,Long.toString(time),0,Long.toString(time));
+                       // meter = new Meter(0,projectName, BTService.MACAddress, projectLocation,projectName,Long.toString(time),0,Long.toString(time));
+                        meter = new Meter();
                         MeterController mc = new MeterController(context);
                         mc.addMeterData(meter);
                     }

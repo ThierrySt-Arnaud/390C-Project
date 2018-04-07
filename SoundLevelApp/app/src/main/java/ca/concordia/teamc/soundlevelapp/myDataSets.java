@@ -7,7 +7,6 @@ import android.text.TextWatcher;
 import android.util.Log;
 import android.view.View;
 import android.widget.AdapterView;
-import android.widget.ArrayAdapter;
 import android.widget.EditText;
 import android.widget.ListView;
 import android.view.Menu;
@@ -37,12 +36,12 @@ public class myDataSets extends AppCompatActivity {
         listView.setAdapter(adapter);*/
 
         List<DataSet> Mylist = new ArrayList<>();
-        DataSet dataA = new DataSet("Project x","Location A",00-00-00,00-00-00,"","");
-        DataSet dataB = new DataSet("Project y","Location B",00-00-00,00-00-00,"","");
-        DataSet dataC = new DataSet("Project z","Location C",00-00-00,00-00-00,"","");
-        DataSet dataD = new DataSet("Project 1","Location D",00-00-00,00-00-00,"","");
-        DataSet dataE = new DataSet("Project 2","Location E",00-00-00,00-00-00,"","");
-        DataSet dataF = new DataSet("Project 3","Location F",00-00-00,00-00-00,"","");
+        DataSet dataA = new DataSet("Project x","Location A","00-00-00","00-00-00","","");
+        DataSet dataB = new DataSet("Project y","Location B","00-00-00","00-00-00","","");
+        DataSet dataC = new DataSet("Project z","Location C","00-00-00","00-00-00","","");
+        DataSet dataD = new DataSet("Project 1","Location D","00-00-00","00-00-00","","");
+        DataSet dataE = new DataSet("Project 2","Location E","00-00-00","00-00-00","","");
+        DataSet dataF = new DataSet("Project 3","Location F","00-00-00","00-00-00","","");
 
         Mylist.add(dataA);
         Mylist.add(dataB);
