@@ -77,6 +77,7 @@ static atomic_bool connection_open = ATOMIC_VAR_INIT(false);
 static atomic_bool recording = ATOMIC_VAR_INIT(false);
 static atomic_bool uploading = ATOMIC_VAR_INIT(false);
 static atomic_bool downloading = ATOMIC_VAR_INIT(false);
+static atomic_bool wait_for_rcv = ATOMIC_VAR_INIT(false);
 static atomic_uint data_to_write = ATOMIC_VAR_INIT(0);
 
 static TaskHandle_t parse_command_handle = NULL;
@@ -154,13 +155,11 @@ void app_main() {
     BaseType_t sample_audio_type;
     sample_audio_type = xTaskCreate(sample_audio, "AudioSampler",
                                      AUDIO_SAMPLE_MEM, (void*) NULL,
-                                     configMAX_PRIORITIES << 1,
-                                     &sample_audio_handle);
+                                     16, &sample_audio_handle);
     BaseType_t parse_command_type;
     parse_command_type = xTaskCreate(parse_command, "CommandParser",
                                      COMMAND_PARSER_MEM, (void*) NULL,
-                                     (configMAX_PRIORITIES << 2)-1,
-                                     &parse_command_handle);
+                                     7, &parse_command_handle);
 
 }
 
@@ -188,6 +187,10 @@ static void esp_spp_cb(esp_spp_cb_event_t event, esp_spp_cb_param_t *param){
         case ESP_SPP_CLOSE_EVT:
             ESP_LOGI(SPP_TAG, "ESP_SPP_CLOSE_EVT");
             atomic_store(&connection_open, false);
+            atomic_store(&connection_ready, false);
+            if(atomic_load(&uploading)){
+                vTaskResume(send_data_handle);
+            }
             break;
 
         // SPP profile start event
@@ -221,7 +224,7 @@ static void esp_spp_cb(esp_spp_cb_event_t event, esp_spp_cb_param_t *param){
             ESP_LOGI(SPP_TAG, "ESP_SPP_CONG_EVT cong=%d handle=%d", param->cong.cong, param->cong.handle);
             atomic_store(&connection_ready, !param->cong.cong);
             if(!param->cong.cong && atomic_load(&uploading)){
-                vTaskResume(send_config_handle);
+                vTaskResume(send_data_handle);
             }
             break;
 
@@ -318,6 +321,28 @@ esp_err_t initialize_spiffs(){
         ESP_LOGI(SPP_TAG, "Partition size: total: %d, used: %d", total, used);
     }
 
+    FILE* stored = fopen(STORAGE_FILENAME,"rb");
+    if (stored == NULL){
+        ESP_LOGI(SPP_TAG, "No stored data found");
+    } else {
+        ESP_LOGI(SPP_TAG, "Found stored data file!");
+        uint8_t i = 0;
+        int8_t c = 0;
+        while (i < 100){
+            c = fgetc(stored);
+            if (feof(stored)){
+                break;
+            }
+            i++;
+            printf("%i ", c);
+        }
+        if (i == 100){
+            printf("...\n");
+        } else {
+            printf("\n");
+        }
+    }
+
     return ret;
 }
 
@@ -325,8 +350,9 @@ void parse_command(void* parameters){
     char upload_comm[] = "{{{";
     char download_comm[] = "}}}";
     char record_comm[] = "###";
+    char rcv[] = "rcv";
     char confirm[] = "OK";
-    BaseType_t send_config_type;
+    BaseType_t send_data_type;
     BaseType_t record_config_type;
     while(true){
         vTaskSuspend(NULL);
@@ -336,32 +362,38 @@ void parse_command(void* parameters){
         free(received_data);
         printf("Received: %s\n", received);
         if (size >= 3){
-            if (strncmp(upload_comm+(size-3),received,3) == 0){
+            if (strncmp(upload_comm,received+(size-3),3) == 0){
                 esp_spp_write(bt_handle,2,(uint8_t*)confirm);
-                atomic_store(&recording,false);
-                vTaskResume(record_data_handle);
                 atomic_store(&uploading,true);
-                send_config_type = xTaskCreate(send_config, "ConfigSender",
-                                               CONFIG_SENDER_MEM, (void*) NULL,
-                                               configMAX_PRIORITIES < 1,
-                                               &send_config_handle);
+                if (atomic_load(&recording)){
+                    ESP_LOGI(SPP_TAG,"Saving record buffer before uploading.");
+                    vTaskResume(record_data_handle);
+                }
+                send_data_type = xTaskCreate(send_data, "DataSender",
+                                             DATA_SENDER_MEM, (void*) NULL,
+                                             17, &send_data_handle);
                 printf("Starting upload.\n");
-            } else if (strncmp(download_comm+(size-3),received,3) == 0){
+            } else if (strncmp(download_comm,received+(size-3),3) == 0){
                 esp_spp_write(bt_handle,2,(uint8_t*)confirm);
-                record_config_type = xTaskCreate(record_config, "ConfigSaver",
+                /*record_config_type = xTaskCreate(record_config, "ConfigSaver",
                                                  CONFIG_SAVER_MEM, (void*) NULL,
-                                                 configMAX_PRIORITIES < 2,
-                                                 &record_config_handle);
+                                                 8, &record_config_handle);*/
                 printf("Starting download.\n");
-            } else if (strncmp(record_comm+(size-3),received,3) == 0){
+            } else if (strncmp(record_comm,received+(size-3),3) == 0){
                 bool rec_status = atomic_load(&recording);
                 rec_status = !rec_status;
-                atomic_store(&recording, rec_status);
                 if (!rec_status){
                     vTaskResume(record_data_handle);
                 }
                 esp_spp_write(bt_handle,2,(uint8_t*)confirm);
+                atomic_store(&recording, rec_status);
                 printf("Changed recording status.\n");
+            } else if (strncmp(rcv,received+(size-3),3) == 0){
+                if (atomic_load(&uploading) && atomic_load(&wait_for_rcv)){
+                    ESP_LOGI(SPP_TAG, "Reception confirmed");
+                    atomic_store(&wait_for_rcv, false);
+                    vTaskResume(send_data_handle);
+                }
             }
         }
         free(received);
@@ -402,17 +434,16 @@ void sample_audio(void* params){
     BaseType_t process_audio_type;
     process_audio_type = xTaskCreate(process_audio, "AudioProcessor",
                                      AUDIO_PROCESS_MEM, reading_buffer,
-                                     configMAX_PRIORITIES << 2,
-                                     &process_audio_handle);
+                                     8, &process_audio_handle);
     while (true){
-        while (!atomic_load(&connection_open) && !atomic_load(&recording)){
+        while (atomic_load(&uploading) || (!atomic_load(&connection_open) && !atomic_load(&recording))){
             i2s_adc_disable(I2S_NUM);
             vTaskResume(record_data_handle);
             vTaskSuspend(NULL);
             i2s_adc_enable(I2S_NUM);
         }
         int16_t bytesRead = i2s_read_bytes(I2S_NUM,(char*)reading_buffer, I2S_READ_LEN*sizeof(uint16_t), record_delay);
-        if (bytesRead == I2S_READ_LEN*2){
+        if (bytesRead == I2S_READ_LEN*sizeof(uint16_t)){
             /*printf("4 samples out of %i:\n", I2S_READ_LEN);
             //printf("%i\n",reading_buffer[0]);
             //printf("%i\n",reading_buffer[I2S_READ_LEN/4]);
@@ -429,69 +460,76 @@ void process_audio(void* buffer){
     BaseType_t record_data_type;
     record_data_type = xTaskCreate(record_data, "DataRecorder",
                                      DATA_RECORDER_MEM, write_buffer,
-                                     configMAX_PRIORITIES << 3,
-                                     &record_data_handle);
+                                     4, &record_data_handle);
     while(true){
         vTaskSuspend(NULL);
-        uint16_t readings = I2S_READ_LEN;
-        //printf("Processing %llu readings...\n", readings);
-        memcpy(process_buffer,buffer,I2S_READ_LEN*sizeof(uint16_t));
-        uint64_t total_holder = 0;
-        uint64_t calverage = 0;
-        for (int i = 0; i < readings; i++){
-            calverage += process_buffer[i];
-        }
-        calverage /= readings;
-        printf("Calibration average: %llu\n",calverage);
-        for (int i = 0; i < readings; i++){
-            total_holder += ((process_buffer[i]-calverage)*(process_buffer[i]-calverage));
-        }
-        double adc_rms_value = sqrt((double) total_holder/readings);
-        printf("ADC RMS value: %f\n",adc_rms_value);
-        double voltage_rms_value = adc_rms_value*3.3/4096*1.5;
-        printf("Compensated voltage RMS value: %f\n",voltage_rms_value);
-        double log_value = 20*log10(voltage_rms_value/MIC_VPA);
-        printf("DB value: %f\n", log_value+8);
-        uint8_t processed_value = (int8_t) round(((log_value+12.26779888)/66.22235685*256)-128);
-        printf("Processed: %i\n", processed_value);
-        if (atomic_load(&connection_open) && atomic_load(&connection_ready)){
-            esp_spp_write(bt_handle, sizeof(uint8_t), &processed_value);
-        }
-        if (atomic_load(&recording)){
-            uint16_t data_in_buffer = atomic_load(&data_to_write);
-            write_buffer[data_in_buffer++] = processed_value;
-            printf("Recorded value #%i\n", data_in_buffer);
-            atomic_store(&data_to_write, data_in_buffer);
-            if (data_in_buffer >= MAX_WRITE_BUFFER){
-                printf("We have %i values, preparing for write to flash.\n", data_in_buffer);
-                vTaskResume(record_data_handle);
+        if(!atomic_load(&uploading) && (atomic_load(&connection_open) || atomic_load(&recording))){
+            uint16_t readings = I2S_READ_LEN;
+            //printf("Processing %llu readings...\n", readings);
+            memcpy(process_buffer,buffer,I2S_READ_LEN*sizeof(uint16_t));
+            uint64_t total_holder = 0;
+            uint64_t calverage = 0;
+            for (int i = 0; i < readings; i++){
+                calverage += process_buffer[i];
+            }
+            calverage /= readings;
+            printf("Calibration average: %llu\n",calverage);
+            for (int i = 0; i < readings; i++){
+                total_holder += ((process_buffer[i]-calverage)*(process_buffer[i]-calverage));
+            }
+            double adc_rms_value = sqrt((double) total_holder/readings);
+            printf("ADC RMS value: %f\n",adc_rms_value);
+            double voltage_rms_value = adc_rms_value*3.3/4096*1.5;
+            printf("Compensated voltage RMS value: %f\n",voltage_rms_value);
+            double log_value = 20*log10(voltage_rms_value/MIC_VPA);
+            printf("DB value: %f\n", log_value+28);
+            uint8_t processed_value = (int8_t) round(((log_value+12.26779888)/66.22235685*256)-128);
+            printf("Processed: %i\n", processed_value);
+            if (atomic_load(&connection_open) && atomic_load(&connection_ready) && !atomic_load(&uploading)){
+                esp_spp_write(bt_handle, sizeof(uint8_t), &processed_value);
+            }
+            if (atomic_load(&recording)){
+                uint16_t data_in_buffer = atomic_load(&data_to_write);
+                write_buffer[data_in_buffer++] = processed_value;
+                printf("Recorded value #%i\n", data_in_buffer);
+                atomic_store(&data_to_write, data_in_buffer);
+                if (data_in_buffer >= MAX_WRITE_BUFFER){
+                    printf("We have %i values, preparing for write to flash.\n", data_in_buffer);
+                    vTaskResume(record_data_handle);
+                }
             }
         }
     }
 }
 
 void record_data(void* write_buffer){
-    uint8_t* ready_buffer = NULL;
     while(true){
         vTaskSuspend(NULL);
         uint16_t to_write = atomic_load(&data_to_write);
-        ready_buffer = malloc(to_write);
-        memcpy(ready_buffer,write_buffer,to_write);
-        FILE* storagefile = fopen(STORAGE_FILENAME,"ab");
-        if (storagefile == NULL){
-            ESP_LOGE(SPP_TAG, "Failed to open file");
-            esp_restart();
-        } else {
-            uint16_t written = fwrite(ready_buffer,sizeof(uint8_t),to_write,storagefile);
-            if(written < to_write){
-                ESP_LOGE(SPP_TAG,"Could only write %i of %i values!", written, to_write);
-                fclose(storagefile);
+        if (to_write > 0){
+            uint8_t* ready_buffer = NULL;
+            ready_buffer = malloc(to_write);
+            memcpy(ready_buffer,write_buffer,to_write);
+            FILE* storagefile = fopen(STORAGE_FILENAME,"ab");
+            if (storagefile == NULL){
+                ESP_LOGE(SPP_TAG, "Failed to open file.");
                 esp_restart();
+            } else {
+                uint16_t written = fwrite(ready_buffer,sizeof(uint8_t),to_write,storagefile);
+                if(written < to_write){
+                    ESP_LOGE(SPP_TAG,"Could only write %i of %i values!", written, to_write);
+                    fclose(storagefile);
+                    esp_restart();
+                }
+                atomic_store(&data_to_write,0);
+                fclose(storagefile);
             }
-            atomic_store(&data_to_write,(to_write-written));
-            fclose(storagefile);
+            free(ready_buffer);
         }
-        free(ready_buffer);
+        if (atomic_load(&uploading)){
+            atomic_store(&recording,false);
+            vTaskResume(send_data_handle);
+        }
     }
 }
 
@@ -540,7 +578,7 @@ void record_config(void* params){
     vTaskDelete(NULL);
 }
 
-void send_config(void* params){
+/*void send_config(void* params){
     nvs_handle my_handle;
     esp_err_t err;
 
@@ -610,10 +648,10 @@ void send_config(void* params){
         }
     }
     vTaskDelete(NULL);
-}
+}*/
 
 void send_data(void * params){
-    char open_data[]= "<<<";
+    /*char open_data[]= "<<<";
     if(!atomic_load(&connection_open)){
         ESP_LOGE(SPP_TAG, "Connection closed before upload completion.");
         atomic_store(&uploading,false);
@@ -621,53 +659,95 @@ void send_data(void * params){
         vTaskDelete(NULL);
     }
     while(!atomic_load(&connection_ready)){vTaskSuspend(NULL);}
-    esp_spp_write(bt_handle,sizeof(open_data),(uint8_t *) open_data);
+    esp_spp_write(bt_handle,sizeof(open_data),(uint8_t *) open_data);*/
+    ESP_LOGI(SPP_TAG,"DataSender created");
+    while(atomic_load(&recording) && atomic_load(&connection_open)){
+        ESP_LOGI(SPP_TAG,"Device still recording.");
+        vTaskSuspend(NULL);
+    }
+    if(!atomic_load(&connection_open)){
+        ESP_LOGE(SPP_TAG, "Connection closed before upload completion.");
+        atomic_store(&uploading,false);
+        //vTaskDelete(send_config_handle);
+        vTaskDelete(NULL);
+    }
+
+    char close_data[]= ">>>\026";
     FILE* storagefile = fopen(STORAGE_FILENAME,"rb");
     if (storagefile == NULL){
         ESP_LOGE(SPP_TAG, "Failed to open file");
-        esp_restart();
+        while(!atomic_load(&connection_ready) && atomic_load(&connection_open)){
+            ESP_LOGI(SPP_TAG,"Waiting for congestion to clear.");
+            vTaskSuspend(NULL);
+        }
+        if(!atomic_load(&connection_open)){
+            ESP_LOGE(SPP_TAG, "Connection closed before upload completion.");
+            atomic_store(&uploading,false);
+            //vTaskDelete(send_config_handle);
+            vTaskDelete(NULL);
+        }
+        esp_spp_write(bt_handle,sizeof(close_data)-1, (uint8_t *) close_data);
     } else{
         fseek(storagefile , 0 , SEEK_END);
         uint32_t lSize = ftell(storagefile);
         rewind(storagefile);
+        ESP_LOGI(SPP_TAG, "Sending file of size %i.", lSize);
         uint8_t* send_buffer = malloc(MAX_SEND_BUFFER*sizeof(uint8_t));
         while(!feof(storagefile) && !ferror(storagefile)){
             uint16_t to_send = fread(send_buffer, sizeof(uint8_t), MAX_SEND_BUFFER, storagefile);
+            while(!atomic_load(&connection_ready) && atomic_load(&connection_open)){
+                ESP_LOGI(SPP_TAG,"Waiting for congestion to clear.");
+                vTaskSuspend(NULL);
+            }
             if(!atomic_load(&connection_open)){
-                ESP_LOGE(SPP_TAG, "Connection closed before upload completion.");
                 free(send_buffer);
                 fclose(storagefile);
+                ESP_LOGE(SPP_TAG, "Connection closed before upload completion.");
                 atomic_store(&uploading,false);
-                vTaskDelete(send_config_handle);
+                //vTaskDelete(send_config_handle);
                 vTaskDelete(NULL);
             }
-            while(!atomic_load(&connection_ready)){vTaskSuspend(NULL);}
-            esp_spp_write(bt_handle,to_send*sizeof(uint8_t), send_buffer);
-            lSize -= to_send*sizeof(uint8_t);
+            if (to_send > 0){
+                esp_spp_write(bt_handle,to_send*sizeof(uint8_t), send_buffer);
+                lSize -= to_send*sizeof(uint8_t);
+                ESP_LOGI(SPP_TAG, "%i bytes left to send.", lSize);
+            }
         }
         if (ferror(storagefile)){
             ESP_LOGE(SPP_TAG, "Failed to fully read file.");
         }
         free(send_buffer);
+        fclose(storagefile);
         if (lSize == 0){
-            char close_data[]= ">>>\026";
+            while(!atomic_load(&connection_ready) && atomic_load(&connection_open)){
+                ESP_LOGI(SPP_TAG,"Waiting for congestion to clear.");
+                vTaskSuspend(NULL);
+            }
             if(!atomic_load(&connection_open)){
                 ESP_LOGE(SPP_TAG, "Connection closed before upload completion.");
-                fclose(storagefile);
                 atomic_store(&uploading,false);
-                vTaskDelete(send_config_handle);
+                //vTaskDelete(send_config_handle);
                 vTaskDelete(NULL);
             }
-            while(!atomic_load(&connection_ready)){vTaskSuspend(NULL);}
-            esp_spp_write(bt_handle,sizeof(close_data), (uint8_t *) close_data);
+            esp_spp_write(bt_handle, 4, (uint8_t *) close_data);
+            atomic_store(&wait_for_rcv, true);
+            while(atomic_load(&wait_for_rcv) && atomic_load(&connection_open)){
+                vTaskSuspend(NULL);
+            }
+            if(!atomic_load(&connection_open)){
+                ESP_LOGE(SPP_TAG, "Connection closed before upload completion.");
+                atomic_store(&uploading, false);
+                atomic_store(&wait_for_rcv, false);
+                //vTaskDelete(send_config_handle);
+                vTaskDelete(NULL);
+            }
             ESP_LOGI(SPP_TAG, "Upload completed.");
-            fclose(storagefile);
-            storagefile = fopen(STORAGE_FILENAME,"wb");
+            remove(STORAGE_FILENAME);
         }
-        fclose(storagefile);
     }
     atomic_store(&uploading,false);
-    vTaskDelete(send_config_handle);
+    //vTaskDelete(send_config_handle);
+    vTaskResume(sample_audio_handle);
     vTaskDelete(NULL);
 }
 
@@ -731,12 +811,15 @@ void reset_requested(esp_err_t* err){
                         if (!gpio_get_level(GPIO_NUM_0)){
                             gpio_set_level(GPIO_NUM_5, 1);
                             *err = nvs_flash_erase();
-                            *err = nvs_flash_init();
                             if (*err == ESP_OK){
                                 ESP_LOGI(SPP_TAG,"Flash erased");
                             } else {
                                 ESP_LOGE(SPP_TAG,"%s flash erase failed err=%s",__func__, esp_err_to_name(*err));
                             }
+                            if (esp_spiffs_mounted(NULL)){
+                                *err = esp_vfs_spiffs_unregister(NULL);
+                            }
+                            *err = esp_spiffs_format(NULL);
                             esp_restart();
                         }
                     }

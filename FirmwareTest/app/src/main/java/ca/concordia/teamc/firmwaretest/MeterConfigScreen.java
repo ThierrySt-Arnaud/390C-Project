@@ -105,9 +105,9 @@ public class MeterConfigScreen extends AppCompatActivity {
                 String str = Arrays.toString(values);
                 Log.d("Receiver", "got message: "+ str);
                 byte value = values[0];
-                double dB = ((value+128)*66.22235685/256)-4.26779888;
+                double dB = ((value+128)*66.22235685/256)+24.26779888;
                 Log.d("DEBUG", ": 8bit int: "+ Integer.toString(value));
-                DataText.setText(Double.toString(dB));
+                DataText.setText(String.format("%.2f",dB));
             }
         };
 
