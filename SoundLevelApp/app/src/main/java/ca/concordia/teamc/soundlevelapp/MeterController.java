@@ -42,7 +42,7 @@ public class MeterController extends SQLiteOpenHelper {
 
     @Override
     public void onUpgrade(SQLiteDatabase sqLiteDatabase, int i, int i1) {
-        sqLiteDatabase.execSQL("DROP IF TABLE EXISTS "+ TABLE_METER);
+        sqLiteDatabase.execSQL("DROP TABLE IF EXISTS "+ TABLE_METER);
         onCreate(sqLiteDatabase);
     }
 
@@ -94,7 +94,7 @@ public class MeterController extends SQLiteOpenHelper {
         contentValues.put(COL6, meter.getRecordingStatus());
         contentValues.put(COL7, meter.getStartRecordingDate());
 
-        long result1 = sqLiteDatabase.update(TABLE_METER,contentValues,"SENSOR_NAME = ?", new String[] {String.valueOf(meter.getSensorName())});
+        //long result1 = sqLiteDatabase.update(TABLE_METER,contentValues,"SENSOR_NAME = ?", new String[] {String.valueOf(meter.getSensorName())});
         return sqLiteDatabase.update(TABLE_METER, contentValues,  "SENSOR_NAME = ?", new String[] { String.valueOf(meter.getSensorName()) });
 
     }
@@ -110,15 +110,8 @@ public class MeterController extends SQLiteOpenHelper {
         if (cursor.moveToFirst()){
             do{
                 Meter meter;
-                meter = new Meter();
-                //meter.setSensorId(Integer.parseInt(cursor.getString(0))); error: cannot find symbol method setSensorId(int)
-                meter.setSensorName(cursor.getString(1));
-                meter.setMacAddress(cursor.getString(2));
-                meter.setLocation(cursor.getString(3));
-                meter.setLastKnownProject(cursor.getString(4));
-                meter.setLastConnectionDate(cursor.getString(5));
-                meter.setRecordingStatus(Boolean.parseBoolean(cursor.getString(6)));
-                meter.setStartRecordingDate(cursor.getString(7));
+                meter = new Meter(cursor.getString(1),cursor.getString(2),cursor.getString(3),cursor.getString(4),cursor.getString(5),Boolean.parseBoolean(cursor.getString(6)),cursor.getString(7));
+                meter.setSensorId(Integer.parseInt(cursor.getString(0)));
 
                 meterRecordList.add(meter);
             }   while (cursor.moveToNext());
@@ -135,18 +128,12 @@ public class MeterController extends SQLiteOpenHelper {
                 new String[] { String.valueOf(sensorName)}, null, null, null, null);
         //Cursor cursor = sqLiteDatabase.rawQuery("SELECT * FROM "+ TABLE_METER + "WHERE " + SENSOR_NAME + "&&" + MAC_ADDRESS + "=?", new String[]{});
 
-        if (cursor != null)
+        if (cursor != null){
             cursor.moveToFirst();
+        }
 
-        Meter meter = new Meter();
-        // meter.setSensorId(Integer.parseInt(cursor.getString(0)));
-        meter.setSensorName(cursor.getString(1));
-        meter.setMacAddress(cursor.getString(2));
-        meter.setLocation(cursor.getString(3));
-        meter.setLastKnownProject(cursor.getString(4));
-        meter.setLastConnectionDate(cursor.getString(5));
-        meter.setRecordingStatus(Boolean.parseBoolean(cursor.getString(6)));
-        meter.setStartRecordingDate(cursor.getString(7));
+        Meter meter = new Meter(cursor.getString(1),cursor.getString(2),cursor.getString(3),cursor.getString(4),cursor.getString(5),Boolean.parseBoolean(cursor.getString(6)),cursor.getString(7));
+        meter.setSensorId(Integer.parseInt(cursor.getString(0)));
 
         return meter;
     }
