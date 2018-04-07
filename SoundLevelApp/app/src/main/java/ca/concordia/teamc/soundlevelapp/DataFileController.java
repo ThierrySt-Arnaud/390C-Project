@@ -13,6 +13,7 @@ import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 
 /**
  * Created by dinaalyousef on 2018-03-25.
@@ -41,9 +42,12 @@ public class DataFileController extends SQLiteOpenHelper {
 
     @Override
     public void onCreate(SQLiteDatabase sqLiteDatabase) {
-        String createTable = "CREATE TABLE " + TABLE_DATAFILE + "(ID INTEGER PRIMARY KEY AUTOINCREMENT, " +
-                " PROJECT_NAME TEXT, LOCATION TEXT, DATA TEXT)";
-        sqLiteDatabase.execSQL(createTable);
+        String createDataSetTable = "CREATE TABLE DataSetTable (ID INTEGER PRIMARY KEY AUTOINCREMENT, PROJECT_NAME TEXT, LOCATION TEXT, DATE_OF_DOWNLOAD INTEGER, DATE_START_RECORD INTEGER, METER_REFERENCE_RECORD TEXT, DATA_FILE TEXT)";
+        String createDataFileTable = "CREATE TABLE DataFileTable (ID INTEGER PRIMARY KEY AUTOINCREMENT, PROJECT_NAME TEXT, LOCATION TEXT, DATA TEXT)";
+        String createMeterTable = "CREATE TABLE SoundMeterTable (ID INTEGER PRIMARY KEY AUTOINCREMENT, SENSOR_NAME TEXT, MAC_ADDRESS TEXT, LOCATION TEXT, LAST_KNOWN_PROJECT TEXT, LAST_CONNECTION_DATE INTEGER, RECORDING_STATUS TEXT, START_RECORDING_DATA INTEGER)";
+        sqLiteDatabase.execSQL(createDataSetTable);
+        sqLiteDatabase.execSQL(createDataFileTable);
+        sqLiteDatabase.execSQL(createMeterTable);
     }
 
     @Override
@@ -58,7 +62,7 @@ public class DataFileController extends SQLiteOpenHelper {
         ContentValues contentValues = new ContentValues();
         contentValues.put(COL1, dataFile.getProjectName());
         contentValues.put(COL2, dataFile.getProjectLocation());
-        contentValues.put(COL3, dataFile.getData().toString());
+        contentValues.put(COL3, Arrays.toString(dataFile.getData()));
 
         long result = sqLiteDatabase.insert(TABLE_DATAFILE, null, contentValues);
         sqLiteDatabase.close();
@@ -128,7 +132,7 @@ public class DataFileController extends SQLiteOpenHelper {
     }
 
     public void writeFile(){
-        String fileString = dataFile.getProjectName();
+        String fileString = dataFile.getProjectName()+",";
 
         for (int i =0; i<dataFile.getData().length;i++){
             fileString += Byte.toString(dataFile.getData()[i]);
@@ -249,5 +253,40 @@ public class DataFileController extends SQLiteOpenHelper {
         }
 
         return "ERROR";
+    }
+
+    public static int[] getdata(String path){
+        try{
+            File f = new File(path);
+            char[] cbuf = new char[1024];
+            FileReader fileReader = new FileReader(f);
+            int charRead = fileReader.read(cbuf, 0, 1024);
+            String readFile = new String(cbuf,0,charRead);
+            readFile = readFile.substring(readFile.indexOf(",")+1);
+            readFile = readFile.replaceAll("\\s+","");
+            readFile = readFile.replaceAll("\\n","");
+            readFile = readFile.replaceAll("\\r","");
+            Log.d("DataFileController", "read file:  "+ readFile);
+            String[] readFileArray = readFile.split(",");
+            int[] fileDataInt = new int[readFileArray.length];
+
+            for (int i=0; i<readFileArray.length; i++){
+                Log.d("DataFileController", "Data:  "+ i + " - " + readFileArray[i]);
+                fileDataInt[i] = Integer.parseInt(readFileArray[i]);
+            }
+
+            return fileDataInt;
+        }catch (FileNotFoundException e){
+            Log.e("DataFileController", "Can not read file ");
+        }catch (IOException e){
+            Log.e("DataFileController", "Can not create/write file ");
+        }
+
+        int[] emptyArray = new int[0];
+        return emptyArray;
+    }
+
+    public String getFilePath(){
+        return dataFile.getFile().getAbsolutePath();
     }
 }

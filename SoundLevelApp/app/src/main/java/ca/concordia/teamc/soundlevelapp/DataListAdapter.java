@@ -15,6 +15,7 @@ import android.widget.Filterable;
 import android.widget.TextView;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 
@@ -75,8 +76,10 @@ public class DataListAdapter extends BaseAdapter implements Filterable
         //sets the text for item name and item description from the current item object
         textViewItemName.setText(currentItem.getProjectName());
         textViewItemLocation.setText(currentItem.getLocation());
-        textViewItemDateStarted.setText(currentItem.getDateStartRecord());
-        textViewItemDateDownloaded.setText(currentItem.getDateOfDownload());
+        Date dateStarted = new Date(currentItem.getDateStartRecord());
+        textViewItemDateStarted.setText(dateStarted.toString());
+        Date dateDownload = new Date(currentItem.getDateOfDownload());
+        textViewItemDateDownloaded.setText(dateDownload.toString());
 
         // returns the view for the current row
         return convertView;

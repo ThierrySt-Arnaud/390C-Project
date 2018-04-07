@@ -9,8 +9,8 @@ public class DataSet {
     int DataSetID;
     String projectName;
     String location;
-    String dateOfDownload;
-    String dateStartRecord;
+    long dateOfDownload;
+    long dateStartRecord;
     String meterReferenceRecord;
     String datafile;
 
@@ -33,6 +33,7 @@ public class DataSet {
     public void setDataSetID(int dataSetID) {
         DataSetID = dataSetID;
     }
+
     public String getProjectName() {
         return projectName;
     }
@@ -53,7 +54,7 @@ public class DataSet {
         return dateOfDownload;
     }
 
-    public void setDateOfDownload(String dateOfDownload) {
+    public void setDateOfDownload(long dateOfDownload) {
         this.dateOfDownload = dateOfDownload;
     }
 
@@ -61,7 +62,7 @@ public class DataSet {
         return dateStartRecord;
     }
 
-    public void setDateStartRecord(String dateStartRecord) {
+    public void setDateStartRecord(long dateStartRecord) {
         this.dateStartRecord = dateStartRecord;
     }
 

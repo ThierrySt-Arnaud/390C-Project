@@ -3,17 +3,20 @@ package ca.concordia.teamc.soundlevelapp;
 import android.graphics.Color;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 
 import com.jjoe64.graphview.GraphView;
 import com.jjoe64.graphview.series.DataPoint;
 import com.jjoe64.graphview.series.LineGraphSeries;
 
+import java.util.Arrays;
 import java.util.Random;
 
 public class myGraph extends AppCompatActivity {
 
     LineGraphSeries<DataPoint> series;
+    int DSID;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -28,7 +31,13 @@ public class myGraph extends AppCompatActivity {
         double  n = 0;
         //Dummy data of the sound recorded
         //int mySoundData[]={33,3,4,5,56,76,87,35,7,67,86,87};
-        int mySoundData[]=new int[99999];
+        String filePath = getIntent().getStringExtra("FilePath");
+        int DSID = getIntent().getIntExtra("DSID",0);
+        Log.d("Graph", "file: " + filePath);
+        int[] fileData = DataFileController.getdata(filePath);
+        Log.d("Graph", "Data from file: " + Arrays.toString(fileData));
+
+        int mySoundData[]=fileData;
         //Lenght of the array of sound recorded
         //int lengthOfmySoundData = mySoundData.length;
 
@@ -37,13 +46,9 @@ public class myGraph extends AppCompatActivity {
 
         //creating graph
         series = new LineGraphSeries <DataPoint>();
-        for (int i=0; i<99998; i++){
-            n = 80+4*rand.nextGaussian();
-            mySoundData[i] = (int) (n);
+        for (int i=0; i<fileData.length; i++){
             x=1+x;
-
-            series.appendData(new DataPoint(x , mySoundData[i] ), true ,100000);
-
+            series.appendData(new DataPoint(x , mySoundData[i] ), true ,1024*1024);
         }
 
         graph.addSeries(series);
@@ -52,6 +57,7 @@ public class myGraph extends AppCompatActivity {
         graph.getGridLabelRenderer().setVerticalAxisTitle("Level of dB");
         graph.getGridLabelRenderer().setHorizontalAxisTitle("Time in s");
         series.setColor(Color.RED);
+
         graph.getViewport().setScalable(true);
 
         // set manual Y bounds
@@ -63,9 +69,6 @@ public class myGraph extends AppCompatActivity {
         graph.getViewport().setXAxisBoundsManual(true);
         graph.getViewport().setMinX(40);
         graph.getViewport().setMaxX(120);
-
-
-
-
     }
+
 }

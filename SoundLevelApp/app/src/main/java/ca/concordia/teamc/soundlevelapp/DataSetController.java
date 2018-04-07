@@ -15,6 +15,7 @@ import java.util.ArrayList;
 public class DataSetController extends SQLiteOpenHelper{
 
     private static final String TAG = "DatSetController";
+    private DataSet dataSet;
 
     private static final String DATABASE_NAME = "SoundLevelApp.db";
     private static final String TABLE_DATASET = "DataSetTable";
@@ -27,16 +28,25 @@ public class DataSetController extends SQLiteOpenHelper{
     private static final String COL5 = "METER_REFERENCE_RECORD";
     private static final String COL6 = "DATA_FILE";
 
-    private static final String[] COLUMNS = {COL0,COL1,COL2,COL3,COL4,COL5};
+    private static final String[] COLUMNS = {COL0,COL1,COL2,COL3,COL4,COL5,COL6};
+
+    public DataSetController(Context context, String projectName, String location, long dateOfDownload, long dateStartRecord, String meterReferenceRecord, String datafile){
+        super(context, DATABASE_NAME,null,1);
+        this.dataSet = new DataSet(projectName, location, dateOfDownload, dateStartRecord, meterReferenceRecord, datafile);
+    }
 
     public DataSetController(Context context){
         super(context, DATABASE_NAME,null,1);
     }
+
     @Override
     public void onCreate(SQLiteDatabase sqLiteDatabase) {
-        String createTable = "CREATE TABLE " + TABLE_DATASET + "(ID INTEGER PRIMARY KEY AUTOINCREMENT, " +
-                " PROJECT_NAME TEXT, LOCATION TEXT, DATE_OF_DOWNLOAD TEXT, DATE_START_RECORD TEXT, METER_REFERENCE_RECORD TEXT, DATA_FILE TEXT)";
-        sqLiteDatabase.execSQL(createTable);
+        String createDataSetTable = "CREATE TABLE DataSetTable (ID INTEGER PRIMARY KEY AUTOINCREMENT, PROJECT_NAME TEXT, LOCATION TEXT, DATE_OF_DOWNLOAD INTEGER, DATE_START_RECORD INTEGER, METER_REFERENCE_RECORD TEXT, DATA_FILE TEXT)";
+        String createDataFileTable = "CREATE TABLE DataFileTable (ID INTEGER PRIMARY KEY AUTOINCREMENT, PROJECT_NAME TEXT, LOCATION TEXT, DATA TEXT)";
+        String createMeterTable = "CREATE TABLE SoundMeterTable (ID INTEGER PRIMARY KEY AUTOINCREMENT, SENSOR_NAME TEXT, MAC_ADDRESS TEXT, LOCATION TEXT, LAST_KNOWN_PROJECT TEXT, LAST_CONNECTION_DATE INTEGER, RECORDING_STATUS TEXT, START_RECORDING_DATA INTEGER)";
+        sqLiteDatabase.execSQL(createDataSetTable);
+        sqLiteDatabase.execSQL(createDataFileTable);
+        sqLiteDatabase.execSQL(createMeterTable);
     }
 
     @Override
@@ -44,6 +54,7 @@ public class DataSetController extends SQLiteOpenHelper{
         sqLiteDatabase.execSQL("DROP TABLE IF EXISTS "+ TABLE_DATASET);
         onCreate(sqLiteDatabase);
     }
+
 
     public boolean addDataSet(DataSet dataSet){
         SQLiteDatabase sqLiteDatabase = this.getWritableDatabase();
@@ -173,8 +184,8 @@ public class DataSetController extends SQLiteOpenHelper{
                 dataSet.setDataSetID(Integer.parseInt(cursor.getString(0)));
                 dataSet.setProjectName(cursor.getString(1));
                 dataSet.setLocation(cursor.getString(2));
-                dataSet.setDateOfDownload(Integer.parseInt(cursor.getString(3)));
-                dataSet.setDateStartRecord(Integer.parseInt(cursor.getString(4)));
+                dataSet.setDateOfDownload(cursor.getLong(3));
+                dataSet.setDateStartRecord(cursor.getLong(4));
                 dataSet.setMeterReferenceRecord(cursor.getString(5));
                 dataSet.setDatafile(cursor.getString(6));
 
@@ -199,15 +210,36 @@ public class DataSetController extends SQLiteOpenHelper{
         dataSet.setDataSetID(Integer.parseInt(cursor.getString(0)));
         dataSet.setProjectName(cursor.getString(1));
         dataSet.setLocation(cursor.getString(2));
-        dataSet.setDateOfDownload(Integer.parseInt(cursor.getString(3)));
-        dataSet.setDateStartRecord(Integer.parseInt(cursor.getString(4)));
+        dataSet.setDateOfDownload(cursor.getLong(3));
+        dataSet.setDateStartRecord(cursor.getLong(4));
         dataSet.setMeterReferenceRecord(cursor.getString(5));
         dataSet.setDatafile(cursor.getString(6));
 
         return dataSet;
     }
 
-    public int updateDataSetRecord(DataSet dataSet){
+    public DataSet getSelectedDataSetRecord(int ID){
+
+        SQLiteDatabase sqLiteDatabase = this.getReadableDatabase();
+
+        Cursor cursor = sqLiteDatabase.query(TABLE_DATASET, COLUMNS, " ID = ?", new String[] { Integer.toString(ID)}, null, null, null, null);
+        //Cursor cursor = sqLiteDatabase.rawQuery("SELECT * FROM "+ TABLE_METER + "WHERE " + SENSOR_NAME + "&&" + MAC_ADDRESS + "=?", new String[]{});
+        DataSet dataSet = new DataSet();
+
+        if (cursor != null && cursor.moveToFirst()){
+            dataSet.setDatSetId(Integer.parseInt(cursor.getString(0)));
+            dataSet.setProjectName(cursor.getString(1));
+            dataSet.setLocation(cursor.getString(2));
+            dataSet.setDateOfDownload(cursor.getLong(3));
+            dataSet.setDateStartRecord(cursor.getLong(4));
+            dataSet.setMeterReferenceRecord(cursor.getString(5));
+            dataSet.setDatafile(cursor.getString(6));
+        }
+
+        return dataSet;
+    }
+
+    public int updateDataSetRecord(){
         SQLiteDatabase sqLiteDatabase = this.getWritableDatabase();
 
         ContentValues contentValues = new ContentValues();
@@ -223,7 +255,7 @@ public class DataSetController extends SQLiteOpenHelper{
     }
 
 
-    public void deleteDatasetRecord(DataSet dataSet){
+    public void deleteDatasetRecord(){
         SQLiteDatabase sqLiteDatabase = this.getWritableDatabase();
         sqLiteDatabase.delete(TABLE_DATASET, COL0 + " =?",
                 new String[] {String.valueOf(dataSet.getDataSetID())});
@@ -232,3 +264,7 @@ public class DataSetController extends SQLiteOpenHelper{
 */
 
 
+    public DataSet getDataSet(){
+        return dataSet;
+    }
+}

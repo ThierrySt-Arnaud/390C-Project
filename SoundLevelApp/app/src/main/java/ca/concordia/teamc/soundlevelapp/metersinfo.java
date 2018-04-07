@@ -22,21 +22,21 @@ import static android.content.ContentValues.TAG;
 public class metersinfo extends AppCompatActivity {
 
     private MeterListAdapter meterListAdapter;
+    private MeterController meterController = new MeterController(this);
+    List<Meter> Mylist =null;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_metersinfo);
         final EditText meterSearch = (EditText) findViewById(R.id.MeterSearch);
 
-
         List<Meter> Mylist = new ArrayList<>();
         Meter meterA = new Meter("test 1", "test mac address 1", "location 1", "project A", "00-00-00", false, "00-00-00");
         Meter meterB = new Meter("test 2", "test mac address 2", "location 2", "project B", "00-00-00", false, "00-00-00");
         Meter meterC = new Meter("test 3", "test mac address 3", "location 3", "project C", "00-00-00", true, "00-00-00");
 
-        Mylist.add(meterA);
-        Mylist.add(meterB);
-        Mylist.add(meterC);
+        Mylist = meterController.getAllMeterRecord();
 
         meterListAdapter = new MeterListAdapter(this, Mylist);
         ListView listView = (ListView) findViewById(R.id.listview);
@@ -68,6 +68,8 @@ public class metersinfo extends AppCompatActivity {
         public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
             Log.d(TAG, "Item " + i + "  got clicked");
             Intent myIntent = new Intent(adapterView.getContext(), metersinfopts.class);
+            Meter meter = Mylist.get(i);
+            myIntent.putExtra("SensorID", meter.getSensorId());
             startActivity(myIntent);
         }
     };

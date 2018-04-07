@@ -24,7 +24,7 @@
         android:layout_marginStart="8dp"
         android:layout_marginTop="8dp"
         android:text="Location"
-        android:textAppearance="@android:style/TextAppearance.Material.Large"
+        android:textAppearance="@style/TextAppearance.AppCompat.Large"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/project_name" />
 
@@ -51,7 +51,7 @@
         app:layout_constraintTop_toBottomOf="@+id/sensor_macaddress" />
 
     <TextView
-        android:id="@+id/textView8"
+        android:id="@+id/last_recorded"
         android:layout_width="370dp"
         android:layout_height="56dp"
         android:layout_marginStart="8dp"
@@ -70,5 +70,5 @@
         android:text="Recording Status"
         android:textAppearance="@style/TextAppearance.AppCompat.Large"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/textView8" />
+        app:layout_constraintTop_toBottomOf="@+id/last_recorded" />
 </android.support.constraint.ConstraintLayout>
