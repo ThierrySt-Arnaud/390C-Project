@@ -22,6 +22,8 @@ import static android.content.ContentValues.TAG;
 public class myDataSets extends AppCompatActivity {
 
     private DataListAdapter dataListAdapter;
+    private DataSetController dsc = new DataSetController(this);
+    private List<DataSet> Mylist=null;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -81,6 +83,8 @@ public class myDataSets extends AppCompatActivity {
         public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
             Log.d(TAG, "Item " + i + "  got clicked");
             Intent myIntent = new Intent(adapterView.getContext(), myDataSets_Detailed.class);
+            int id = Mylist.get(i).getDatSetId();
+            myIntent.putExtra("ID", id);
             startActivity(myIntent);
         }
     };

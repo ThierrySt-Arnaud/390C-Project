@@ -17,8 +17,10 @@ import android.util.Log;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.lang.reflect.Array;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
+import java.util.Arrays;
 import java.util.UUID;
 
 /**
@@ -42,7 +44,7 @@ public class BluetoothService extends Service {
     // SPP UUID service - this should work for most devices
     private static final UUID BTMODULEUUID = UUID.fromString("00001101-0000-1000-8000-00805F9B34FB");
     // String for MAC address
-    protected String MACAddress = "";
+    protected static String MACAddress = "";
 
     private StringBuilder recDataString = new StringBuilder();
 
@@ -74,14 +76,14 @@ public class BluetoothService extends Service {
             public void handleMessage(android.os.Message msg) {
                 Log.d("DEBUG", "handleMessage");
                 if (msg.what == handlerState) { //if message is what we want
-                    //String readMsg = (String) msg.obj;
-                    byte[] readValues = (byte[]) msg.obj;   // msg.arg1 = bytes from connect thread
+                    byte[] readMessage = (byte[]) msg.obj;   // msg.arg1 = bytes from connect thread
                     //recDataString.append(readMessage);
-                    // Log.d("RECORDED", readMsg);
+                    Log.d("RECORDED", recDataString.toString());
                     // Do stuff here with your data, like adding it to the database
                     // Log.d("RECORDED", "Broadcasting message");
                     Intent i = new Intent(BT_MESSAGE);
-                    i.putExtra("message", readValues);
+                    i.putExtra("message", readMessage);
+                    i.putExtra("length", msg.arg1);
                     sendBroadcast(i);
                 }
                 recDataString.delete(0, recDataString.length());  //clear all string data
@@ -135,6 +137,7 @@ public class BluetoothService extends Service {
             mConnectingThread.closeSocket();
         }
         unregisterReceiver(BTBroadcastReceiver);
+        MACAddress = "";
         Log.d("SERVICE", "onDestroy");
     }
 
@@ -207,7 +210,8 @@ public class BluetoothService extends Service {
                 Log.d("DEBUG BT", "CONNECTED THREAD STARTED");
                 //I send a character when resuming.beginning transmission to check device is connected
                 //If it is not an exception will be thrown in the write method and finish() will be called
-                mConnectedThread.write("x");
+                byte[] testMsg = {120};
+                mConnectedThread.write(testMsg);
             } catch (IOException e) {
                 try {
                     Log.d("DEBUG BT", "SOCKET CONNECTION FAILED : " + e.toString());
@@ -274,10 +278,12 @@ public class BluetoothService extends Service {
             while (!stopThread) {
                 try {
                     bytes = mmInStream.read(buffer);            //read bytes from input buffer
-                    //String readMessage = new String(buffer, 0, bytes, Charset.forName("UTF-8"));
-                    // Log.d("DEBUG BT PART", "CONNECTED THREAD " + readMessage);
+//                    String readMessage = new String(buffer, 0, bytes, Charset.forName("UTF-8"));
+//                    Log.d("DEBUG BT PART", "CONNECTED THREAD " + readMessage);
                     // Send the obtained bytes to the UI Activity via handler
+                    Log.d("BYTE ARRAY", Arrays.toString(buffer));
                     bluetoothIn.obtainMessage(handlerState, bytes, -1, buffer).sendToTarget();
+                    buffer[bytes] = '\0';
                 } catch (IOException e) {
                     Log.d("DEBUG BT", e.toString());
                     Log.d("BT SERVICE", "UNABLE TO READ/WRITE, STOPPING SERVICE");
@@ -288,10 +294,10 @@ public class BluetoothService extends Service {
         }
 
         //write method
-        public void write(String input) {
-            byte[] msgBuffer = input.getBytes(); //converts entered String into bytes
+        public void write(byte[] input) {
+            //byte[] msgBuffer = input.getBytes(); //converts entered String into bytes
             try {
-                mmOutStream.write(msgBuffer); //write bytes over BT connection via outstream
+                mmOutStream.write(input); //write bytes over BT connection via outstream
             } catch (IOException e) {
                 //if you cannot write, close the application
                 Log.d("DEBUG BT", "UNABLE TO READ/WRITE " + e.toString());
@@ -314,7 +320,7 @@ public class BluetoothService extends Service {
         }
     }
 
-    public void write(String msg){
+    public void write(byte[] msg){
         Log.d("BT SERVICE", "Writing to remote device");
         mConnectedThread.write(msg);
     }

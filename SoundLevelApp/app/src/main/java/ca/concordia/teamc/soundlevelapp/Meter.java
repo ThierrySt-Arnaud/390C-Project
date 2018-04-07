@@ -69,11 +69,11 @@ public class Meter {
         this.lastKnownProject = lastKnownProject;
     }
 
-    public String getLastConnectionDate() {
+    public long getLastConnectionDate() {
         return lastConnectionDate;
     }
 
-    public void setLastConnectionDate(String lastConnectionDate) {
+    public void setLastConnectionDate(long lastConnectionDate) {
         this.lastConnectionDate = lastConnectionDate;
     }
 
@@ -85,11 +85,11 @@ public class Meter {
         this.recordingStatus = recordingStatus;
     }
 
-    public String getStartRecordingDate() {
+    public long getStartRecordingDate() {
         return startRecordingDate;
     }
 
-    public void setStartRecordingDate(String startRecordingDate) {
+    public void setStartRecordingDate(long startRecordingDate) {
         this.startRecordingDate = startRecordingDate;
     }
 }

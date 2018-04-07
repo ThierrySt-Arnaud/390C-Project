@@ -10,7 +10,7 @@
         android:layout_height="match_parent">
 
         <TextView
-            android:id="@+id/mydatasets_sensorname"
+            android:id="@+id/dsd_sensor_name"
             android:layout_width="356dp"
             android:layout_height="42dp"
             android:layout_marginEnd="8dp"
@@ -20,10 +20,10 @@
             android:textAppearance="@style/TextAppearance.AppCompat.Large"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/textView4" />
+            app:layout_constraintTop_toBottomOf="@+id/dsd_project_name" />
 
         <TextView
-            android:id="@+id/textView4"
+            android:id="@+id/dsd_project_name"
             android:layout_width="356dp"
             android:layout_height="42dp"
             android:layout_marginEnd="8dp"
@@ -36,7 +36,7 @@
             app:layout_constraintTop_toTopOf="parent" />
 
         <TextView
-            android:id="@+id/textView5"
+            android:id="@+id/dsd_location"
             android:layout_width="356dp"
             android:layout_height="42dp"
             android:layout_marginEnd="8dp"
@@ -46,12 +46,12 @@
             android:textAppearance="@style/TextAppearance.AppCompat.Large"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/mydatasets_sensorname" />
+            app:layout_constraintTop_toBottomOf="@+id/dsd_sensor_name" />
 
         <TextView
-            android:id="@+id/textView6"
+            android:id="@+id/dsd_data_started"
             android:layout_width="356dp"
-            android:layout_height="42dp"
+            android:layout_height="68dp"
             android:layout_marginEnd="8dp"
             android:layout_marginStart="8dp"
             android:layout_marginTop="8dp"
@@ -59,12 +59,12 @@
             android:textAppearance="@style/TextAppearance.AppCompat.Large"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/textView5" />
+            app:layout_constraintTop_toBottomOf="@+id/dsd_location" />
 
         <TextView
-            android:id="@+id/textView7"
+            android:id="@+id/dsd_date_downloaded"
             android:layout_width="356dp"
-            android:layout_height="42dp"
+            android:layout_height="79dp"
             android:layout_marginEnd="8dp"
             android:layout_marginStart="8dp"
             android:layout_marginTop="8dp"
@@ -72,7 +72,7 @@
             android:textAppearance="@style/TextAppearance.AppCompat.Large"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/textView6" />
+            app:layout_constraintTop_toBottomOf="@+id/dsd_data_started" />
 
         <Button
             android:id="@+id/button_viewgraph"
@@ -86,7 +86,7 @@
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/textView7" />
+            app:layout_constraintTop_toBottomOf="@+id/dsd_date_downloaded" />
 
     </android.support.constraint.ConstraintLayout>
 </LinearLayout>

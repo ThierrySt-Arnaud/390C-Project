@@ -1,5 +1,7 @@
 package ca.concordia.teamc.soundlevelapp;
 
+import android.bluetooth.BluetoothAdapter;
+import android.bluetooth.BluetoothProfile;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.Context;
@@ -21,10 +23,11 @@ import android.widget.TextView;
 import android.widget.Toast;
 import android.content.Intent;
 import android.content.DialogInterface;
-
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
 import java.io.UnsupportedEncodingException;
 import java.sql.Time;
-import java.util.Arrays;
 
 import static android.support.v4.os.LocaleListCompat.create;
 
@@ -40,10 +43,9 @@ public class MeterConfigScreen extends AppCompatActivity{
     protected static Button btn;
 
     Profile profile = new Profile();
-    Meter meter = null;
-    DataFile dataFile= null;
-    DataSet dataSet = null;
+    MeterController meterController = null;
     DataFileController dfc = null;
+    DataSetController dsc = null;
 
     BroadcastReceiver mReceiver;
     BluetoothService BTService;
@@ -53,6 +55,15 @@ public class MeterConfigScreen extends AppCompatActivity{
     boolean isDownloadRequestOK = false;
     boolean isUploadRequestSend = false;
     boolean isUploadRequestOk = false;
+
+    byte[] downloadSequence = {123,123,123};
+    byte[] uploadSequence = {125,125,125};
+    byte[] configStartSequence = {60,60,60};
+    byte[] configEndSequence = {62,62,62};
+    byte[] okSequence = {111,107};
+    byte[] rcvSequence = {82, 67, 86};
+
+    boolean editable = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -76,24 +87,17 @@ public class MeterConfigScreen extends AppCompatActivity{
 
         saveButton.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
-                if ((LocationText.getText().toString().matches(""))
-                        || (ProjectText.getText().toString().matches("")) || (LastDateText.getText().toString().matches(""))) {
-                    Toast msg = Toast.makeText(getApplicationContext(), "Invalid Input!", Toast.LENGTH_LONG);
-                    msg.show();
-                } else {
-                    profile.setProject(ProjectText.getText().toString());
-                    profile.setLocation(LocationText.getText().toString());
-                    profile.setLastDate(LastDateText.getText().toString());
-
-                    sharedPreferenceHelper.saveProfileName(profile);
-
-                    Log.d("SEND", ProjectText.getText().toString() + "\n" + LocationText.getText().toString() + "/n" + LastDateText.getText().toString());
-                    BTService.write(ProjectText.getText().toString() + "\n" + LocationText.getText().toString() + "/n" + LastDateText.getText().toString() );
-                    //BTService.write("location: "+ LocationText.getText().toString());
-
-                    editText(false);
-                    Toast toast = Toast.makeText(getApplicationContext(), "Saved!", Toast.LENGTH_LONG);
-                    toast.show();
+                Log.d("SEND", "upload");
+                if(isUploadRequestSend && isUploadRequestOk){
+                    // expect RCV
+                    Log.d("MeterConfig", "Still waiting for RCV");
+                }else if (isUploadRequestSend && !isUploadRequestOk){
+                    // expect ok, wait for ok
+                    Log.d("MeterConfig", "Still waiting for upload OK");
+                }else{
+                    // send download message
+                    BTService.write(uploadSequence);
+                    isUploadRequestSend = true;
                 }
             }
         });
@@ -109,7 +113,7 @@ public class MeterConfigScreen extends AppCompatActivity{
                     Log.d("MeterConfig", "Still waiting for download OK");
                 }else{
                  // send download message
-                    BTService.write("{{{");
+                    BTService.write(downloadSequence);
                     isDownloadRequestSend = true;
                 }
             }
@@ -121,143 +125,102 @@ public class MeterConfigScreen extends AppCompatActivity{
         mReceiver = new BroadcastReceiver() {
             @Override
             public void onReceive(Context context, Intent intent) {
-                byte[] values = intent.getByteArrayExtra("message");
-                String str = Arrays.toString(values);
-                Log.d("Receiver", "got message: "+ str);
+                byte[] orgMsg = intent.getByteArrayExtra("message");
+                int msgLength = intent.getIntExtra("length", 0);
+                byte[] msg = Arrays.copyOfRange(orgMsg, 0, msgLength);
+                Log.d("Receiver", "got length: "+ msgLength);
+                Log.d("Receiver", Arrays.toString(msg));
 
                 if(isDownloadRequestSend && isDownloadRequestOK){
                     // expect config file
-
-                    if (msg.contains("<<<")){
+                    if (indexOf(msg,configStartSequence) != -1){
                         isDownloadRequestOK = false;
                         isDownloadRequestSend = false;
-<<<<<<< HEAD
-
-                        msg = msg.replace((char) 0x0A, '\n');
-                        msg = msg.replace((char) 0x0D, '\n');
-
                         try{
-                            String[] file = msg.split("<<<");
-                            String[] config = file[0].split("\n");
-                            String data = file[1].replace(">>>","");
+                            //byte[] file = msg.split("<<<");
+                            byte[] configByte = Arrays.copyOfRange(msg,0, indexOf(msg,configStartSequence)-1);
+                            byte[] data = Arrays.copyOfRange(msg,indexOf(msg,configStartSequence)+3, indexOf(msg,configEndSequence)-1);
+
+                            String configString = new String(configByte,0,configByte.length);
+                            configString = configString.replace((char) 0x0A, '\n');
+                            configString = configString.replace((char) 0x0D, '\n');
+                            String[] config = configString.split("\\r?\\n");
 
                             for(String str : config){
                                 Log.d("CONFIG", str);
                             }
 
-                            Log.d("DATA", data);
+                            Log.d("DATA", Arrays.toString(data));
 
-                            dfc = new DataFileController(context, config[0], config[1], data.getBytes());
+                            dfc = new DataFileController(context, config[0], config[1], data);
                             dfc.addDataFile();
 
                             // DataRef is place holder
-                            // dataSet = new DataSet(config[0],config[1], System.currentTimeMillis(), System.currentTimeMillis(), "meterRef", dataFile.getFile().getAbsolutePath());
-                            dataSet = new DataSet();
-                            DataSetController dsc = new DataSetController(context);
-                            dsc.addDataSet(dataSet);
+                            //dataSet = new DataSet(config[0],config[1], System.currentTimeMillis(), System.currentTimeMillis(), "meterRef", dfc.getFilePath());
+                            dsc = new DataSetController(context, config[0],config[1], System.currentTimeMillis(), System.currentTimeMillis(), "meterRef", dfc.getFilePath());
+                            dsc.addDataSet();
 
                             ProjectText.setText(config[0]);
                             LocationText.setText(config[1]);
                             Storage.setProgress(Integer.parseInt(config[2]));
                             DataText.setTextSize(20);
-                            DataText.setText(data);
-
-
-=======
-
-                        msg = msg.replace((char) 0x0A, '\n');
-                        msg = msg.replace((char) 0x0D, '\n');
-
-                        try{
-                            String[] file = msg.split("<<<");
-                            String[] config = file[0].split("\n");
-                            String data = file[1].replace(">>>","");
-
-                            for(String str : config){
-                                Log.d("CONFIG", str);
-                            }
-
-                            Log.d("DATA", data);
-
-                            ProjectText.setText(config[0]);
-                            LocationText.setText(config[1]);
-                            Storage.setProgress(Integer.parseInt(config[2]));
-                            DataText.setTextSize(20);
-                            DataText.setText(data);
-
-
->>>>>>> bluetooth-fix
+                            DataText.setText(Arrays.toString(data));
                         }catch (ArrayIndexOutOfBoundsException exception){
                             Log.w("MeterConfig", "Ill formatted file!");
                         }
                     }
                 }else if(isDownloadRequestSend && !isDownloadRequestOK){
                     // expect ok
-                    if (msg.equalsIgnoreCase("ok")){
+                    if (indexOf(msg,okSequence) != -1){
                         isDownloadRequestOK = true;
-<<<<<<< HEAD
                         Log.d("MeterConfig", "Received download OK");
-=======
                         Log.d("MeterConfig", "Received OK");
                     }
-                }*/
-
-                /*try{
-                    if (value >= 0 && value <= 255){*/
-                        byte value = values[0];
-                        double dB = value / 4.0 + 39;
-                        Log.d("DEBUG", ": 8bit int: "+ Integer.toString(value));
-                        DataText.setText(Double.toString(dB));
-                    /*}else{
-                        Log.w("WARN", "int not 8bit");
->>>>>>> bluetooth-fix
-                    }
                 }
-
-<<<<<<< HEAD
                 if(isUploadRequestSend && isUploadRequestOk){
                     // expect config file
-                    if (msg.contains("RCV")){
+                    if (indexOf(msg,rcvSequence) != -1){
                         isUploadRequestOk = false;
                         isUploadRequestSend = false;
 
                     }
                 }else if(isUploadRequestSend && !isUploadRequestOk){
                     // expect ok to send data
-                    if (msg.equalsIgnoreCase("ok")){
+                    if (indexOf(msg,okSequence) != -1){
                         isUploadRequestOk = true;
                         Log.d("MeterConfig", "Received upload OK");
                         String projectName = ProjectText.getText().toString();
                         String projectLocation = LocationText.getText().toString();
                         long time = System.currentTimeMillis();
-                        BTService.write(projectName +">"+projectLocation);
+                        String configSend = projectName +">"+projectLocation;
+                        BTService.write(configSend.getBytes());
                         // place holder verify later
-                       // meter = new Meter(0,projectName, BTService.MACAddress, projectLocation,projectName,Long.toString(time),0,Long.toString(time));
-                        meter = new Meter();
-                        MeterController mc = new MeterController(context);
-                        mc.addMeterData(meter);
+                        //meter = new Meter(0,projectName, BTService.MACAddress, projectLocation,projectName,Long.toString(time),0,Long.toString(time));
+                        MeterController mc = new MeterController(context,0,projectName, BTService.MACAddress, projectLocation,projectName,time,false,time);
+                        mc.addMeterData();
                     }
                 }
 
-                try{
-                    int value = Integer.parseInt(msg);
+                if(msgLength == 1){
+                    try{
+                        //int value = Integer.parseInt(msg);
+                        Byte byteValue = msg[0];
+                        int value = byteValue.intValue();
 
-                    if (value >= 0 && value <= 255){
-                        int dB = value / 4 + 39;
-                        Log.d("DEBUG", ": 8bit int: "+ Integer.toString(value));
-                        DataText.setText(Integer.toString(dB));
-                    }else{
-                        Log.w("WARN", "int not 8bit");
+                        if (value >= 0 && value <= 255){
+                            int dB = value / 4 + 39;
+                            Log.d("DEBUG", ": 8bit int: "+ Integer.toString(value));
+                            DataText.setText(Integer.toString(dB));
+                        }else{
+                            Log.w("WARN", "int not 8bit");
+                        }
+
+                    }catch (NumberFormatException e){
+                        Log.w("DEBUG", "Ill formated int");
                     }
-
-                }catch (NumberFormatException e){
-                    Log.w("DEBUG", "Ill formated int");
+                }else{
+                    Log.w("DEBUG", "msgLength > 1, not a reading");
                 }
-=======
-                }catch (NumberFormatException e){
-                    Log.w("DEBUG", "Ill formated int");
-                }*/
->>>>>>> bluetooth-fix
             }
         };
 
@@ -368,5 +331,37 @@ public class MeterConfigScreen extends AppCompatActivity{
         LocationText.setFocusableInTouchMode(bool);
         LocationText.setFocusable(bool);
 
+    }
+
+    public void switchEdit(View v){
+        editable = !editable;
+        editText(editable);
+    }
+
+    public int indexOf(byte[] outerArray, byte[] smallerArray) {
+        for(int i = 0; i < outerArray.length - smallerArray.length+1; ++i) {
+            boolean found = true;
+            for(int j = 0; j < smallerArray.length; ++j) {
+                if (outerArray[i+j] != smallerArray[j]) {
+                    found = false;
+                    break;
+                }
+            }
+            if (found) return i;
+        }
+        return -1;
+    }
+
+    @Override
+    public void onStop(){
+        super.onStop();
+        try{
+            unregisterReceiver(mReceiver);
+        }catch (IllegalArgumentException e){
+            // no receiver registred
+        }
+
+        unbindService(connection);
+        bound = false;
     }
 }
