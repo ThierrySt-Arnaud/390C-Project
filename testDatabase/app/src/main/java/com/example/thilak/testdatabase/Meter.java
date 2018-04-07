@@ -1,4 +1,4 @@
-package ca.concordia.teamc.soundlevelapp;
+package com.example.thilak.testdatabase;
 
 /**
  * Created by Thilak on 2018-03-22.
@@ -6,7 +6,7 @@ package ca.concordia.teamc.soundlevelapp;
 
 public class Meter {
 
-    int sensorId;
+    //int sensorId;
     String sensorName;
     String macAddress;
     String location;
@@ -16,8 +16,10 @@ public class Meter {
     String startRecordingDate;
 
     /*
+
     public Meter(int sensorId, String sensorName, String macAddress, String location, String lastKnownProject, String lastConnectionDate, boolean recordingStatus, String startRecordingDate) {
-        this.sensorId = sensorId;
+
+        //this.sensorId = sensorId;
 
         this.sensorName = sensorName;
         this.macAddress = macAddress;
@@ -27,16 +29,15 @@ public class Meter {
         this.recordingStatus = recordingStatus;
         this.startRecordingDate = startRecordingDate;
     }
+*/
 
-    public int getSensorId(){
-        return sensorId;
-    }
-  
-    public void setSensorId(int sensorId) {
-        this.sensorId = sensorId;
-    }
-     */
+    // public int getSensorId(){
+    //    return sensorId;
+   // }
 
+    //public void setSensorId(int sensorId) {
+        //this.sensorId = sensorId;
+    //}
 
     public String getSensorName() {
         return sensorName;
