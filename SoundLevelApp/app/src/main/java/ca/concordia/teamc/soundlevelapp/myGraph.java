@@ -16,7 +16,6 @@ import java.util.Random;
 public class myGraph extends AppCompatActivity {
 
     LineGraphSeries<DataPoint> series;
-    int DSID;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -24,20 +23,26 @@ public class myGraph extends AppCompatActivity {
         setContentView(R.layout.activity_my_graph);
 
         //Beginning of x Axis
-        int x =0;
-
+        double x = 0;
+        double y = 0;
         Random rand = new Random();
 
-        double  n = 0;
         //Dummy data of the sound recorded
         //int mySoundData[]={33,3,4,5,56,76,87,35,7,67,86,87};
-        String filePath = getIntent().getStringExtra("FilePath");
-        int DSID = getIntent().getIntExtra("DSID",0);
-        Log.d("Graph", "file: " + filePath);
-        int[] fileData = DataFileController.getdata(filePath);
-        Log.d("Graph", "Data from file: " + Arrays.toString(fileData));
 
-        int mySoundData[]=fileData;
+        String filePath = getIntent().getStringExtra("FilePath");
+        byte[] fileData;
+        if (filePath.isEmpty()){
+            fileData = new byte[128*1024];
+            rand.nextBytes(fileData);
+        } else{
+            Log.d("Graph", "file: " + filePath);
+            DataFile df = new DataFile(this, filePath);
+            fileData = df.getData();
+            Log.d("Graph", "Data from file: " + Arrays.toString(fileData));
+        }
+
+        //double[] mySoundData= new double[fileData.length];
         //Lenght of the array of sound recorded
         //int lengthOfmySoundData = mySoundData.length;
 
@@ -46,9 +51,10 @@ public class myGraph extends AppCompatActivity {
 
         //creating graph
         series = new LineGraphSeries <DataPoint>();
-        for (int i=0; i<fileData.length; i++){
-            x=1+x;
-            series.appendData(new DataPoint(x , mySoundData[i] ), true ,1024*1024);
+        for (byte value: fileData){
+            x += 0.125;
+            y = (((value+128)*66.22235685/256)-12.26779888);
+            series.appendData(new DataPoint(x , y), true ,2*1024*1024);
         }
 
         graph.addSeries(series);

@@ -2,86 +2,63 @@ package ca.concordia.teamc.soundlevelapp;
 
 import android.content.Context;
 import android.util.Log;
+
+import java.io.BufferedInputStream;
+import java.io.BufferedOutputStream;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 
 /**
- * Created by dinaalyousef on 2018-03-24.
+ * Created by Thierry St-Arnaud on 04-27-2018.
  */
 
 public class DataFile {
-
-    private Context context;
+    String fileName;
     File file;
-    int id;
-    String projectName;
-    String projectLocation;
-    byte[] data;
+    private static final String TAG = "DataFile";
 
-    public DataFile(Context context, File file, String pName, String pLocation,byte[] data){
-        this.context = context;
-        this.projectName = pName;
-        this.projectLocation = pLocation;
-        this.file = file;
-        this.data = data;
+    public DataFile(Context context){
+        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyMMddHHmmssZ");
+        Date currentDate = new Date(System.currentTimeMillis());
+        fileName = (simpleDateFormat.format(currentDate)+".bin");
+        File newFile = new File(context.getFilesDir(), fileName);
+        this.file = newFile;
     }
 
-    public DataFile(Context context,int id, String pName, String pLocation, byte[] data){
-        this.context = context;
-        this.id = id;
-        this.projectName = pName;
-        this.projectLocation = pLocation;
-        this.data = data;
+    public DataFile(Context context, String oldFileName){
+        this.fileName = oldFileName;
+        this.file = new File(context.getFilesDir(), oldFileName);
     }
 
-    public DataFile(Context context, String pName, String pLocation, byte[] data){
-        this.context = context;
-        this.projectName = pName;
-        this.projectLocation = pLocation;
-        this.data = data;
+    public void writeToFile(byte[] byteData){
+        try{
+            BufferedOutputStream bos = new BufferedOutputStream(new FileOutputStream(file, true));
+            bos.write(byteData);
+        } catch (IOException e) {
+            Log.e(TAG,"Couldn't read from " + fileName + ": ", e);
+        }
     }
 
-    public File getFile() {
-        return file;
-    }
-
-    public void setFile(File file) {
-        this.file = file;
+    public String getFileName() {
+        return fileName;
     }
 
     public byte[] getData() {
+        byte[] data = new byte[(int) file.length()];
+        try{
+            BufferedInputStream bis = new BufferedInputStream(new FileInputStream(file));
+            bis.read(data);
+        } catch (IOException e) {
+            Log.e(TAG,"Couldn't read from " + fileName + ": ", e);
+        }
+
         return data;
-    }
-
-    public void setData(byte[] data) {
-        this.data = data;
-    }
-
-    public String getProjectName() {
-        return projectName;
-    }
-
-    public void setProjectName(String projectName) {
-        this.projectName = projectName;
-    }
-
-    public String getProjectLocation() {
-        return projectLocation;
-    }
-
-    public void setProjectLocation(String projectLocation) {
-        this.projectLocation = projectLocation;
-    }
-
-    public int getId() {
-        return id;
-    }
-
-    public void setId(int id) {
-        this.id = id;
     }
 }

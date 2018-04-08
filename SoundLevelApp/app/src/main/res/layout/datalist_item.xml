@@ -9,38 +9,39 @@
 
     <TextView
         android:id="@+id/text_view_project_name"
-        android:layout_width="88dp"
-        android:layout_height="36dp"
-        android:layout_marginStart="8dp"
+        android:layout_width="0dp"
+        android:layout_height="30dp"
         android:textAppearance="@style/TextAppearance.AppCompat.Large"
-        app:layout_constraintStart_toStartOf="parent" />
+        app:layout_constraintEnd_toStartOf="@+id/text_view_item_location"
+        app:layout_constraintHorizontal_weight="25"
+        app:layout_constraintStart_toStartOf="parent"
+        tools:layout_editor_absoluteY="0dp" />
 
     <TextView
         android:id="@+id/text_view_item_location"
-        android:layout_width="97dp"
-        android:layout_height="36dp"
-        android:layout_marginStart="8dp"
+        android:layout_width="0dp"
+        android:layout_height="30dp"
         android:textAppearance="@style/TextAppearance.AppCompat.Large"
+        app:layout_constraintEnd_toStartOf="@+id/text_view_item_datestarted"
+        app:layout_constraintHorizontal_weight="25"
         app:layout_constraintStart_toEndOf="@+id/text_view_project_name"
         tools:layout_editor_absoluteY="0dp" />
 
     <TextView
         android:id="@+id/text_view_item_datestarted"
-        android:layout_width="78dp"
-        android:layout_height="36dp"
-        android:layout_marginStart="8dp"
+        android:layout_width="0dp"
+        android:layout_height="30dp"
         android:textAppearance="@style/TextAppearance.AppCompat.Large"
-        app:layout_constraintStart_toEndOf="@+id/text_view_item_location"
-        tools:layout_editor_absoluteY="0dp" />
+        app:layout_constraintEnd_toStartOf="@+id/text_view_item_datedownloaded"
+        app:layout_constraintHorizontal_weight="25"
+        app:layout_constraintStart_toEndOf="@+id/text_view_item_location" />
 
     <TextView
         android:id="@+id/text_view_item_datedownloaded"
-        android:layout_width="79dp"
-        android:layout_height="36dp"
-        android:layout_marginEnd="8dp"
-        android:layout_marginStart="8dp"
+        android:layout_width="0dp"
+        android:layout_height="30dp"
         android:textAppearance="@style/TextAppearance.AppCompat.Large"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toEndOf="@+id/text_view_item_datestarted"
-        tools:layout_editor_absoluteY="0dp" />
+        app:layout_constraintHorizontal_weight="25"
+        app:layout_constraintStart_toEndOf="@+id/text_view_item_datestarted" />
 </android.support.constraint.ConstraintLayout>

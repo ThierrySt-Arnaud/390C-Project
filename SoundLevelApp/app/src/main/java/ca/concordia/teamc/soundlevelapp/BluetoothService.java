@@ -44,7 +44,8 @@ public class BluetoothService extends Service {
     // SPP UUID service - this should work for most devices
     private static final UUID BTMODULEUUID = UUID.fromString("00001101-0000-1000-8000-00805F9B34FB");
     // String for MAC address
-    protected static String MACAddress = "";
+    protected static String MACAddress;
+    protected static String deviceName;
 
     private StringBuilder recDataString = new StringBuilder();
 
@@ -141,6 +142,14 @@ public class BluetoothService extends Service {
         Log.d("SERVICE", "onDestroy");
     }
 
+    public String getMACAddress(){
+        return MACAddress;
+    }
+
+    public String getDeviceName(){
+        return deviceName;
+    }
+
     @Nullable
     @Override
     public IBinder onBind(Intent intent) {
@@ -155,6 +164,7 @@ public class BluetoothService extends Service {
             stopSelf();
         } else {
             if (btAdapter.isEnabled()) {
+                deviceName = btAdapter.getName();
                 Log.d("DEBUG BT", "BT ENABLED! BT ADDRESS : " + btAdapter.getAddress() + " , BT NAME : " + btAdapter.getName());
                 try {
                     BluetoothDevice device = btAdapter.getRemoteDevice(MACAddress);

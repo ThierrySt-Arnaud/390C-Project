@@ -17,24 +17,45 @@ import java.util.Date;
 
 public class myDataSets_Detailed extends AppCompatActivity{
 
-    private DataSetController dsc = new DataSetController(this);
-    private DataSet dataSet = new DataSet();
+    private DataSetController dsc;
+    private DataSet dataSet;
+    Button yourButton;
+    TextView pNameTV;
+    TextView locationTV;
+    TextView sNameTV;
+    TextView startedTV;
+    TextView downloadedTV;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_mydatasets_detailed);
+        dsc = new DataSetController(this);
 
-        Button yourButton = (Button) findViewById(R.id.button_viewgraph);
-        TextView pNameTV = (TextView) findViewById(R.id.dsd_project_name);
-        TextView locationTV = (TextView) findViewById(R.id.dsd_location);
-        TextView sNameTV = (TextView) findViewById(R.id.dsd_sensor_name);
-        TextView startedTV = (TextView) findViewById(R.id.dsd_data_started);
-        TextView downloadedTV = (TextView) findViewById(R.id.dsd_date_downloaded);
+        yourButton = (Button) findViewById(R.id.button_viewgraph);
+        pNameTV = (TextView) findViewById(R.id.dsd_project_name);
+        locationTV = (TextView) findViewById(R.id.dsd_location);
+        sNameTV = (TextView) findViewById(R.id.dsd_sensor_name);
+        startedTV = (TextView) findViewById(R.id.dsd_data_started);
+        downloadedTV = (TextView) findViewById(R.id.dsd_date_downloaded);
 
         int ID = getIntent().getIntExtra("ID", 0);
-        dataSet = dsc.getSelectedDataSetRecord(ID);
+        dataSet = dsc.getSelectedDataSet(ID);
 
+        yourButton.setOnClickListener(new View.OnClickListener(){
+            public void onClick(View v){
+                Intent myIntent = new Intent(myDataSets_Detailed.this, myGraph.class);
+                myIntent.putExtra("FilePath", dataSet.getDatafile());
+                myIntent.putExtra("DSID", dataSet.getDataSetID());
+                Log.d("DSD", "FilePath" + dataSet.getDatafile());
+                startActivity(myIntent);
+            }
+        });
+    }
+
+    @Override
+    public void onStart(){
+        super.onStart();
         String pName = dataSet.getProjectName();
         String location = dataSet.getLocation();
         String sName = dataSet.getMeterReferenceRecord();
@@ -48,15 +69,6 @@ public class myDataSets_Detailed extends AppCompatActivity{
         startedTV.setText("Date Started:\n" + startedDate.toString());
         downloadedTV.setText("Date Downloaded:\n"+ downloadDate.toString());
 
-        yourButton.setOnClickListener(new View.OnClickListener(){
-            public void onClick(View v){
-                Intent myIntent = new Intent(myDataSets_Detailed.this, myGraph.class);
-                myIntent.putExtra("FilePath", dataSet.getDatafile());
-                myIntent.putExtra("DSID", dataSet.getDatSetId());
-                Log.d("DSD", "FilePath" + dataSet.getDatafile());
-                startActivity(myIntent);
-            }
-        });
     }
 
     @Override

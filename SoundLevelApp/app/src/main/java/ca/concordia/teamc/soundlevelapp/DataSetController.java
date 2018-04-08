@@ -30,12 +30,7 @@ public class DataSetController extends SQLiteOpenHelper{
 
     private static final String[] COLUMNS = {COL0,COL1,COL2,COL3,COL4,COL5,COL6};
 
-    public DataSetController(Context context, String projectName, String location, long dateOfDownload, long dateStartRecord, String meterReferenceRecord, String datafile){
-        super(context, DATABASE_NAME,null,1);
-        this.dataSet = new DataSet(projectName, location, dateOfDownload, dateStartRecord, meterReferenceRecord, datafile);
-    }
-
-    public DataSetController(Context context){
+    DataSetController(Context context){
         super(context, DATABASE_NAME,null,1);
     }
 
@@ -62,8 +57,8 @@ public class DataSetController extends SQLiteOpenHelper{
         ContentValues contentValues = new ContentValues();
         contentValues.put(COL1, dataSet.getProjectName());
         contentValues.put(COL2, dataSet.getLocation());
-        contentValues.put(COL3, dataSet.getDateOfDownload());
-        contentValues.put(COL4, dataSet.getDateStartRecord());
+        contentValues.put(COL3, Long.toString(dataSet.getDateOfDownload()));
+        contentValues.put(COL4, Long.toString(dataSet.getDateStartRecord()));
         contentValues.put(COL5, dataSet.getMeterReferenceRecord());
         contentValues.put(COL6, dataSet.getDatafile());
 
@@ -71,11 +66,7 @@ public class DataSetController extends SQLiteOpenHelper{
         long result = sqLiteDatabase.insert(TABLE_DATASET, null, contentValues);
         //sqLiteDatabase.close();
         //return result;
-        if(result == -1) {
-            return false;
-        }else{
-            return true;
-        }
+        return result == -1;
     }
 
 
@@ -113,10 +104,11 @@ public class DataSetController extends SQLiteOpenHelper{
             do{
                 DataSet dataSet;
                 dataSet = new DataSet();
+                dataSet.setDataSetID(Integer.parseInt(cursor.getString(0)));
                 dataSet.setProjectName(cursor.getString(1));
                 dataSet.setLocation(cursor.getString(2));
-                dataSet.setDateOfDownload(cursor.getString(3));
-                dataSet.setDateStartRecord(cursor.getString(4));
+                dataSet.setDateOfDownload(Long.parseLong(cursor.getString(3)));
+                dataSet.setDateStartRecord(Long.parseLong(cursor.getString(4)));
                 dataSet.setMeterReferenceRecord(cursor.getString(5));
                 dataSet.setDatafile(cursor.getString(6));
 
@@ -127,23 +119,23 @@ public class DataSetController extends SQLiteOpenHelper{
     }
 
 
-    public DataSet getSelectedDataSet(String projectName){
+    public DataSet getSelectedDataSet(int ID){
 
         SQLiteDatabase sqLiteDatabase = this.getReadableDatabase();
 
-        Cursor cursor = sqLiteDatabase.query(TABLE_DATASET, COLUMNS, "PROJECT_NAME = ?",
-                new String[] { String.valueOf(projectName)}, null, null, null, null);
+        Cursor cursor = sqLiteDatabase.query(TABLE_DATASET, COLUMNS, "ID = ?",
+                new String[] {Integer.toString(ID)}, null, null, null, null);
         //Cursor cursor = sqLiteDatabase.rawQuery("SELECT * FROM "+ TABLE_METER + "WHERE " + SENSOR_NAME + "&&" + MAC_ADDRESS + "=?", new String[]{});
 
         if (cursor != null)
             cursor.moveToFirst();
 
         DataSet dataSet = new DataSet();
-        // meter.setSensorId(Integer.parseInt(cursor.getString(0)));
+        dataSet.setDataSetID(Integer.parseInt(cursor.getString(0)));
         dataSet.setProjectName(cursor.getString(1));
         dataSet.setLocation(cursor.getString(2));
-        dataSet.setDateOfDownload(cursor.getString(3));
-        dataSet.setDateStartRecord(cursor.getString(4));
+        dataSet.setDateOfDownload(Long.parseLong(cursor.getString(3)));
+        dataSet.setDateStartRecord(Long.parseLong(cursor.getString(4)));
         dataSet.setMeterReferenceRecord(cursor.getString(5));
         dataSet.setDatafile((cursor.getString(6)));
 
@@ -262,9 +254,3 @@ public class DataSetController extends SQLiteOpenHelper{
         sqLiteDatabase.close();
     }
 */
-
-
-    public DataSet getDataSet(){
-        return dataSet;
-    }
-}

@@ -31,11 +31,6 @@ public class MeterController extends SQLiteOpenHelper {
 
     private static final String[] COLUMNS = {COL0,COL1,COL2,COL3,COL4,COL5,COL6,COL7};
 
-    public MeterController(Context context, int sensorId, String sensorName, String macAddress, String location, String lastKnownProject, long lastConnectionDate, boolean recordingStatus, long startRecordingDate){
-        super(context, DATABASE_NAME, null,1);
-        this.meter = new Meter(sensorId,  sensorName, macAddress, location, lastKnownProject, lastConnectionDate, recordingStatus, startRecordingDate);
-    }
-
     public MeterController(Context context){
         super(context, DATABASE_NAME, null,1);
     }
@@ -121,7 +116,7 @@ public class MeterController extends SQLiteOpenHelper {
         if (cursor.moveToFirst()){
             do{
                 Meter meter;
-                meter = new Meter(cursor.getString(1),cursor.getString(2),cursor.getString(3),cursor.getString(4),cursor.getString(5),Boolean.parseBoolean(cursor.getString(6)),cursor.getString(7));
+                meter = new Meter(cursor.getString(1),cursor.getString(2),cursor.getString(3),cursor.getString(4),Long.parseLong(cursor.getString(5)),Boolean.parseBoolean(cursor.getString(6)),Long.parseLong(cursor.getString(7)));
                 meter.setSensorId(Integer.parseInt(cursor.getString(0)));
 
                 meterRecordList.add(meter);
@@ -131,20 +126,38 @@ public class MeterController extends SQLiteOpenHelper {
     }
 
 
-    public Meter getSelectedMeterRecord(String sensorName){
+    public Meter getSelectedMeterRecord(int ID){
 
         SQLiteDatabase sqLiteDatabase = this.getReadableDatabase();
 
-        Cursor cursor = sqLiteDatabase.query(TABLE_METER, COLUMNS, "SENSOR_NAME = ?",
-                new String[] { String.valueOf(sensorName)}, null, null, null, null);
+        Cursor cursor = sqLiteDatabase.query(TABLE_METER, COLUMNS, "ID = ?",
+                new String[] { Integer.toString(ID)}, null, null, null, null);
         //Cursor cursor = sqLiteDatabase.rawQuery("SELECT * FROM "+ TABLE_METER + "WHERE " + SENSOR_NAME + "&&" + MAC_ADDRESS + "=?", new String[]{});
 
         if (cursor != null){
             cursor.moveToFirst();
         }
 
-        Meter meter = new Meter(cursor.getString(1),cursor.getString(2),cursor.getString(3),cursor.getString(4),cursor.getString(5),Boolean.parseBoolean(cursor.getString(6)),cursor.getString(7));
+        Meter meter = new Meter(cursor.getString(1),cursor.getString(2),cursor.getString(3),cursor.getString(4),Long.parseLong(cursor.getString(5)),Boolean.parseBoolean(cursor.getString(6)),Long.parseLong(cursor.getString(7)));
         meter.setSensorId(Integer.parseInt(cursor.getString(0)));
+
+        return meter;
+    }
+    public Meter getSelectedMeterRecord(String macAddress){
+
+        SQLiteDatabase sqLiteDatabase = this.getReadableDatabase();
+
+        Cursor cursor = sqLiteDatabase.query(TABLE_METER, COLUMNS, "MAC_ADDRESS = ?",
+                new String[] { macAddress }, null, null, null, null);
+        //Cursor cursor = sqLiteDatabase.rawQuery("SELECT * FROM "+ TABLE_METER + "WHERE " + SENSOR_NAME + "&&" + MAC_ADDRESS + "=?", new String[]{});
+
+        Meter meter = null;
+        if (cursor != null){
+            cursor.moveToFirst();
+
+            meter = new Meter(cursor.getString(1),cursor.getString(2),cursor.getString(3),cursor.getString(4),Long.parseLong(cursor.getString(5)),Boolean.parseBoolean(cursor.getString(6)),Long.parseLong(cursor.getString(7)));
+            meter.setSensorId(Integer.parseInt(cursor.getString(0)));
+        }
 
         return meter;
     }
@@ -194,7 +207,7 @@ public class MeterController extends SQLiteOpenHelper {
         return meterRecordList;
     }
 
-   /*public Meter getSelectedMeterRecord(String sensorName){
+/*  public Meter getSelectedMeterRecord(String sensorName){
 
       SQLiteDatabase sqLiteDatabase = this.getReadableDatabase();
 
@@ -292,8 +305,4 @@ public class MeterController extends SQLiteOpenHelper {
             return true;
         }
     }
-    */
-
-
-
-
+*/

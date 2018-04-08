@@ -143,7 +143,7 @@ public class ListDevicesActivity extends AppCompatActivity {
             final String address = info.substring(info.length() - 17);
 
             Log.d("DeviceList", "Current Address: "+ BluetoothService.MACAddress);
-            Log.d("DeviceList", "Cliecked Adress" + address);
+            Log.d("DeviceList", "Clicked Address" + address);
 
             if(BluetoothService.MACAddress.equalsIgnoreCase(address)){
                 Intent meterConfigScreenIntent = new Intent(ListDevicesActivity.this, MeterConfigScreen.class);
