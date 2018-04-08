@@ -89,6 +89,13 @@ public class MeterConfigScreen extends AppCompatActivity{
 
         final SharedPreferenceHelper sharedPreferenceHelper = new SharedPreferenceHelper(MeterConfigScreen.this);
 
+        Intent BTSIntent = new Intent(this, BluetoothService.class);
+        bindService(BTSIntent, connection, Context.BIND_AUTO_CREATE);
+
+        IntentFilter filter = new IntentFilter();
+        filter.addAction(BluetoothService.BT_MESSAGE);
+
+
         if (sharedPreferenceHelper.getProfileProject() != null) {
             LocationText.setText(sharedPreferenceHelper.getProfileLocation());
         }
@@ -140,28 +147,6 @@ public class MeterConfigScreen extends AppCompatActivity{
                 }
             }
         });
-    }
-
-    @Override
-    public void onStart(){
-        super.onStart();
-        Intent intent = getIntent();
-        String project = intent.getStringExtra("projectName");
-        String location = intent.getStringExtra("meterLocation");
-        String lastdate = intent.getStringExtra("profilelastdate");
-
-        meterController = MeterController.getInstance(this);
-        dsc = DataSetController.getInstance(this);
-
-        ProjectText.setText(project);
-        LocationText.setText(location);
-        LastDateText.setText(lastdate);
-
-        Intent BTSIntent = new Intent(this, BluetoothService.class);
-        bindService(BTSIntent, connection, Context.BIND_AUTO_CREATE);
-
-        IntentFilter filter = new IntentFilter();
-        filter.addAction(BluetoothService.BT_MESSAGE);
 
         mReceiver = new BroadcastReceiver() {
             @Override
@@ -231,6 +216,23 @@ public class MeterConfigScreen extends AppCompatActivity{
             }
         };
         registerReceiver(mReceiver, filter);
+    }
+
+    @Override
+    public void onStart(){
+        super.onStart();
+        Intent intent = getIntent();
+        String project = intent.getStringExtra("projectName");
+        String location = intent.getStringExtra("meterLocation");
+        String lastdate = intent.getStringExtra("profilelastdate");
+
+        meterController = MeterController.getInstance(this);
+        dsc = DataSetController.getInstance(this);
+
+        ProjectText.setText(project);
+        LocationText.setText(location);
+        LastDateText.setText(lastdate);
+
         currentMeter = meterController.getSelectedMeterRecord(BTService.getMACAddress());
         if (currentMeter == null){
             currentMeter = new Meter();
