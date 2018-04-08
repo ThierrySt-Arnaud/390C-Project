@@ -129,17 +129,17 @@ public class MeterConfigScreen extends AppCompatActivity{
 
         recordButton.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
-            Log.d("SEND", "record");
-            if(isRecordRequestSend){
-                // expect config file, do nothing
-                Log.d("MeterConfig", "Still waiting for config and data file");
-            } else{
-                // send download message
-                BTService.write(recordSequence);
-                isRecordRequestSend = true;
+                Log.d("SEND", "record");
+                if(isRecordRequestSend){
+                    // expect config file, do nothing
+                    Log.d("MeterConfig", "Still waiting for config and data file");
+                } else{
+                    // send download message
+                    BTService.write(recordSequence);
+                    isRecordRequestSend = true;
+                }
             }
-        }
-    });
+        });
     }
 
     @Override

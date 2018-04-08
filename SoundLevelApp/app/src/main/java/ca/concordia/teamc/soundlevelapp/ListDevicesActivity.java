@@ -145,6 +145,7 @@ public class ListDevicesActivity extends AppCompatActivity {
                 Intent meterConfigScreenIntent = new Intent(ListDevicesActivity.this, MeterConfigScreen.class);
                 startActivity(meterConfigScreenIntent);
             }else{
+                Log.d(TAG, "Sending address to service:" + address);
                 Intent intent = new Intent(ListDevicesActivity.this.getBaseContext(), BluetoothService.class);
                 intent.putExtra("address", address);
                 startService(intent);
