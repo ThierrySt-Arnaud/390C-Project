@@ -35,7 +35,7 @@ public class myGraph extends AppCompatActivity {
         if (filePath.isEmpty()){
             fileData = new byte[128*1024];
             rand.nextBytes(fileData);
-        } else{
+        } else {
             Log.d("Graph", "file: " + filePath);
             DataFile df = new DataFile(this, filePath);
             fileData = df.getData();
@@ -53,7 +53,7 @@ public class myGraph extends AppCompatActivity {
         series = new LineGraphSeries <DataPoint>();
         for (byte value: fileData){
             x += 0.125;
-            y = (((value+128)*66.22235685/256)-12.26779888);
+            y = (((value+128)*66.22235685/256)+42.26779888);
             series.appendData(new DataPoint(x , y), true ,2*1024*1024);
         }
 

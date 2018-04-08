@@ -22,7 +22,7 @@ import static android.content.ContentValues.TAG;
 public class myDataSets extends AppCompatActivity {
 
     private DataListAdapter dataListAdapter;
-    private DataSetController dsc = new DataSetController(this);
+    private DataSetController dsc = DataSetController.getInstance(this);
     private List<DataSet> Mylist=null;
 
     @Override

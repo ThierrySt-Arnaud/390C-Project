@@ -17,7 +17,7 @@ import javax.crypto.Mac;
 
 public class metersinfopts extends AppCompatActivity {
 
-    private MeterController meterController = new MeterController(this);
+    private MeterController meterController;
     private Meter meter = null;
 
     @Override
@@ -33,7 +33,7 @@ public class metersinfopts extends AppCompatActivity {
         TextView recordStatusTV = (TextView) findViewById(R.id.recording_status);
 
         int ID = getIntent().getIntExtra("SensorID", 0);
-
+        meterController = MeterController.getInstance(this);
         meter = meterController.getSelectedMeterRecord(ID);
 
         String pName = meter.getSensorName();

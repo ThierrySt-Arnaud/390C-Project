@@ -23,7 +23,7 @@ import static android.content.ContentValues.TAG;
 public class metersinfo extends AppCompatActivity {
 
     private MeterListAdapter meterListAdapter;
-    private MeterController meterController = new MeterController(this);
+    private MeterController meterController;
     List<Meter> myList;
     EditText meterSearch;
     ListView listView;
@@ -33,11 +33,8 @@ public class metersinfo extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_metersinfo);
         meterSearch = (EditText) findViewById(R.id.MeterSearch);
-        meterController = new MeterController(this);
+        meterController = MeterController.getInstance(this);
         listView = (ListView) findViewById(R.id.listview);
-        if (meterController.getAllMeterRecord().isEmpty()){
-
-        }
     }
 
     AdapterView.OnItemClickListener meterListListener = new AdapterView.OnItemClickListener() {

@@ -7,10 +7,7 @@ import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
-import java.io.FileReader;
-import java.io.FileWriter;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -41,6 +38,7 @@ public class DataFile {
         try{
             BufferedOutputStream bos = new BufferedOutputStream(new FileOutputStream(file, true));
             bos.write(byteData);
+            bos.close();
         } catch (IOException e) {
             Log.e(TAG,"Couldn't read from " + fileName + ": ", e);
         }
@@ -50,15 +48,20 @@ public class DataFile {
         return fileName;
     }
 
+    public long getSize(){
+        return file.length();
+    }
+
     public byte[] getData() {
         byte[] data = new byte[(int) file.length()];
         try{
             BufferedInputStream bis = new BufferedInputStream(new FileInputStream(file));
             bis.read(data);
+            bis.close();
         } catch (IOException e) {
             Log.e(TAG,"Couldn't read from " + fileName + ": ", e);
+            return null;
         }
-
         return data;
     }
 }

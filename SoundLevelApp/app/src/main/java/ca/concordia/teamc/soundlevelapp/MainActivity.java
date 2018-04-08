@@ -20,8 +20,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         setContentView(R.layout.activity_main);
         sharedPreferenceHelper = new SharedPreferenceHelper(MainActivity.this);
 
-        DataSetController dsc = new DataSetController(this);
-        MeterController mc = new MeterController(this);
+        DataSetController dsc = DataSetController.getInstance(this);
+        MeterController mc = MeterController.getInstance(this);
 
         if (mc.getAllMeterRecord().isEmpty()){
             Meter meterA = new Meter("test 1", "test mac address 1", "location 1", "project A", System.currentTimeMillis(), false, System.currentTimeMillis());

@@ -2,6 +2,7 @@ package ca.concordia.teamc.soundlevelapp;
 
 
 import android.content.Intent;
+import android.nfc.Tag;
 import android.os.Bundle;
 import android.provider.ContactsContract;
 import android.support.v7.app.AppCompatActivity;
@@ -12,11 +13,12 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import java.util.Date;
 
 public class myDataSets_Detailed extends AppCompatActivity{
-
+    static final String TAG = "DataSet View";
     private DataSetController dsc;
     private DataSet dataSet;
     Button yourButton;
@@ -25,12 +27,13 @@ public class myDataSets_Detailed extends AppCompatActivity{
     TextView sNameTV;
     TextView startedTV;
     TextView downloadedTV;
+    int ID;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        Log.d(TAG,"Called onCreate");
         setContentView(R.layout.activity_mydatasets_detailed);
-        dsc = new DataSetController(this);
 
         yourButton = (Button) findViewById(R.id.button_viewgraph);
         pNameTV = (TextView) findViewById(R.id.dsd_project_name);
@@ -39,9 +42,46 @@ public class myDataSets_Detailed extends AppCompatActivity{
         startedTV = (TextView) findViewById(R.id.dsd_data_started);
         downloadedTV = (TextView) findViewById(R.id.dsd_date_downloaded);
 
-        int ID = getIntent().getIntExtra("ID", 0);
-        dataSet = dsc.getSelectedDataSet(ID);
+        ID = getIntent().getIntExtra("ID",0);
 
+    }
+
+    @Override
+    public void onStart(){
+        super.onStart();
+        Log.d(TAG,"Called onStart");
+        dsc = DataSetController.getInstance(this);
+        Log.d(TAG,"ID is "+ ID);
+    }
+
+    @Override
+    public void onSaveInstanceState(Bundle saveInstanceState){
+        Log.d(TAG,"Called onSaveInstanceState");
+
+        saveInstanceState.putInt("ID", ID);
+        Log.d(TAG,"Saved ID as " + ID);
+        super.onSaveInstanceState(saveInstanceState);
+    }
+
+    @Override
+    public void onRestoreInstanceState(Bundle saveInstanceState){
+        super.onRestoreInstanceState(saveInstanceState);
+        Log.d(TAG,"Called onSaveInstanceState");
+        if (saveInstanceState != null){
+            ID = saveInstanceState.getInt("ID", 0);
+            Log.d(TAG,"Instance ID is : " + ID);
+        }
+    }
+
+    @Override
+    public  void onResume(){
+        super.onResume();
+        Log.d(TAG,"Called onResume");
+        if (ID == 0){
+            ID = getIntent().getIntExtra("ID",0);
+            Log.d(TAG,"Intent ID is: " + ID);
+        }
+        dataSet = dsc.getSelectedDataSet(ID);
         yourButton.setOnClickListener(new View.OnClickListener(){
             public void onClick(View v){
                 Intent myIntent = new Intent(myDataSets_Detailed.this, myGraph.class);
@@ -51,11 +91,6 @@ public class myDataSets_Detailed extends AppCompatActivity{
                 startActivity(myIntent);
             }
         });
-    }
-
-    @Override
-    public void onStart(){
-        super.onStart();
         String pName = dataSet.getProjectName();
         String location = dataSet.getLocation();
         String sName = dataSet.getMeterReferenceRecord();
@@ -68,7 +103,15 @@ public class myDataSets_Detailed extends AppCompatActivity{
         sNameTV.setText("Sensor Name: "+ sName);
         startedTV.setText("Date Started:\n" + startedDate.toString());
         downloadedTV.setText("Date Downloaded:\n"+ downloadDate.toString());
+    }
 
+    @Override
+    public void onStop(){
+        Log.d(TAG,"Called onStop");
+
+        getIntent().putExtra("ID",ID);
+        Log.d(TAG,"Saved ID as " + ID);
+        super.onStop();
     }
 
     @Override

@@ -23,6 +23,9 @@ import android.widget.TextView;
 import android.widget.Toast;
 import android.content.Intent;
 import android.content.DialogInterface;
+
+import com.google.common.primitives.Bytes;
+
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
@@ -33,6 +36,8 @@ import static android.support.v4.os.LocaleListCompat.create;
 
 
 public class MeterConfigScreen extends AppCompatActivity{
+
+    private final static String TAG = "MeterConfig";
     protected EditText ProjectText =null;
     protected EditText LocationText =null;
     protected EditText LastDateText =null;
@@ -40,6 +45,7 @@ public class MeterConfigScreen extends AppCompatActivity{
     protected ProgressBar Storage = null;
     protected Button saveButton = null;
     protected Button downloadButton = null;
+    protected Button recordButton = null;
     protected Button btn;
 
     Profile profile = new Profile();
@@ -55,13 +61,17 @@ public class MeterConfigScreen extends AppCompatActivity{
     boolean isDownloadRequestOK = false;
     boolean isUploadRequestSend = false;
     boolean isUploadRequestOk = false;
+    boolean isRecordRequestSend = false;
 
     static final byte[] downloadSequence = {123,123,123};
     static final byte[] uploadSequence = {125,125,125};
     static final byte[] dataStartSequence = {60,60,60};
-    static final byte[] dataEndSequence = {62,62,62};
+    static final byte[] dataEndSequence = {62,62,62,26};
     static final byte[] okSequence = {111,107};
     static final byte[] rcvSequence = {82, 67, 86};
+    static final byte[] recordSequence = {35,35,35};
+
+    Meter currentMeter = null;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -75,6 +85,7 @@ public class MeterConfigScreen extends AppCompatActivity{
         Storage = (ProgressBar) findViewById(R.id.progressBar);
         saveButton = (Button) findViewById(R.id.saveButton);
         downloadButton = (Button) findViewById(R.id.downloadButton);
+        recordButton = (Button) findViewById(R.id.button5);
 
         final SharedPreferenceHelper sharedPreferenceHelper = new SharedPreferenceHelper(MeterConfigScreen.this);
 
@@ -85,36 +96,69 @@ public class MeterConfigScreen extends AppCompatActivity{
         saveButton.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
                 Log.d("SEND", "upload");
-                if(isUploadRequestSend && isUploadRequestOk){
-                    // expect RCV
-                    Log.d("MeterConfig", "Still waiting for RCV");
-                }else if (!isUploadRequestOk){
-                    // expect ok, wait for ok
-                    Log.d("MeterConfig", "Still waiting for upload OK");
-                }else{
-                    // send download message
-                    BTService.write(uploadSequence);
-                    isUploadRequestSend = true;
-                }
+            if(isUploadRequestSend && isUploadRequestOk){
+                // expect RCV
+                Log.d(TAG, "Still waiting for RCV");
+            }else if (!isUploadRequestOk){
+                // expect ok, wait for ok
+                Log.d(TAG, "Still waiting for upload OK");
+            }else{
+                // send download message
+                BTService.write(uploadSequence);
+                isUploadRequestSend = true;
+            }
             }
         });
 
         downloadButton.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
-                Log.d("SEND", "download");
-                if(isDownloadRequestSend && isDownloadRequestOK){
-                    // expect config file, do nothing
-                    Log.d("MeterConfig", "Still waiting for config and data file");
-                }else if (!isDownloadRequestOK){
-                    // expect ok, wait for ok
-                    Log.d("MeterConfig", "Still waiting for download OK");
-                }else{
-                 // send download message
-                    BTService.write(downloadSequence);
-                    isDownloadRequestSend = true;
-                }
+            Log.d("SEND", "download");
+            if(isDownloadRequestSend && isDownloadRequestOK){
+                // expect config file, do nothing
+                Log.d(TAG, "Still waiting for config and data file");
+            }else if (!isDownloadRequestOK){
+                // expect ok, wait for ok
+                Log.d(TAG, "Still waiting for download OK");
+            }else{
+             // send download message
+                BTService.write(downloadSequence);
+                isDownloadRequestSend = true;
+            }
             }
         });
+
+        recordButton.setOnClickListener(new View.OnClickListener() {
+            public void onClick(View v) {
+            Log.d("SEND", "record");
+            if(isRecordRequestSend){
+                // expect config file, do nothing
+                Log.d("MeterConfig", "Still waiting for config and data file");
+            } else{
+                // send download message
+                BTService.write(recordSequence);
+                isRecordRequestSend = true;
+            }
+        }
+    });
+    }
+
+    @Override
+    public void onStart(){
+        super.onStart();
+        Intent intent = getIntent();
+        String project = intent.getStringExtra("projectName");
+        String location = intent.getStringExtra("meterLocation");
+        String lastdate = intent.getStringExtra("profilelastdate");
+
+        meterController = MeterController.getInstance(this);
+        dsc = DataSetController.getInstance(this);
+
+        ProjectText.setText(project);
+        LocationText.setText(location);
+        LastDateText.setText(lastdate);
+
+        Intent BTSIntent = new Intent(this, BluetoothService.class);
+        bindService(BTSIntent, connection, Context.BIND_AUTO_CREATE);
 
         IntentFilter filter = new IntentFilter();
         filter.addAction(BluetoothService.BT_MESSAGE);
@@ -129,42 +173,22 @@ public class MeterConfigScreen extends AppCompatActivity{
                 Log.d("Receiver", Arrays.toString(msg));
 
                 if(isDownloadRequestSend && isDownloadRequestOK){
-                    try{
-                        if (msgLength >= dataEndSequence.length && indexOf(msg, dataEndSequence) > -1) {
-                            Meter currentMeter = meterController.getSelectedMeterRecord(BTService.getMACAddress());
-                            if (currentMeter == null){
-                                currentMeter = new Meter();
-                                currentMeter.setSensorName(BTService.getDeviceName());
-                                currentMeter.setMacAddress(BTService.getMACAddress());
-                                currentMeter.setLastConnectionDate(System.currentTimeMillis());
-                                currentMeter.setRecordingStatus(false);
-                                currentMeter.setStartRecordingDate(System.currentTimeMillis());
-                                String lp = LocationText.getText().toString();
-                                if(lp.isEmpty()){
-                                    lp = "Empty location";
-                                }
-                                currentMeter.setLocation(lp);
-                                lp = ProjectText.getText().toString();
-                                if(lp.isEmpty()){
-                                    lp = "Empty project";
-                                }
-                                currentMeter.setLastKnownProject(lp);
-                                meterController.addMeterData(currentMeter);
-                            }
-                            long currentTime = System.currentTimeMillis();
-                            DataSet dataSet = new DataSet(currentMeter.getLastKnownProject(),currentMeter.getLocation(), System.currentTimeMillis(), System.currentTimeMillis(), "meterRef",newDF.getFileName() );
-                            dsc.addDataSet(dataSet);
-                            newDF = null;
-                            BTService.write(rcvSequence);
-                        } else {
-                            newDF.writeToFile(msg);
-                        }
-                    }catch (ArrayIndexOutOfBoundsException exception){
-                        Log.w("MeterConfig", "Ill formatted file!");
+                    if (Bytes.indexOf(msg, dataEndSequence) > -1) {
+
+                        long currentTime = System.currentTimeMillis();
+                        long startTime = currentTime - newDF.getSize()*125;
+                        DataSet dataSet = new DataSet(currentMeter.getLastKnownProject(),currentMeter.getLocation(), currentTime, startTime, "meterRef",newDF.getFileName() );
+                        dsc.addDataSet(dataSet);
+                        newDF = null;
+                        BTService.write(rcvSequence);
+                        isDownloadRequestOK = false;
+                        isDownloadRequestSend = false;
+                    } else {
+                        newDF.writeToFile(msg);
                     }
                 } else if(!isDownloadRequestOK){
                     // expect ok
-                    if (indexOf(msg,okSequence) != -1){
+                    if (Bytes.indexOf(msg,okSequence) > -1){
                         isDownloadRequestOK = true;
                         newDF = new DataFile(context);
                         Log.d("MeterConfig", "Received download OK");
@@ -172,59 +196,62 @@ public class MeterConfigScreen extends AppCompatActivity{
                     }
                 } else if(isUploadRequestSend && isUploadRequestOk){
                     // expect config file
-                    if (indexOf(msg,rcvSequence) != -1){
+                    if (Bytes.indexOf(msg,rcvSequence) > -1){
                         isUploadRequestOk = false;
                         isUploadRequestSend = false;
 
                     }
-                }else if(!isUploadRequestOk){
+                }else if(isUploadRequestOk){
                     // expect ok to send data
-                    if (indexOf(msg,okSequence) != -1){
-                        isUploadRequestOk = true;
+                    if (Bytes.indexOf(msg,okSequence) > -1) {
                         Log.d("MeterConfig", "Received upload OK");
                         String projectName = ProjectText.getText().toString();
                         String projectLocation = LocationText.getText().toString();
-                        long time = System.currentTimeMillis();
-                        String configSend = projectName +">"+projectLocation;
-                        BTService.write(configSend.getBytes());
-                        // place holder verify later
-                        Meter meter = new Meter(projectName, BTService.getMACAddress(), projectLocation,projectName,time,false,time);
-                        meterController.addMeterData(meter);
+                        currentMeter.setLastKnownProject(projectName);
+                        currentMeter.setLocation(projectLocation);
+                        currentMeter.setLastConnectionDate(System.currentTimeMillis());
+                        meterController.updateMeterRecord(currentMeter);
+                    }
+                } else if(isRecordRequestSend){
+                    if (Bytes.indexOf(msg,okSequence) > -1){
+                        long currentTime = System.currentTimeMillis();
+                        currentMeter.setRecordingStatus(!currentMeter.getRecordingStatus());
+                        currentMeter.setStartRecordingDate(currentTime);
+                        currentMeter.setLastConnectionDate(currentTime);
+                        Log.d(TAG,"Meter Confirmed new recording status");
                     }
                 } else if(msgLength == 1){
-                    //int value = Integer.parseInt(msg);
-                    byte value = msg[0];
-                    double dB = (((value+128)*66.22235685/256)-12.26779888);
+                    int value = msg[0];
+                    double dB = (((value+128)*66.22235685/256)+42.26779888);
                     Log.d("DEBUG", ": 8bit int: "+ Integer.toString(value));
-                    DataText.setText(String.format("%.2f", dB));
+                    DataText.setText(String.format("%.1f", dB));
                 }else{
                     Log.w("DEBUG", "msgLength > 1, not a reading");
                 }
             }
         };
-
         registerReceiver(mReceiver, filter);
+        currentMeter = meterController.getSelectedMeterRecord(BTService.getMACAddress());
+        if (currentMeter == null){
+            currentMeter = new Meter();
+            currentMeter.setSensorName(BTService.getDeviceName());
+            currentMeter.setMacAddress(BTService.getMACAddress());
+            currentMeter.setLastConnectionDate(System.currentTimeMillis());
+            currentMeter.setRecordingStatus(false);
+            currentMeter.setStartRecordingDate(System.currentTimeMillis());
+            String lp = LocationText.getText().toString();
+            if(lp.isEmpty()){
+                lp = "Empty location";
+            }
+            currentMeter.setLocation(lp);
+            lp = ProjectText.getText().toString();
+            if(lp.isEmpty()){
+                lp = "Empty project";
+            }
+            currentMeter.setLastKnownProject(lp);
+            meterController.addMeterData(currentMeter);
+        }
     }
-
-    @Override
-    public void onStart(){
-        super.onStart();
-        Intent intent = getIntent();
-        String project = intent.getStringExtra("projectName");
-        String location = intent.getStringExtra("meterLocation");
-        String lastdate = intent.getStringExtra("profilelastdate");
-
-        meterController = new MeterController(this);
-        dsc = new DataSetController(this);
-
-        ProjectText.setText(project);
-        LocationText.setText(location);
-        LastDateText.setText(lastdate);
-
-        Intent BTSIntent = new Intent(this, BluetoothService.class);
-        bindService(BTSIntent, connection, Context.BIND_AUTO_CREATE);
-    }
-
     /** Defines callbacks for service binding, passed to bindService() */
     private ServiceConnection connection = new ServiceConnection() {
 
@@ -304,7 +331,7 @@ public class MeterConfigScreen extends AppCompatActivity{
         return super.onOptionsItemSelected(item);
     }
 
-    public int indexOf(byte[] outerArray, byte[] smallerArray) {
+    /*public int indexOf(byte[] outerArray, byte[] smallerArray) {
         for(int i = 0; i < outerArray.length - smallerArray.length+1; ++i) {
             boolean found = true;
             for(int j = 0; j < smallerArray.length; ++j) {
@@ -316,7 +343,7 @@ public class MeterConfigScreen extends AppCompatActivity{
             if (found) return i;
         }
         return -1;
-    }
+    }*/
 
     @Override
     public void onStop(){

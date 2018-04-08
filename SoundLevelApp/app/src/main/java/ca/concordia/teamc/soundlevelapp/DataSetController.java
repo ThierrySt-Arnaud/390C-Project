@@ -5,6 +5,7 @@ import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
+import android.util.Log;
 
 import java.util.ArrayList;
 
@@ -13,9 +14,8 @@ import java.util.ArrayList;
  */
 
 public class DataSetController extends SQLiteOpenHelper{
-
-    private static final String TAG = "DatSetController";
-    private DataSet dataSet;
+    private static DataSetController mInstance = null;
+    private static final String TAG = "DataSetController";
 
     private static final String DATABASE_NAME = "SoundLevelApp.db";
     private static final String TABLE_DATASET = "DataSetTable";
@@ -30,7 +30,18 @@ public class DataSetController extends SQLiteOpenHelper{
 
     private static final String[] COLUMNS = {COL0,COL1,COL2,COL3,COL4,COL5,COL6};
 
-    DataSetController(Context context){
+    public static DataSetController getInstance(Context ctx) {
+
+        // Use the application context, which will ensure that you
+        // don't accidentally leak an Activity's context.
+        // See this article for more information: http://bit.ly/6LRzfx
+        if (mInstance == null) {
+            mInstance = new DataSetController(ctx.getApplicationContext());
+        }
+        return mInstance;
+    }
+
+    private DataSetController(Context context){
         super(context, DATABASE_NAME,null,1);
     }
 
@@ -101,19 +112,26 @@ public class DataSetController extends SQLiteOpenHelper{
         Cursor cursor = sqLiteDatabase.rawQuery(selectQuery, null);
 
         if (cursor.moveToFirst()){
-            do{
-                DataSet dataSet;
-                dataSet = new DataSet();
-                dataSet.setDataSetID(Integer.parseInt(cursor.getString(0)));
-                dataSet.setProjectName(cursor.getString(1));
-                dataSet.setLocation(cursor.getString(2));
-                dataSet.setDateOfDownload(Long.parseLong(cursor.getString(3)));
-                dataSet.setDateStartRecord(Long.parseLong(cursor.getString(4)));
-                dataSet.setMeterReferenceRecord(cursor.getString(5));
-                dataSet.setDatafile(cursor.getString(6));
+            try{
+                do{
+                    DataSet dataSet;
+                    dataSet = new DataSet();
+                    dataSet.setDataSetID(Integer.parseInt(cursor.getString(0)));
+                    dataSet.setProjectName(cursor.getString(1));
+                    dataSet.setLocation(cursor.getString(2));
+                    dataSet.setDateOfDownload(Long.parseLong(cursor.getString(3)));
+                    dataSet.setDateStartRecord(Long.parseLong(cursor.getString(4)));
+                    dataSet.setMeterReferenceRecord(cursor.getString(5));
+                    dataSet.setDatafile(cursor.getString(6));
 
-                dataSetArrayList.add(dataSet);
-            }   while (cursor.moveToNext());
+                    dataSetArrayList.add(dataSet);
+                }   while (cursor.moveToNext());
+            }  catch (Exception e) {
+                Log.e(TAG,"Couldn't read from DataSet Table: " + e);
+            } finally {
+                cursor.close();
+            }
+
         }
         return dataSetArrayList;
     }
@@ -126,18 +144,24 @@ public class DataSetController extends SQLiteOpenHelper{
         Cursor cursor = sqLiteDatabase.query(TABLE_DATASET, COLUMNS, "ID = ?",
                 new String[] {Integer.toString(ID)}, null, null, null, null);
         //Cursor cursor = sqLiteDatabase.rawQuery("SELECT * FROM "+ TABLE_METER + "WHERE " + SENSOR_NAME + "&&" + MAC_ADDRESS + "=?", new String[]{});
-
-        if (cursor != null)
-            cursor.moveToFirst();
-
-        DataSet dataSet = new DataSet();
-        dataSet.setDataSetID(Integer.parseInt(cursor.getString(0)));
-        dataSet.setProjectName(cursor.getString(1));
-        dataSet.setLocation(cursor.getString(2));
-        dataSet.setDateOfDownload(Long.parseLong(cursor.getString(3)));
-        dataSet.setDateStartRecord(Long.parseLong(cursor.getString(4)));
-        dataSet.setMeterReferenceRecord(cursor.getString(5));
-        dataSet.setDatafile((cursor.getString(6)));
+        DataSet dataSet = null;
+        if (cursor.moveToFirst()){
+            try{
+                dataSet = new DataSet();
+                dataSet.setDataSetID(Integer.parseInt(cursor.getString(0)));
+                dataSet.setProjectName(cursor.getString(1));
+                dataSet.setLocation(cursor.getString(2));
+                dataSet.setDateOfDownload(Long.parseLong(cursor.getString(3)));
+                dataSet.setDateStartRecord(Long.parseLong(cursor.getString(4)));
+                dataSet.setMeterReferenceRecord(cursor.getString(5));
+                dataSet.setDatafile((cursor.getString(6)));
+            } catch (Exception e) {
+                Log.e(TAG,"Couldn't read from DataSet Table: " + e);
+                dataSet = null;
+            } finally {
+                cursor.close();
+            }
+        }
 
         return dataSet;
     }

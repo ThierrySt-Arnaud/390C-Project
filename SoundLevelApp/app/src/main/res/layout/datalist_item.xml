@@ -9,7 +9,7 @@
 
     <TextView
         android:id="@+id/text_view_project_name"
-        android:layout_width="0dp"
+        android:layout_width="100dp"
         android:layout_height="30dp"
         android:textAppearance="@style/TextAppearance.AppCompat.Large"
         app:layout_constraintEnd_toStartOf="@+id/text_view_item_location"
@@ -19,7 +19,7 @@
 
     <TextView
         android:id="@+id/text_view_item_location"
-        android:layout_width="0dp"
+        android:layout_width="100dp"
         android:layout_height="30dp"
         android:textAppearance="@style/TextAppearance.AppCompat.Large"
         app:layout_constraintEnd_toStartOf="@+id/text_view_item_datestarted"
@@ -29,7 +29,7 @@
 
     <TextView
         android:id="@+id/text_view_item_datestarted"
-        android:layout_width="0dp"
+        android:layout_width="100dp"
         android:layout_height="30dp"
         android:textAppearance="@style/TextAppearance.AppCompat.Large"
         app:layout_constraintEnd_toStartOf="@+id/text_view_item_datedownloaded"
@@ -38,7 +38,7 @@
 
     <TextView
         android:id="@+id/text_view_item_datedownloaded"
-        android:layout_width="0dp"
+        android:layout_width="100dp"
         android:layout_height="30dp"
         android:textAppearance="@style/TextAppearance.AppCompat.Large"
         app:layout_constraintEnd_toEndOf="parent"

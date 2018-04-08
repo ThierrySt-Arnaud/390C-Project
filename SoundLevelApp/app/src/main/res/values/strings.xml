@@ -9,9 +9,9 @@
     <string name="phone_location_text">Phone Location</string>
     <string name="textview_text">Meter Data</string>
     <string name="storage_space_text">Storage Space:</string>
-    <string name="meters_info_button">Meters Info</string>
+    <string name="meters_info_button">Known Meters</string>
     <string name="datasets_button">Datasets</string>
-    <string name="meters_in_range_button">Meters in Range</string>
+    <string name="meters_in_range_button">Connect Meter</string>
     <string name="known_meter_text">Known Meters</string>
     <string name="search_new_device_button">Search New Device</string>
     <string name="list_paired_button">List Paired</string>

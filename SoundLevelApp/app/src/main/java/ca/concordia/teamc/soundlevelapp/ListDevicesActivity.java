@@ -28,11 +28,8 @@ import java.util.UUID;
 public class ListDevicesActivity extends AppCompatActivity {
     private static final String TAG = "ListDevices activity";
     private BluetoothAdapter bluetooth;
-    private Set<BluetoothDevice> pairedDevices;
-    private Set<BluetoothDevice> discoveredDevices;
     private ArrayAdapter<String> BTArrayAdapter;
     private ArrayAdapter<String> discoveredBTArrayAdapter;
-    Thread listen;
     BroadcastReceiver btReceiver;
 
     ToggleButton Tbutton;
@@ -66,15 +63,14 @@ public class ListDevicesActivity extends AppCompatActivity {
         BTArrayAdapter = new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1);
         //set adapter for list view
         bluetoothDevicesList.setAdapter(BTArrayAdapter);
-        bluetoothDevicesList.setOnItemClickListener(devicesClickListener);
 
         discoveredDevicesList = (ListView) findViewById(R.id.discovered_list);
 
         discoveredBTArrayAdapter = new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1);
 
-        discoveredBTArrayAdapter.add("Test device" + "\n" + "00:00:00:00:00");
+        discoveredBTArrayAdapter.add("Test device" + "\n" + "00:00:00:00:00:00");
         discoveredDevicesList.setAdapter(discoveredBTArrayAdapter);
-        discoveredDevicesList.setOnItemClickListener(devicesClickListener);
+
         btReceiver = new BroadcastReceiver() {
             public void onReceive(Context context, Intent intent) {
                 String action = intent.getAction();
@@ -104,11 +100,9 @@ public class ListDevicesActivity extends AppCompatActivity {
 
             @Override
             public void onClick(View v) {
-                if(Tbutton.isChecked())
-
-                {
-                    Toast.makeText(getApplicationContext(), "Searching for New Devices", Toast.LENGTH_SHORT).show();
-                }
+            if(Tbutton.isChecked()){
+                Toast.makeText(getApplicationContext(), "Searching for New Devices", Toast.LENGTH_SHORT).show();
+            }
             }
         });
     }
@@ -118,11 +112,14 @@ public class ListDevicesActivity extends AppCompatActivity {
         super.onStart();
 
         Tbutton.setChecked(false);
-        pairedDevices = bluetooth.getBondedDevices();
+        Set<BluetoothDevice> pairedDevices = bluetooth.getBondedDevices();
         for (BluetoothDevice device : pairedDevices){
             // show name & address
             BTArrayAdapter.add(device.getName() + "\n" + device.getAddress() );
         }
+
+        discoveredDevicesList.setOnItemClickListener(discoveredDevicesClickListener);
+        bluetoothDevicesList.setOnItemClickListener(pairedDevicesClickListener);
     }
 
     public void listNewDevices(View view) {
@@ -130,12 +127,10 @@ public class ListDevicesActivity extends AppCompatActivity {
         bluetooth.startDiscovery();
         //call receiver
         registerReceiver(btReceiver, new IntentFilter(BluetoothDevice.ACTION_FOUND));
-
-
     }
 
 
-    private AdapterView.OnItemClickListener devicesClickListener = new AdapterView.OnItemClickListener() {
+    private AdapterView.OnItemClickListener pairedDevicesClickListener = new AdapterView.OnItemClickListener() {
         public void onItemClick(AdapterView<?> av, View v, int arg2, long arg3) {
 
             // Get the device MAC address, which is the last 17 chars in the View
@@ -145,7 +140,33 @@ public class ListDevicesActivity extends AppCompatActivity {
             Log.d("DeviceList", "Current Address: "+ BluetoothService.MACAddress);
             Log.d("DeviceList", "Clicked Address" + address);
 
+
             if(BluetoothService.MACAddress.equalsIgnoreCase(address)){
+                Intent meterConfigScreenIntent = new Intent(ListDevicesActivity.this, MeterConfigScreen.class);
+                startActivity(meterConfigScreenIntent);
+            }else{
+                Intent intent = new Intent(ListDevicesActivity.this.getBaseContext(), BluetoothService.class);
+                intent.putExtra("address", address);
+                startService(intent);
+            }
+        }
+    };
+
+    private AdapterView.OnItemClickListener discoveredDevicesClickListener = new AdapterView.OnItemClickListener() {
+        public void onItemClick(AdapterView<?> av, View v, int arg2, long arg3) {
+
+            // Get the device MAC address, which is the last 17 chars in the View
+            String info = ((TextView) v).getText().toString();
+            final String address = info.substring(info.length() - 17);
+
+            Log.d("DeviceList", "Current Address: " + BluetoothService.MACAddress);
+            Log.d("DeviceList", "Clicked Address" + address);
+
+
+            if(address.contentEquals("00:00:00:00:00:00")){
+                Intent dummyConfigIntent = new Intent(ListDevicesActivity.this, DummyMeterConfigScreen.class);
+                startActivity(dummyConfigIntent);
+            } else if(BluetoothService.MACAddress.equalsIgnoreCase(address)){
                 Intent meterConfigScreenIntent = new Intent(ListDevicesActivity.this, MeterConfigScreen.class);
                 startActivity(meterConfigScreenIntent);
             }else{
