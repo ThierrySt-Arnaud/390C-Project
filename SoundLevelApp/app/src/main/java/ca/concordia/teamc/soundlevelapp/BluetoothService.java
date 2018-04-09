@@ -45,6 +45,7 @@ public class BluetoothService extends Service {
     private static final UUID BTMODULEUUID = UUID.fromString("00001101-0000-1000-8000-00805F9B34FB");
     // String for MAC address
     protected static String MACAddress = "";
+    protected static String deviceName = "";
 
     private StringBuilder recDataString = new StringBuilder();
 
@@ -57,7 +58,7 @@ public class BluetoothService extends Service {
         stopThread = false;
     }
 
-    /**
+    /*
      * Class used for the client Binder.  Because we know this service always
      * runs in the same process as its clients, we don't need to deal with IPC.
      */
@@ -128,6 +129,11 @@ public class BluetoothService extends Service {
     @Override
     public void onDestroy() {
         super.onDestroy();
+        disconnect();
+        Log.d("SERVICE", "onDestroy");
+    }
+
+    public void disconnect(){
         bluetoothIn.removeCallbacksAndMessages(null);
         stopThread = true;
         if (mConnectedThread != null) {
@@ -136,9 +142,20 @@ public class BluetoothService extends Service {
         if (mConnectingThread != null) {
             mConnectingThread.closeSocket();
         }
-        unregisterReceiver(BTBroadcastReceiver);
+        try{
+            unregisterReceiver(BTBroadcastReceiver);
+        } catch (Exception e){
+            Log.w("BT disconnect", "Couldn't unregister receiver!");
+        }
         MACAddress = "";
-        Log.d("SERVICE", "onDestroy");
+    }
+
+    public String getMACAddress(){
+        return MACAddress;
+    }
+
+    public String getDeviceName(){
+        return deviceName;
     }
 
     @Nullable
@@ -158,6 +175,7 @@ public class BluetoothService extends Service {
                 Log.d("DEBUG BT", "BT ENABLED! BT ADDRESS : " + btAdapter.getAddress() + " , BT NAME : " + btAdapter.getName());
                 try {
                     BluetoothDevice device = btAdapter.getRemoteDevice(MACAddress);
+                    deviceName = device.getName();
                     Log.d("DEBUG BT", "ATTEMPTING TO CONNECT TO REMOTE DEVICE : " + MACAddress);
                     mConnectingThread = new ConnectingThread(device);
                     mConnectingThread.start();
@@ -277,11 +295,7 @@ public class BluetoothService extends Service {
             // Keep looping to listen for received messages
             while (!stopThread) {
                 try {
-                    bytes = mmInStream.read(buffer);            //read bytes from input buffer
-//                    String readMessage = new String(buffer, 0, bytes, Charset.forName("UTF-8"));
-//                    Log.d("DEBUG BT PART", "CONNECTED THREAD " + readMessage);
-                    // Send the obtained bytes to the UI Activity via handler
-                    Log.d("BYTE ARRAY", Arrays.toString(buffer));
+                    bytes = mmInStream.read(buffer);
                     bluetoothIn.obtainMessage(handlerState, bytes, -1, buffer).sendToTarget();
                     buffer[bytes] = '\0';
                 } catch (IOException e) {

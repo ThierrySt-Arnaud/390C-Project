@@ -483,7 +483,7 @@ void process_audio(void* buffer){
             printf("Compensated voltage RMS value: %f\n",voltage_rms_value);
             double log_value = 20*log10(voltage_rms_value/MIC_VPA);
             printf("DB value: %f\n", log_value+28);
-            uint8_t processed_value = (int8_t) round(((log_value+12.26779888)/66.22235685*256)-128);
+            uint8_t processed_value = (int8_t) round(((log_value+12.26779888)*256/66.22235685)-128);
             printf("Processed: %i\n", processed_value);
             if (atomic_load(&connection_open) && atomic_load(&connection_ready) && !atomic_load(&uploading)){
                 esp_spp_write(bt_handle, sizeof(uint8_t), &processed_value);
@@ -507,8 +507,7 @@ void record_data(void* write_buffer){
         vTaskSuspend(NULL);
         uint16_t to_write = atomic_load(&data_to_write);
         if (to_write > 0){
-            uint8_t* ready_buffer = NULL;
-            ready_buffer = malloc(to_write);
+            uint8_t* ready_buffer = malloc(to_write);
             memcpy(ready_buffer,write_buffer,to_write);
             FILE* storagefile = fopen(STORAGE_FILENAME,"ab");
             if (storagefile == NULL){

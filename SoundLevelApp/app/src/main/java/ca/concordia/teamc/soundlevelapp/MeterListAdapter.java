@@ -140,7 +140,5 @@ public class MeterListAdapter extends BaseAdapter implements Filterable
             notifyDataSetInvalidated();
         }
     }
-
-
 }
 

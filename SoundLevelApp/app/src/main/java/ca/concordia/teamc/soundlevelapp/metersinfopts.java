@@ -1,23 +1,19 @@
 package ca.concordia.teamc.soundlevelapp;
 
-import android.os.TestLooperManager;
+import android.graphics.Color;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.content.Intent;
-import android.view.MenuInflater;
-import android.view.MenuItem;
 import android.widget.TextView;
 
 import java.util.Date;
 
-import javax.crypto.Mac;
-
 public class metersinfopts extends AppCompatActivity {
 
-    private MeterController meterController = new MeterController(this);
+    private MeterController meterController;
     private Meter meter = null;
 
     @Override
@@ -25,34 +21,39 @@ public class metersinfopts extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_metersinfopts);
 
-        TextView projectNameTV = (TextView) findViewById(R.id.project_name);
-        TextView locationTV = (TextView) findViewById(R.id.location);
-        TextView MACAddressTV = (TextView) findViewById(R.id.sensor_macaddress);
-        TextView lastConnectedTV = (TextView) findViewById(R.id.last_connected);
-        TextView startRecordTV = (TextView) findViewById(R.id.last_recorded);
-        TextView recordStatusTV = (TextView) findViewById(R.id.recording_status);
+        TextView sensorNameTV = (TextView) findViewById(R.id.tvSensorName);
+        TextView projectNameTV = (TextView) findViewById(R.id.tvProject);
+        TextView locationTV = (TextView) findViewById(R.id.tvLocation);
+        TextView MACAddressTV = (TextView) findViewById(R.id.tvMACAddress);
+        TextView lastConnectedTV = (TextView) findViewById(R.id.tvLastConnected);
+        TextView startRecordTV = (TextView) findViewById(R.id.tvRecordingChange);
+        TextView recordStatusTV = (TextView) findViewById(R.id.tvRecordingStatus);
 
         int ID = getIntent().getIntExtra("SensorID", 0);
-
+        meterController = MeterController.getInstance(this);
         meter = meterController.getSelectedMeterRecord(ID);
 
-        String pName = meter.getSensorName();
+        String sName = meter.getSensorName();
+        String pName = meter.getLastKnownProject();
         String location = meter.getLocation();
         String mac = meter.getMacAddress();
         Date lastconnectedDate = new Date(meter.getLastConnectionDate());
         Date startRecord = new Date(meter.getStartRecordingDate());
         boolean recordStatus = meter.getRecordingStatus();
 
-        projectNameTV.setText("Sensor Name: "+ pName);
-        locationTV.setText("Location: "+ location);
-        MACAddressTV.setText("MAC Address: "+ mac);
-        lastConnectedTV.setText("Last Connected:\n"+ lastconnectedDate.toString());
-        startRecordTV.setText("Start Recorded:\n"+ startRecord.toString());
+        sensorNameTV.setText(sName);
+        projectNameTV.setText(pName);
+        locationTV.setText(location);
+        MACAddressTV.setText(mac);
+        lastConnectedTV.setText(lastconnectedDate.toString());
+        startRecordTV.setText(startRecord.toString());
 
         if(recordStatus){
-            recordStatusTV.setText("Recording Status: ON");
+            recordStatusTV.setText("ON");
+            recordStatusTV.setTextColor(Color.GREEN);
         }else {
-            recordStatusTV.setText("Recording Status: OFF");
+            recordStatusTV.setText("OFF");
+            recordStatusTV.setTextColor(Color.RED);
         }
 
     }
@@ -88,4 +89,5 @@ public class metersinfopts extends AppCompatActivity {
         return super.onOptionsItemSelected(item);
 
 
-    }}
+    }
+}

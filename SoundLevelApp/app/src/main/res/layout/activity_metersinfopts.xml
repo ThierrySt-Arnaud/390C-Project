@@ -8,67 +8,134 @@
 
     <TextView
         android:id="@+id/project_name"
-        android:layout_width="370dp"
-        android:layout_height="56dp"
-        android:layout_marginStart="8dp"
-        android:layout_marginTop="8dp"
-        android:text="Project Name"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        android:text="Project:"
+        android:textAppearance="@style/TextAppearance.AppCompat.Medium"
+        app:layout_constraintStart_toStartOf="@+id/tvSensorName"
+        app:layout_constraintTop_toBottomOf="@+id/tvSensorName" />
+
+    <TextView
+        android:id="@+id/location"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        android:text="Location:"
+        android:textAppearance="@style/TextAppearance.AppCompat.Medium"
+        app:layout_constraintStart_toStartOf="@+id/tvProject"
+        app:layout_constraintTop_toBottomOf="@+id/tvProject" />
+
+    <TextView
+        android:id="@+id/sensor_macaddress"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        android:text="MAC Address:"
+        android:textAppearance="@style/TextAppearance.AppCompat.Medium"
+        app:layout_constraintStart_toStartOf="@+id/tvLocation"
+        app:layout_constraintTop_toBottomOf="@+id/tvLocation" />
+
+    <TextView
+        android:id="@+id/last_connected"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        android:text="Last Connected:"
+        android:textAppearance="@style/TextAppearance.AppCompat.Medium"
+        app:layout_constraintStart_toStartOf="@+id/tvMACAddress"
+        app:layout_constraintTop_toBottomOf="@+id/tvMACAddress" />
+
+    <TextView
+        android:id="@+id/last_recorded"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        android:text="Recording Status Change"
+        android:textAppearance="@style/TextAppearance.AppCompat.Medium"
+        app:layout_constraintStart_toStartOf="@+id/tvLastConnected"
+        app:layout_constraintTop_toBottomOf="@+id/tvRecordingStatus" />
+
+    <TextView
+        android:id="@+id/recording_status"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        android:text="Recording Status:"
+        android:textAppearance="@style/TextAppearance.AppCompat.Medium"
+        app:layout_constraintStart_toStartOf="@+id/tvRecordingChange"
+        app:layout_constraintTop_toBottomOf="@+id/tvLastConnected" />
+
+    <TextView
+        android:id="@+id/tvProject"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="TextView"
         android:textAppearance="@style/TextAppearance.AppCompat.Large"
+        app:layout_constraintStart_toStartOf="@+id/project_name"
+        app:layout_constraintTop_toBottomOf="@+id/project_name" />
+
+    <TextView
+        android:id="@+id/tvLocation"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="TextView"
+        android:textAppearance="@style/TextAppearance.AppCompat.Large"
+        app:layout_constraintStart_toStartOf="@+id/location"
+        app:layout_constraintTop_toBottomOf="@+id/location" />
+
+    <TextView
+        android:id="@+id/textView6"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="8dp"
+        android:text="Sensor Name:"
+        android:textAppearance="@style/TextAppearance.AppCompat.Medium"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
     <TextView
-        android:id="@+id/location"
-        android:layout_width="370dp"
-        android:layout_height="56dp"
-        android:layout_marginStart="8dp"
-        android:layout_marginTop="8dp"
-        android:text="Location"
+        android:id="@+id/tvSensorName"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="TextView"
         android:textAppearance="@style/TextAppearance.AppCompat.Large"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/project_name" />
+        app:layout_constraintStart_toStartOf="@+id/textView6"
+        app:layout_constraintTop_toBottomOf="@+id/textView6" />
 
     <TextView
-        android:id="@+id/sensor_macaddress"
-        android:layout_width="370dp"
-        android:layout_height="56dp"
-        android:layout_marginStart="4dp"
-        android:layout_marginTop="8dp"
-        android:text="Sensor MAC Address"
+        android:id="@+id/tvMACAddress"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="TextView"
         android:textAppearance="@style/TextAppearance.AppCompat.Large"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/location" />
-
-    <TextView
-        android:id="@+id/last_connected"
-        android:layout_width="370dp"
-        android:layout_height="56dp"
-        android:layout_marginStart="8dp"
-        android:layout_marginTop="8dp"
-        android:text="Last Connected"
-        android:textAppearance="@style/TextAppearance.AppCompat.Large"
-        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintStart_toStartOf="@+id/sensor_macaddress"
         app:layout_constraintTop_toBottomOf="@+id/sensor_macaddress" />
 
     <TextView
-        android:id="@+id/last_recorded"
-        android:layout_width="370dp"
-        android:layout_height="56dp"
-        android:layout_marginStart="8dp"
-        android:layout_marginTop="8dp"
-        android:text="Date Last Recorded"
+        android:id="@+id/tvLastConnected"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="TextView"
         android:textAppearance="@style/TextAppearance.AppCompat.Large"
-        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintStart_toStartOf="@+id/last_connected"
         app:layout_constraintTop_toBottomOf="@+id/last_connected" />
 
     <TextView
-        android:id="@+id/recording_status"
-        android:layout_width="370dp"
-        android:layout_height="56dp"
-        android:layout_marginStart="8dp"
-        android:layout_marginTop="8dp"
-        android:text="Recording Status"
+        android:id="@+id/tvRecordingStatus"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="TextView"
         android:textAppearance="@style/TextAppearance.AppCompat.Large"
-        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintStart_toStartOf="@+id/recording_status"
+        app:layout_constraintTop_toBottomOf="@+id/recording_status" />
+
+    <TextView
+        android:id="@+id/tvRecordingChange"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="TextView"
+        android:textAppearance="@style/TextAppearance.AppCompat.Large"
+        app:layout_constraintStart_toStartOf="@+id/last_recorded"
         app:layout_constraintTop_toBottomOf="@+id/last_recorded" />
 </android.support.constraint.ConstraintLayout>

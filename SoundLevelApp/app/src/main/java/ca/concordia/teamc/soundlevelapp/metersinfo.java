@@ -1,6 +1,7 @@
 package ca.concordia.teamc.soundlevelapp;
 
 import android.content.Intent;
+import android.os.SystemClock;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.text.Editable;
@@ -22,24 +23,39 @@ import static android.content.ContentValues.TAG;
 public class metersinfo extends AppCompatActivity {
 
     private MeterListAdapter meterListAdapter;
-    private MeterController meterController = new MeterController(this);
-    List<Meter> Mylist =null;
+    private MeterController meterController;
+    List<Meter> myList;
+    EditText meterSearch;
+    ListView listView;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_metersinfo);
-        final EditText meterSearch = (EditText) findViewById(R.id.MeterSearch);
+        meterSearch = (EditText) findViewById(R.id.MeterSearch);
+        meterController = MeterController.getInstance(this);
+        listView = (ListView) findViewById(R.id.listview);
+    }
 
-        List<Meter> Mylist = new ArrayList<>();
-        Meter meterA = new Meter("test 1", "test mac address 1", "location 1", "project A", "00-00-00", false, "00-00-00");
-        Meter meterB = new Meter("test 2", "test mac address 2", "location 2", "project B", "00-00-00", false, "00-00-00");
-        Meter meterC = new Meter("test 3", "test mac address 3", "location 3", "project C", "00-00-00", true, "00-00-00");
+    AdapterView.OnItemClickListener meterListListener = new AdapterView.OnItemClickListener() {
 
-        Mylist = meterController.getAllMeterRecord();
+        @Override
+        public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
+            Log.d(TAG, "Item " + i + "  got clicked");
+            Intent myIntent = new Intent(adapterView.getContext(), metersinfopts.class);
+            Meter meter = myList.get(i);
+            myIntent.putExtra("SensorID", meter.getSensorId());
+            startActivity(myIntent);
+        }
+    };
 
-        meterListAdapter = new MeterListAdapter(this, Mylist);
-        ListView listView = (ListView) findViewById(R.id.listview);
+    @Override
+    public void onStart(){
+        super.onStart();
+
+        myList = meterController.getAllMeterRecord();
+
+        meterListAdapter = new MeterListAdapter(this, myList);
 
         listView.setAdapter(meterListAdapter);
         listView.setOnItemClickListener(meterListListener);
@@ -61,18 +77,6 @@ public class metersinfo extends AppCompatActivity {
             }
         });
     }
-
-    AdapterView.OnItemClickListener meterListListener = new AdapterView.OnItemClickListener() {
-
-        @Override
-        public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
-            Log.d(TAG, "Item " + i + "  got clicked");
-            Intent myIntent = new Intent(adapterView.getContext(), metersinfopts.class);
-            Meter meter = Mylist.get(i);
-            myIntent.putExtra("SensorID", meter.getSensorId());
-            startActivity(myIntent);
-        }
-    };
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {

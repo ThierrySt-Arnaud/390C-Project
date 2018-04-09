@@ -18,17 +18,35 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-
-        // DataFile test
-        DataSet ds = new DataSet();
-        ds.setProjectName("TestProject");
-        float[] f = new float[] { 1.2f, 9.7f, 3.4f };
-        DataFile df = new DataFile(getApplicationContext(),ds,f);
-
-        Log.d("MainActivity", df.readFile());
-        df.deleteFile();
-
         sharedPreferenceHelper = new SharedPreferenceHelper(MainActivity.this);
+
+        DataSetController dsc = DataSetController.getInstance(this);
+        MeterController mc = MeterController.getInstance(this);
+
+        if (mc.getAllMeterRecord().isEmpty()){
+            Meter meterA = new Meter("Meter1", "00:00:00:00:00:01", "location 1", "project A", System.currentTimeMillis(), false, System.currentTimeMillis());
+            Meter meterB = new Meter("Meter2", "00:00:00:00:00:02", "location 2", "project B", System.currentTimeMillis(), false, System.currentTimeMillis());
+            Meter meterC = new Meter("Meter3", "00:00:00:00:00:03", "location 3", "project C", System.currentTimeMillis(), true, System.currentTimeMillis());
+
+            mc.addMeterData(meterA);
+            mc.addMeterData(meterB);
+            mc.addMeterData(meterC);
+        }
+        if (dsc.getAllDataSet().isEmpty()){
+            DataSet dataA = new DataSet("Project x","Location A",System.currentTimeMillis(),System.currentTimeMillis(),"","");
+            DataSet dataB = new DataSet("Project y","Location B",System.currentTimeMillis(),System.currentTimeMillis(),"","");
+            DataSet dataC = new DataSet("Project z","Location C",System.currentTimeMillis(),System.currentTimeMillis(),"","");
+            DataSet dataD = new DataSet("Project 1","Location D",System.currentTimeMillis(),System.currentTimeMillis(),"","");
+            DataSet dataE = new DataSet("Project 2","Location E",System.currentTimeMillis(),System.currentTimeMillis(),"","");
+            DataSet dataF = new DataSet("Project 3","Location F",System.currentTimeMillis(),System.currentTimeMillis(),"","");
+
+            dsc.addDataSet(dataA);
+            dsc.addDataSet(dataB);
+            dsc.addDataSet(dataC);
+            dsc.addDataSet(dataD);
+            dsc.addDataSet(dataE);
+            dsc.addDataSet(dataF);
+        }
 
         setupUI();
     }

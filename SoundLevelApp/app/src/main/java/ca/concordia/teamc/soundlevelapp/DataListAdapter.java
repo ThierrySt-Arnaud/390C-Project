@@ -14,6 +14,7 @@ import android.widget.Filter;
 import android.widget.Filterable;
 import android.widget.TextView;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -54,6 +55,7 @@ public class DataListAdapter extends BaseAdapter implements Filterable
 
     @Override
     public View getView(int position, View convertView, ViewGroup parent) {
+        SimpleDateFormat sdf = new SimpleDateFormat("dd-MM-yyyy");
         // inflate the layout for each list row
         if (convertView == null) {
             convertView = LayoutInflater.from(context).
@@ -77,9 +79,9 @@ public class DataListAdapter extends BaseAdapter implements Filterable
         textViewItemName.setText(currentItem.getProjectName());
         textViewItemLocation.setText(currentItem.getLocation());
         Date dateStarted = new Date(currentItem.getDateStartRecord());
-        textViewItemDateStarted.setText(dateStarted.toString());
+        textViewItemDateStarted.setText(sdf.format(dateStarted));
         Date dateDownload = new Date(currentItem.getDateOfDownload());
-        textViewItemDateDownloaded.setText(dateDownload.toString());
+        textViewItemDateDownloaded.setText(sdf.format(dateDownload));
 
         // returns the view for the current row
         return convertView;

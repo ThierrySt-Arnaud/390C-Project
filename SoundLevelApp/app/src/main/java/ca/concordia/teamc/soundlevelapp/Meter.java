@@ -11,14 +11,14 @@ public class Meter {
     String macAddress;
     String location;
     String lastKnownProject;
-    String lastConnectionDate;
+    long lastConnectionDate;
     boolean recordingStatus;
-    String startRecordingDate;
+    long startRecordingDate;
 
     public Meter() {
     }
 
-    public Meter(String sensorName, String macAddress, String location, String lastKnownProject, String lastConnectionDate, boolean recordingStatus, String startRecordingDate) {
+    public Meter(String sensorName, String macAddress, String location, String lastKnownProject, long lastConnectionDate, boolean recordingStatus, long startRecordingDate) {
         this.sensorName = sensorName;
         this.macAddress = macAddress;
         this.location = location;

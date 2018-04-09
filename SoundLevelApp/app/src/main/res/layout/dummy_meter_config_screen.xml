@@ -5,7 +5,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context="ca.concordia.teamc.soundlevelapp.MeterConfigScreen">
+    tools:context="ca.concordia.teamc.soundlevelapp.DummyMeterConfigScreen">
 
     <EditText
         android:id="@+id/ProjectEditText"
@@ -60,6 +60,7 @@
         android:layout_marginStart="8dp"
         android:max="100"
         android:min="0"
+        android:progress="24"
         app:layout_constraintBottom_toTopOf="@+id/saveButton"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.0"
@@ -94,7 +95,6 @@
         android:layout_marginBottom="32dp"
         android:layout_marginStart="8dp"
         android:hint="@string/save_button_text"
-        android:onClick="dialogevent"
         android:text="UPLOAD"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintLeft_toLeftOf="parent"
@@ -109,7 +109,7 @@
         android:layout_marginEnd="8dp"
         android:layout_marginStart="8dp"
         android:layout_marginTop="8dp"
-        android:text="@string/textview_text"
+        android:text="68.1"
         android:textAppearance="@style/TextAppearance.AppCompat.Display2"
         app:layout_constraintBottom_toTopOf="@+id/textView"
         app:layout_constraintEnd_toEndOf="parent"
