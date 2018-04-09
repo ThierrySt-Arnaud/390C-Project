@@ -53,7 +53,7 @@ public class myGraph extends AppCompatActivity {
         series = new LineGraphSeries <DataPoint>();
         for (byte value: fileData){
             x += 0.125;
-            y = (((value+128)*66.22235685/256)+42.26779888);
+            y = (((value+128)*66.22235685/256)+28.26779888);
             series.appendData(new DataPoint(x , y), true ,2*1024*1024);
         }
 

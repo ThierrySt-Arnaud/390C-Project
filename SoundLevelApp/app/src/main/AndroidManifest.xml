@@ -25,7 +25,9 @@
         <activity
             android:name=".MeterConfigScreen"
             android:label="Meter Configuration"
-            android:parentActivityName=".ListDevicesActivity">
+            android:parentActivityName=".ListDevicesActivity"
+            android:configChanges="keyboardHidden|orientation|screenSize"
+            android:screenOrientation="portrait">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value=".ListDevicesActivity" />

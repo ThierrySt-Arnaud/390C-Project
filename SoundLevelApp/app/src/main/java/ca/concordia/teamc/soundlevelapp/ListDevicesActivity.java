@@ -38,8 +38,8 @@ public class ListDevicesActivity extends AppCompatActivity {
 
     private static final UUID BTMODULEUUID = UUID.fromString("00001101-0000-1000-8000-00805F9B34FB"); // "random" unique identifier
 
-
     ListView bluetoothDevicesList;
+    TextView newDevicesTextView;
     ListView discoveredDevicesList;
 
     @Override
@@ -65,12 +65,12 @@ public class ListDevicesActivity extends AppCompatActivity {
         bluetoothDevicesList.setAdapter(BTArrayAdapter);
 
         discoveredDevicesList = (ListView) findViewById(R.id.discovered_list);
+        newDevicesTextView = findViewById(R.id.NewDevices);
 
         discoveredBTArrayAdapter = new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1);
 
         discoveredBTArrayAdapter.add("Test device" + "\n" + "00:00:00:00:00:00");
         discoveredDevicesList.setAdapter(discoveredBTArrayAdapter);
-
         btReceiver = new BroadcastReceiver() {
             public void onReceive(Context context, Intent intent) {
                 String action = intent.getAction();
@@ -90,7 +90,6 @@ public class ListDevicesActivity extends AppCompatActivity {
                 }
             }
         };
-
         IntentFilter filter = new IntentFilter();
         filter.addAction(BluetoothDevice.ACTION_FOUND);
         filter.addAction(BluetoothDevice.ACTION_ACL_CONNECTED);
@@ -101,8 +100,24 @@ public class ListDevicesActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
             if(Tbutton.isChecked()){
+                if(!discoveredDevicesList.isShown()){
+                    bluetoothDevicesList.setVisibility(View.VISIBLE);
+                    newDevicesTextView.setVisibility(View.VISIBLE);
+                }
+                // start searching for all devices in range
+                if(!bluetooth.isDiscovering()){
+                    bluetooth.startDiscovery();
+
+                }
                 Toast.makeText(getApplicationContext(), "Searching for New Devices", Toast.LENGTH_SHORT).show();
+            } else{
+                if(bluetooth.isDiscovering()){
+                    bluetooth.cancelDiscovery();
+
+                }
+                Toast.makeText(getApplicationContext(), "Stopping search", Toast.LENGTH_SHORT).show();
             }
+
             }
         });
     }
@@ -112,10 +127,12 @@ public class ListDevicesActivity extends AppCompatActivity {
         super.onStart();
 
         Tbutton.setChecked(false);
-        Set<BluetoothDevice> pairedDevices = bluetooth.getBondedDevices();
-        for (BluetoothDevice device : pairedDevices){
-            // show name & address
-            BTArrayAdapter.add(device.getName() + "\n" + device.getAddress() );
+        if (BTArrayAdapter.getCount() < 1) {
+            Set<BluetoothDevice> pairedDevices = bluetooth.getBondedDevices();
+            for (BluetoothDevice device : pairedDevices) {
+                // show name & address
+                BTArrayAdapter.add(device.getName() + "\n" + device.getAddress());
+            }
         }
 
         discoveredDevicesList.setOnItemClickListener(discoveredDevicesClickListener);
@@ -123,10 +140,7 @@ public class ListDevicesActivity extends AppCompatActivity {
     }
 
     public void listNewDevices(View view) {
-        // start searching for all devices in range
-        bluetooth.startDiscovery();
         //call receiver
-        registerReceiver(btReceiver, new IntentFilter(BluetoothDevice.ACTION_FOUND));
     }
 
 

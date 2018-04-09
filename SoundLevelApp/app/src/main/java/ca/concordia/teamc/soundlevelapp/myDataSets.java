@@ -92,7 +92,6 @@ public class myDataSets extends AppCompatActivity {
 
 
         if (item.getItemId() == R.id.action_metersinrange) {
-
             Intent intent= new Intent(this, ListDevicesActivity.class);
             startActivity(intent);
             return true;
@@ -100,8 +99,6 @@ public class myDataSets extends AppCompatActivity {
         }
 
         if (item.getItemId() == R.id.action_knownmeters) {
-
-
             Intent intent= new Intent(this, metersinfo.class);
             startActivity(intent);
             return true;

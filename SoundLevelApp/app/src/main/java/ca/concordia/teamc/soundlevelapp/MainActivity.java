@@ -24,9 +24,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         MeterController mc = MeterController.getInstance(this);
 
         if (mc.getAllMeterRecord().isEmpty()){
-            Meter meterA = new Meter("test 1", "test mac address 1", "location 1", "project A", System.currentTimeMillis(), false, System.currentTimeMillis());
-            Meter meterB = new Meter("test 2", "test mac address 2", "location 2", "project B", System.currentTimeMillis(), false, System.currentTimeMillis());
-            Meter meterC = new Meter("test 3", "test mac address 3", "location 3", "project C", System.currentTimeMillis(), true, System.currentTimeMillis());
+            Meter meterA = new Meter("Meter1", "00:00:00:00:00:01", "location 1", "project A", System.currentTimeMillis(), false, System.currentTimeMillis());
+            Meter meterB = new Meter("Meter2", "00:00:00:00:00:02", "location 2", "project B", System.currentTimeMillis(), false, System.currentTimeMillis());
+            Meter meterC = new Meter("Meter3", "00:00:00:00:00:03", "location 3", "project C", System.currentTimeMillis(), true, System.currentTimeMillis());
 
             mc.addMeterData(meterA);
             mc.addMeterData(meterB);

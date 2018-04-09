@@ -1,7 +1,5 @@
 package ca.concordia.teamc.soundlevelapp;
 
-import android.bluetooth.BluetoothAdapter;
-import android.bluetooth.BluetoothProfile;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.Context;
@@ -27,26 +25,18 @@ import android.content.DialogInterface;
 import com.google.common.primitives.Bytes;
 
 import java.util.Arrays;
-import java.util.Collection;
-import java.util.Collections;
-import java.io.UnsupportedEncodingException;
-import java.sql.Time;
-
-import static android.support.v4.os.LocaleListCompat.create;
-
 
 public class MeterConfigScreen extends AppCompatActivity{
 
     private final static String TAG = "MeterConfig";
-    protected EditText ProjectText =null;
-    protected EditText LocationText =null;
-    protected EditText LastDateText =null;
+    protected EditText ProjectText = null;
+    protected EditText LocationText = null;
+    protected EditText LastDateText = null;
     protected TextView DataText = null;
     protected ProgressBar Storage = null;
     protected Button saveButton = null;
     protected Button downloadButton = null;
     protected Button recordButton = null;
-    protected Button btn;
 
     Profile profile = new Profile();
     MeterController meterController = null;
@@ -54,11 +44,12 @@ public class MeterConfigScreen extends AppCompatActivity{
     DataFile newDF = null;
 
     BroadcastReceiver mReceiver;
-    BluetoothService BTService;
+    static BluetoothService BTService;
     boolean bound = false;
 
     int currentSequence = 0;
     boolean isDownloadRequestOK = false;
+    boolean gotMeter;
 
     static final byte[] downloadSequence = {'{','{','{'};
     static final byte[] uploadSequence = {'}','}','}'};
@@ -97,10 +88,32 @@ public class MeterConfigScreen extends AppCompatActivity{
         saveButton.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
                 if(currentSequence == 0){
-                    // send download message
-                    Log.d("SEND", "upload");
-                    BTService.write(uploadSequence);
-                    currentSequence = 3;
+                    if ((LocationText.getText().toString().matches(""))
+                            || (ProjectText.getText().toString().matches(""))/* || (LastDateText.getText().toString().matches(""))*/ ) {
+                        Toast msg = Toast.makeText(getApplicationContext(), "Please fill any empty fields.", Toast.LENGTH_LONG);
+                        msg.show();
+                    } else {
+                        AlertDialog.Builder altdial = new AlertDialog.Builder(MeterConfigScreen.this);
+                        altdial.setMessage("Are you sure you want to upload the following changes for this device?").setCancelable(false)
+                                .setPositiveButton("Upload", new DialogInterface.OnClickListener() {
+                                    @Override
+                                    public void onClick(DialogInterface dialogInterface, int i) {
+                                        // send download message
+                                        Log.d("SEND", "upload");
+                                        BTService.write(uploadSequence);
+                                        currentSequence = 3;
+                                    }
+                                })
+                                .setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+                                    @Override
+                                    public void onClick(DialogInterface dialogInterface, int i) {
+                                        dialogInterface.cancel();
+                                    }
+                                });
+                        AlertDialog alert = altdial.create();
+                        alert.setTitle("Confirmation");
+                        alert.show();
+                    }
                 }else{
                     Log.d(TAG,"Waiting for sequence " + currentSequence + " to finish.");
                 }
@@ -136,6 +149,33 @@ public class MeterConfigScreen extends AppCompatActivity{
         mReceiver = new BroadcastReceiver() {
             @Override
             public void onReceive(Context context, Intent intent) {
+                if (!gotMeter) {
+                    currentMeter = meterController.getSelectedMeterRecord(BTService.getMACAddress());
+                    if (currentMeter == null) {
+                        currentMeter = new Meter();
+                        currentMeter.setSensorName(BTService.getDeviceName());
+                        currentMeter.setMacAddress(BTService.getMACAddress());
+                        currentMeter.setRecordingStatus(false);
+                        currentMeter.setStartRecordingDate(System.currentTimeMillis());
+                        String lp = LocationText.getText().toString();
+                        if (lp.isEmpty()) {
+                            lp = "Empty";
+                        }
+                        currentMeter.setLocation(lp);
+                        lp = ProjectText.getText().toString();
+                        if (lp.isEmpty()) {
+                            lp = "Empty";
+                        }
+                        currentMeter.setLastKnownProject(lp);
+                        meterController.addMeterData(currentMeter);
+                    }
+                    currentMeter.setLastConnectionDate(System.currentTimeMillis());
+
+                    ProjectText.setText(currentMeter.getLastKnownProject());
+                    LocationText.setText(currentMeter.getLocation());
+                    gotMeter = true;
+                }
+
                 byte[] orgMsg = intent.getByteArrayExtra("message");
                 int msgLength = intent.getIntExtra("length", 0);
                 byte[] msg = Arrays.copyOfRange(orgMsg, 0, msgLength);
@@ -148,7 +188,7 @@ public class MeterConfigScreen extends AppCompatActivity{
                             if (Bytes.indexOf(msg, dataEndSequence) > -1) {
                                 long currentTime = System.currentTimeMillis();
                                 long startTime = currentTime - newDF.getSize()*125;
-                                DataSet dataSet = new DataSet(currentMeter.getLastKnownProject(),currentMeter.getLocation(), currentTime, startTime, "meterRef",newDF.getFileName() );
+                                DataSet dataSet = new DataSet(currentMeter.getLastKnownProject(),currentMeter.getLocation(), currentTime, startTime, currentMeter.getSensorName(),newDF.getFileName() );
                                 dsc.addDataSet(dataSet);
                                 newDF = null;
                                 BTService.write(rcvSequence);
@@ -201,7 +241,7 @@ public class MeterConfigScreen extends AppCompatActivity{
                         break;
                     default:
                         int value = msg[0];
-                        double dB = (((value+128)*66.22235685/256)+42.26779888);
+                        double dB = (((value+128)*66.22235685/256)+28.26779888);
                         Log.d(TAG, ": 8bit int: "+ Integer.toString(value));
                         DataText.setText(String.format("%.1f", dB));
                 }
@@ -210,24 +250,23 @@ public class MeterConfigScreen extends AppCompatActivity{
         registerReceiver(mReceiver, filter);
     }
 
+
+
     @Override
     public void onStart(){
         super.onStart();
-        Intent intent = getIntent();
-        String project = intent.getStringExtra("projectName");
-        String location = intent.getStringExtra("meterLocation");
-        String lastdate = intent.getStringExtra("profilelastdate");
-
-
-        Intent BTSIntent = new Intent(this, BluetoothService.class);
-        bindService(BTSIntent, connection, Context.BIND_AUTO_CREATE);
 
         meterController = MeterController.getInstance(this);
         dsc = DataSetController.getInstance(this);
 
-        ProjectText.setText(project);
-        LocationText.setText(location);
-        LastDateText.setText(lastdate);
+        Intent BTSIntent = new Intent(this, BluetoothService.class);
+        bindService(BTSIntent, connection, Context.BIND_AUTO_CREATE);
+    }
+
+    @Override
+    public void onResume(){
+        super.onResume();
+        gotMeter = false;
     }
 
     @Override
@@ -245,76 +284,21 @@ public class MeterConfigScreen extends AppCompatActivity{
     }
     /** Defines callbacks for service binding, passed to bindService() */
     private ServiceConnection connection = new ServiceConnection() {
-
         @Override
         public void onServiceConnected(ComponentName className, IBinder service) {
             // We've bound to LocalService, cast the IBinder and get LocalService instance
             BluetoothService.LocalBinder binder = (BluetoothService.LocalBinder) service;
             BTService = binder.getService();
             bound = true;
-            currentMeter = meterController.getSelectedMeterRecord(BTService.getMACAddress());
-            if (currentMeter == null){
-                currentMeter = new Meter();
-                currentMeter.setSensorName(BTService.getDeviceName());
-                currentMeter.setMacAddress(BTService.getMACAddress());
-                currentMeter.setLastConnectionDate(System.currentTimeMillis());
-                currentMeter.setRecordingStatus(false);
-                currentMeter.setStartRecordingDate(System.currentTimeMillis());
-                String lp = LocationText.getText().toString();
-                if(lp.isEmpty()){
-                    lp = "Empty";
-                }
-                currentMeter.setLocation(lp);
-                lp = ProjectText.getText().toString();
-                if(lp.isEmpty()){
-                    lp = "Empty";
-                }
-                currentMeter.setLastKnownProject(lp);
-                meterController.addMeterData(currentMeter);
-            }
         }
 
         @Override
         public void onServiceDisconnected(ComponentName arg0) {
             bound = false;
+            finish();
         }
     };
-
-    public void dialogevent(View view){
-
-    btn = (Button) findViewById(R.id.saveButton);
-    btn.setOnClickListener(new View.OnClickListener() {
-        @Override
-        public void onClick(View view) {
-            if ((LocationText.getText().toString().matches(""))
-                    || (ProjectText.getText().toString().matches("")) || (LastDateText.getText().toString().matches("")) ) {
-                Toast msg = Toast.makeText(getApplicationContext(), "Please fill any empty fields.", Toast.LENGTH_LONG);
-                msg.show();
-            } else {
-                AlertDialog.Builder altdial = new AlertDialog.Builder(MeterConfigScreen.this);
-                altdial.setMessage("Are you sure you want to upload the following changes for this device?").setCancelable(false)
-                        .setPositiveButton("Upload", new DialogInterface.OnClickListener() {
-                            @Override
-                            public void onClick(DialogInterface dialogInterface, int i) {
-                                finish();
-                            }
-                        })
-                        .setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
-                            @Override
-                            public void onClick(DialogInterface dialogInterface, int i) {
-                                dialogInterface.cancel();
-                            }
-                        });
-                AlertDialog alert = altdial.create();
-                alert.setTitle("Confirmation");
-                alert.show();
-
-            }
-        }
-    });
-
-    }
-    @Override
+    /*@Override
     public boolean onCreateOptionsMenu(Menu menu) {
         MenuInflater inflater = getMenuInflater();
         inflater.inflate(R.menu.action_button, menu);
@@ -340,7 +324,7 @@ public class MeterConfigScreen extends AppCompatActivity{
 
         }
         return super.onOptionsItemSelected(item);
-    }
+    }*/
 
     @Override
     public void onStop(){

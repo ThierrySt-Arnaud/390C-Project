@@ -36,11 +36,11 @@ public class myDataSets_Detailed extends AppCompatActivity{
         setContentView(R.layout.activity_mydatasets_detailed);
 
         yourButton = (Button) findViewById(R.id.button_viewgraph);
-        pNameTV = (TextView) findViewById(R.id.dsd_project_name);
-        locationTV = (TextView) findViewById(R.id.dsd_location);
-        sNameTV = (TextView) findViewById(R.id.dsd_sensor_name);
-        startedTV = (TextView) findViewById(R.id.dsd_data_started);
-        downloadedTV = (TextView) findViewById(R.id.dsd_date_downloaded);
+        pNameTV = (TextView) findViewById(R.id.tvDSProject);
+        locationTV = (TextView) findViewById(R.id.tvDSLocation);
+        sNameTV = (TextView) findViewById(R.id.tvDSSensor);
+        startedTV = (TextView) findViewById(R.id.tvDSDateStarted);
+        downloadedTV = (TextView) findViewById(R.id.tvDSDateDownloaded);
 
         ID = getIntent().getIntExtra("ID",0);
 
@@ -98,11 +98,11 @@ public class myDataSets_Detailed extends AppCompatActivity{
         Date downloadDate = new Date(dataSet.getDateOfDownload());
         Log.d("DSD", "FilePath" + dataSet.getDatafile());
 
-        pNameTV.setText("Project Name: " + pName);
-        locationTV.setText("Location: " + location);
-        sNameTV.setText("Sensor Name: "+ sName);
-        startedTV.setText("Date Started:\n" + startedDate.toString());
-        downloadedTV.setText("Date Downloaded:\n"+ downloadDate.toString());
+        pNameTV.setText(pName);
+        locationTV.setText(location);
+        sNameTV.setText(sName);
+        startedTV.setText(startedDate.toString());
+        downloadedTV.setText(downloadDate.toString());
     }
 
     @Override
