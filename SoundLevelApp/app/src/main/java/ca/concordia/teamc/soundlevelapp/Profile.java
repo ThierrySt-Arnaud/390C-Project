@@ -2,13 +2,12 @@ package ca.concordia.teamc.soundlevelapp;
 
 
 public class Profile {
-    String Name;
+
     String Project;
     String Location;
+    String LastDate;
 
-    protected void setName(String name) {
-        Name = name;
-    }
+
     protected void setProject(String project){
         Project = project;
     }
@@ -17,9 +16,9 @@ public class Profile {
         Location = location;
     }
 
-    protected String getName(){
-        return Name;
-    }
+    protected void setLastDate(String lastdate) {LastDate = lastdate; }
+
+
 
     protected String getProject(){
 
@@ -29,5 +28,10 @@ public class Profile {
     protected String getLocation(){
 
         return Location;
+    }
+
+    protected String getLastDate(){
+
+        return LastDate;
     }
 }

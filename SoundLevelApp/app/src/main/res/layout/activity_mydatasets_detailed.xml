@@ -1,0 +1,116 @@
+<?xml version="1.0" encoding="utf-8"?>
+<android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <TextView
+        android:id="@+id/dsd_sensor_name"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        android:text="Sensor Name:"
+        android:textAppearance="@style/TextAppearance.AppCompat.Medium"
+        app:layout_constraintStart_toStartOf="@+id/tvDSProject"
+        app:layout_constraintTop_toBottomOf="@+id/tvDSProject" />
+
+    <TextView
+        android:id="@+id/dsd_project_name"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="8dp"
+        android:text="Project Name:"
+        android:textAppearance="@style/TextAppearance.AppCompat.Medium"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <TextView
+        android:id="@+id/dsd_location"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        android:text="Location:"
+        android:textAppearance="@style/TextAppearance.AppCompat.Medium"
+        app:layout_constraintStart_toStartOf="@+id/tvDSSensor"
+        app:layout_constraintTop_toBottomOf="@+id/tvDSSensor" />
+
+    <TextView
+        android:id="@+id/dsd_data_started"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        android:text="Date Started:"
+        android:textAppearance="@style/TextAppearance.AppCompat.Medium"
+        app:layout_constraintStart_toStartOf="@+id/tvDSLocation"
+        app:layout_constraintTop_toBottomOf="@+id/tvDSLocation" />
+
+    <TextView
+        android:id="@+id/dsd_date_downloaded"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        android:text="Date Downloaded:"
+        android:textAppearance="@style/TextAppearance.AppCompat.Medium"
+        app:layout_constraintStart_toStartOf="@+id/tvDSDateStarted"
+        app:layout_constraintTop_toBottomOf="@+id/tvDSDateStarted" />
+
+    <Button
+        android:id="@+id/button_viewgraph"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="8dp"
+        android:layout_marginEnd="8dp"
+        android:layout_marginStart="8dp"
+        android:text="View Graph"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/tvDSDateDownloaded" />
+
+    <TextView
+        android:id="@+id/tvDSProject"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="TextView"
+        android:textAppearance="@style/TextAppearance.AppCompat.Large"
+        app:layout_constraintStart_toStartOf="@+id/dsd_project_name"
+        app:layout_constraintTop_toBottomOf="@+id/dsd_project_name" />
+
+    <TextView
+        android:id="@+id/tvDSSensor"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="TextView"
+        android:textAppearance="@style/TextAppearance.AppCompat.Large"
+        app:layout_constraintStart_toStartOf="@+id/dsd_sensor_name"
+        app:layout_constraintTop_toBottomOf="@+id/dsd_sensor_name" />
+
+    <TextView
+        android:id="@+id/tvDSLocation"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="TextView"
+        android:textAppearance="@style/TextAppearance.AppCompat.Large"
+        app:layout_constraintStart_toStartOf="@+id/dsd_location"
+        app:layout_constraintTop_toBottomOf="@+id/dsd_location" />
+
+    <TextView
+        android:id="@+id/tvDSDateStarted"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="TextView"
+        android:textAppearance="@style/TextAppearance.AppCompat.Large"
+        app:layout_constraintStart_toStartOf="@+id/dsd_data_started"
+        app:layout_constraintTop_toBottomOf="@+id/dsd_data_started" />
+
+    <TextView
+        android:id="@+id/tvDSDateDownloaded"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="TextView"
+        android:textAppearance="@style/TextAppearance.AppCompat.Large"
+        app:layout_constraintStart_toStartOf="@+id/dsd_date_downloaded"
+        app:layout_constraintTop_toBottomOf="@+id/dsd_date_downloaded" />
+
+</android.support.constraint.ConstraintLayout>
